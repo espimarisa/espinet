@@ -161,7 +161,7 @@ services:
     container_name: cloudflared
     restart: unless-stopped
     command: tunnel --no-autoupdate run
-    network_mode: [externalNetwork]
+    networks: [externalNetwork]
     environment:
     - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
 
