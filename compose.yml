@@ -4,7 +4,7 @@ services:
     image: nextcloud/all-in-one:latest
     container_name: nextcloud-aio-mastercontainer
     restart: unless-stopped
-    network_mode: host # nasty fix?
+    networks: [externalNetwork]
     environment:
       - APACHE_PORT=11000
       - APACHE_IP_BINDING=127.0.0.1
