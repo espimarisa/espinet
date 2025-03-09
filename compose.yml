@@ -7,7 +7,7 @@ services:
     networks: [externalNetwork]
     environment:
       - APACHE_PORT=11000
-      - APACHE_IP_BINDING=127.0.0.1
+      - APACHE_IP_BINDING=0.0.0.0
       - NEXTCLOUD_DATADIR=${NEXTCLOUD_DIRECTORY}
       - NEXTCLOUD_UPLOAD_LIMIT=100G
       - NEXTCLOUD_MAX_TIME=12000
