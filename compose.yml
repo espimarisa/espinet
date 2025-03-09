@@ -280,24 +280,6 @@ services:
       - PGID=${GLOBAL_PGID}
       - UMASK=${GLOBAL_UMASK}
 
-  # seedboxapi: automatically set seedbox api for trackers (MAM)
-  # If you are not using myanonamouse, you may safely remove this container
-  seedboxapi:
-    image: myanonamouse/seedboxapi:latest
-    container_name: seedboxapi
-    network_mode: service:gluetun
-    depends_on:
-      qbittorrent:
-        condition: service_started
-      gluetun:
-        condition: service_healthy
-    environment:
-      - DEBUG=1
-      - interval=1 # Check every minute
-      - mam_id=${MAM_ID} # MyAnonAmouse Session ID
-    volumes:
-      - seedboxapi:/config
-
 volumes:
   caddy:
     external: true
@@ -332,9 +314,6 @@ volumes:
   prowlarr:
     external: true
     name: prowlarr-volume
-  seedboxapi:
-    external: true
-    name: seedboxapi-volume
 
 networks:
   externalNetwork:
