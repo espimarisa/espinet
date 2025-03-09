@@ -13,6 +13,7 @@ services:
       - NEXTCLOUD_MAX_TIME=12000
       - NEXTCLOUD_MEMORY_LIMIT=16384M # Memory limit, lower if a problem
       - NEXTCLOUD_ENABLE_DRI_DEVICE=true # Disable if /dev/dri doesn't exist
+      - SKIP_DOMAIN_VALIDATION=true
     volumes:
       - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
       - ${NEXTCLOUD_DIRECTORY}:/data
