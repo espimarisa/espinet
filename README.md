@@ -19,7 +19,7 @@ wip
 - qbittorrent-natmap: auto port forwarding
 - jellyfin: media server for anime/tv/movies
 - navidrome: media server for music
-- cloudflare-ddns: keep A/AAAA records up to date
+- cloudflared: cloudflare tunneling support
 - deemix: music downloader via grabbing from deemix
 - lidarr: music pvr used in combination with deemix
 - radarr: movies pvr

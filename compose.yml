@@ -155,19 +155,15 @@ services:
     ports:
       - ${NAVIDROME_PORT}:${NAVIDROME_PORT} # navidrome webui port, defaults to 4533
 
-  # cloudflare-ddns: cloudflare dns updater
-  cloudflare-ddns:
-    image: favonia/cloudflare-ddns:latest
-    container_name: cloudflare-ddns
+  # cloudflared: cloudflare tunneling
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
     restart: unless-stopped
-    network_mode: host
-    read_only: true
-    cap_drop: [all]
-    security_opt: [no-new-privileges:true]
+    command: tunnel --no-autoupdate run
+    network_mode: [externalNetwork]
     environment:
-      - CF_API_TOKEN=${CF_API_TOKEN}
-      - DOMAINS=${CF_DOMAINS}
-      - PROXIED=${CF_PROXIED}
+    - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
 
   # deemix: deemix downloader
   deemix:
@@ -345,4 +341,4 @@ networks:
     external: true
     driver: bridge
     name: external-network
-    enable_ipv6: false
+    enable_ipv6: true
