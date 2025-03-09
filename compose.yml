@@ -4,10 +4,10 @@ services:
     image: nextcloud/all-in-one:latest
     container_name: nextcloud-aio-mastercontainer
     restart: unless-stopped
-    networks: [externalNetwork]
+    network_mode: host # nasty fix?
     environment:
       - APACHE_PORT=11000
-      - APACHE_IP_BINDING=0.0.0.0
+      - APACHE_IP_BINDING=127.0.0.1
       - NEXTCLOUD_DATADIR=${NEXTCLOUD_DIRECTORY}
       - NEXTCLOUD_UPLOAD_LIMIT=100G
       - NEXTCLOUD_MAX_TIME=12000
