@@ -145,7 +145,7 @@ services:
     container_name: cloudflared
     restart: unless-stopped
     command: tunnel --no-autoupdate run
-    networks: [externalNetwork, nextcloud_network]
+    network_mode: "host"
     environment:
     - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
     extra_hosts:
