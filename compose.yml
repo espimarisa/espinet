@@ -21,6 +21,8 @@ services:
     ports:
       - 8080:8080 # NextCloud HTTP Port
       - 8443:8443 # NextCloud HTTPS Port
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   # gluetun: vpn
   gluetun:
@@ -146,6 +148,8 @@ services:
     networks: [externalNetwork]
     environment:
     - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   # deemix: deemix downloader
   deemix:
