@@ -9,15 +9,15 @@ category = sys.argv[2]
 # qBittorrent categories allowed to create hardlinks
 # be sure you create these first!
 allowed_categories = [
-  "anime",
-  "anime-movies",
-  "audiobooks",
-  "books",
-  "comics",
-  "manga",
-  "movies",
-  "music",
-  "tv"
+    "anime",
+    "anime-movies",
+    "audiobooks",
+    "books",
+    "comics",
+    "manga",
+    "movies",
+    "music",
+    "tv"
 ]
 
 if category not in allowed_categories:
@@ -26,15 +26,15 @@ if category not in allowed_categories:
 # folders allowed to have hardlinks put in
 # these are the download folders inside of qbittorrent
 allowed_folders = [
-  "anime",
-  "anime-movies",
-  "audiobooks",
-  "books",
-  "comics",
-  "manga",
-  "movies",
-  "music",
-  "tv"
+    "anime",
+    "anime-movies",
+    "audiobooks",
+    "books",
+    "comics",
+    "manga",
+    "movies",
+    "music",
+    "tv"
 ]
 
 # final destination folders
@@ -42,20 +42,20 @@ allowed_folders = [
 # mine is hardcoded to be /mnt/md0/medialibrary
 # which is mapped to /storage/medialibrary inside of docker
 dest_folders = [
-  "/storage/medialibrary/anime",
-  "/storage/medialibrary/anime-movies",
-  "/storage/medialibrary/audiobooks",
-  "/storage/medialibrary/books",
-  "/storage/medialibrary/comics",
-  "/storage/medialibrary/manga",
-  "/storage/medialibrary/movies",
-  "/storage/medialibrary/music",
-  "/storage/medialibrary/tv"
+    "/storage/medialibrary/anime",
+    "/storage/medialibrary/anime-movies",
+    "/storage/medialibrary/audiobooks",
+    "/storage/medialibrary/books",
+    "/storage/medialibrary/comics",
+    "/storage/medialibrary/manga",
+    "/storage/medialibrary/movies",
+    "/storage/medialibrary/music",
+    "/storage/medialibrary/tv"
 ]
 
 # creates hardlinks
 drive = splitdrive(path)[0]
-folder = dirsplit(path)[0].split("/")[-1] # this is shit code ngl
+folder = dirsplit(path)[0].split("/")[-1]  # this is shit code ngl
 base = basename(path)
 print(folder)
 for x in zip(allowed_folders, dest_folders):

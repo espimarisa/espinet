@@ -147,7 +147,7 @@ services:
     command: tunnel --no-autoupdate run
     network_mode: "host"
     environment:
-    - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
     extra_hosts:
       - host.docker.internal:host-gateway
 
