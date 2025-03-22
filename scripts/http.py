@@ -12,7 +12,7 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-os.chdir("./landing/")
+os.chdir("../landing")
 handler_object = MyHttpRequestHandler
 with socketserver.TCPServer(("", PORT), handler_object) as httpd:
     print(f"Serving at port {PORT}")
