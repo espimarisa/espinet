@@ -103,6 +103,7 @@ services:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
     restart: unless-stopped
+    runtime: nvidia
     networks: [externalNetwork]
     devices:
       - /dev/dri:/dev/dri # Remove if /dev/dri doesn't exist or
@@ -121,6 +122,14 @@ services:
       - PGID=${GLOBAL_PGID}
       - UMASK=${GLOBAL_UMASK}
       - DOCKER_MODS=ghcr.io/jumoog/intro-skipper # Allows adding the "skip intro" button to the web UI. Remove if you don't use this plugin
+      - NVIDIA_VISIBLE_DEVICES=all # Remove this and the following lines if you do not want NVIDIA support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   # navidrome: media client for music
   navidrome:
