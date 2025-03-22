@@ -3,7 +3,7 @@ import socketserver
 import os
 
 
-PORT = 80
+PORT = 6969
 
 
 class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
