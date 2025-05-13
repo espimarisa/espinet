@@ -44,7 +44,7 @@ services:
       - WIREGUARD_PRIVATE_KEY=${VPN_WIREGUARD_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${VPN_WIREGUARD_ADDRESSES}
       - UPDATER_PERIOD=24h
-      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,192.168.1.0,10.0.0.1/24 # Internal LAN network
+      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,192.168.1.0/24 # Internal LAN network
     volumes:
       - gluetun:/gluetun
     ports:
