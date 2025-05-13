@@ -44,7 +44,7 @@ services:
       - WIREGUARD_PRIVATE_KEY=${VPN_WIREGUARD_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${VPN_WIREGUARD_ADDRESSES}
       - UPDATER_PERIOD=24h
-      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,192.168.1.0/24 # Internal LAN network
+      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,192.168.1.0,10.0.0.1/24 # Internal LAN network
     volumes:
       - gluetun:/gluetun
     ports:
@@ -110,7 +110,6 @@ services:
     volumes:
       - jellyfin:/config
       - ${MEDIALIBRARY_DIRECTORY}:/data # Media library folder, for my structure it is /mnt/md0/medialibrary
-      - ${MEDIALIBRARY_DIRECTORY}/music:/music:ro # Music read-only
     ports:
       - ${JELLYFIN_HTTP_PORT}:${JELLYFIN_HTTP_PORT} # Jellyfin WebUI port, default is normally 8096
       - ${JELLYFIN_HTTPS_PORT}:${JELLYFIN_HTTPS_PORT} # Jellyfin HTTPS WebUI port, default is normally 8920
@@ -276,9 +275,6 @@ services:
       - UMASK=${GLOBAL_UMASK}
 
 volumes:
-  caddy:
-    external: true
-    name: caddy-volume
   nextcloud_aio_mastercontainer:
     external: true
     name: nextcloud_aio_mastercontainer

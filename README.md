@@ -1,31 +1,23 @@
 # espinet
 
-compose setup and scripts for media and data archival
+Various configurations and scripts from my homelab.
 
-## setup
+## Services
 
-wip
+This is not an exhaustive list of what I have configured. This is just for my own record-keeping.
 
-- create your environment variable file in `.env` and follow the documentation inside of `compose.yml`
-- run `bash	./scripts/setup.sh`
-- todo: guide on how to setup the other services
+- cloudflared: Cloudflare tunneling support
+- Deemix: Download music through Deezer
+- Gluetun: VPN for downloads network
+- Jellyfin: Home media server
+- Lidarr: Music PVR indexer
+- Navidrome: Home music server
+- NextCloud: File syncing/backups
+- Prowlarr: PVR indexer manager
+- qBittorrent: BitTorrent client
+- Radarr: Movie PVR indexer
+- Sonarr: TV/Anime PVR indexer
 
-## services
+## License
 
-- nextcloud: file syncing/backups
-- gluetun: vpn for torrenting
-- qbittorrent: bittorrent client
-- qbittorrent-natmap: auto port forwarding
-- jellyfin: media server for anime/tv/movies
-- navidrome: media server for music
-- cloudflared: cloudflare tunneling support
-- deemix: music downloader via grabbing from deemix
-- lidarr: music pvr used in combination with deemix
-- radarr: movies pvr
-- sonarr: tv/anime pvr
-- prowlarr: pvr manager
-- flaresolverr: cloudflare bypasser
-
-## license
-
-[zlib/libpng](LICENSE.md)
+[Zlib](LICENSE.md)
