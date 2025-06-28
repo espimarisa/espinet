@@ -35,7 +35,3 @@ services:
     volumes:
       - ${PATH_MEDIA_LIBRARY}:/data
       - jellyfin:/config
-
-networks:
-  external:
-    external: true

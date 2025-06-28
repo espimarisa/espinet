@@ -18,7 +18,3 @@ services:
       CF_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
       DOMAINS: ${CLOUDFLARE_DOMAINS}
       PROXIED: "false"
-
-networks:
-  external:
-    external: true

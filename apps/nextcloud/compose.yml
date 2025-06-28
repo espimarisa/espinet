@@ -108,8 +108,6 @@ services:
       - redis:/data
 
 networks:
-  external:
-    external: true
   internal:
     driver: bridge
     name: nextcloud-internal-network
