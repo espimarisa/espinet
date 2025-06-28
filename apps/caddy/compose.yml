@@ -22,7 +22,3 @@ services:
 networks:
   external:
     external: true
-
-volumes:
-  caddy:
-    external: true
