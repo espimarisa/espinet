@@ -1,0 +1,123 @@
+services:
+  nextcloud:
+    container_name: nextcloud
+    image: nextcloud:fpm-alpine
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      - mariadb
+      - redis
+    env_file:
+      - ../../.env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_HOST: mariadb
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      OVERWRITECONDITION: '{"Host": "${URL_PUBLISHED_NEXTCLOUD}"}'
+      OVERWRITEPROTOCOL: https
+      PGID: ${PGID}
+      PUID: ${PUID}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TRUSTED_DOMAINS: "${URL_PUBLISHED_NEXTCLOUD}"
+      TRUSTED_PROXIES: caddy
+      TZ: ${TZ}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://localhost:9000/status || exit 1",
+        ]
+      interval: 30s
+      retries: 3
+      start_period: 60s
+      timeout: 10s
+    labels:
+      caddy: ${URL_PUBLISHED_NEXTCLOUD}
+      caddy.reverse_proxy: "nextcloud:9000"
+    networks:
+      - external
+      - internal
+    volumes:
+      - nextcloud:/var/www/html
+      - ${PATH_NEXTCLOUD_DATA}:/var/www/html/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  mariadb:
+    container_name: mariadb
+    image: mariadb:10.6
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    env_file:
+      - ../../.env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      PGID: ${PGID}
+      PUID: ${PUID}
+      TZ: ${TZ}
+    networks:
+      - internal
+    volumes:
+      - mariadb:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mariadb-admin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u${MYSQL_USER}",
+          "-p${MYSQL_PASSWORD}",
+        ]
+      interval: 30s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    logging: # Added logging configuration
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    networks:
+      - internal
+    volumes:
+      - redis:/data
+
+networks:
+  external:
+    external: true
+  internal:
+    driver: bridge
+    name: nextcloud-internal-network
+
+volumes:
+  nextcloud:
+    external: true
+  mariadb:
+    external: true
+  redis:
+    external: true
