@@ -15,7 +15,7 @@ services:
       - TZ=${TZ} # Timezone to use
     labels:
       caddy: ${JELLYFIN_PUBLISHED_URL} # Tell caddy to reverse proxy container to JELLYFIN_PUBLISHED_URL
-      caddy.reverse_proxy: "{{upstreams 8096}}" # Tell caddy to reverse proxy to 8096 (Jellyfin HTTP port).
+      caddy.reverse_proxy: "jellyfin:8096" # Tell caddy to reverse proxy to 8096 (Jellyfin HTTP port).
     networks:
       - external # Listen on the "external" network created in root/compose.yml
     ports:
