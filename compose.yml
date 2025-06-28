@@ -1,9 +1,6 @@
 include:
-  # Media
-  - ./jellyfin/compose.yml # Jellyfin (Home Media Server)
-
-  # Networking
-  - ./cloudflare-ddns/compose.yml # cloudflare-ddns (Automatic DNS record updating)
+  - ./apps/cloudflare-ddns/compose.yml # cloudflare-ddns (Automatic DNS record updating)
+  - ./apps/jellyfin/compose.yml # Jellyfin (Home Media Server)
 
 networks:
   external: # External network (Jellyfin, NextCloud)
