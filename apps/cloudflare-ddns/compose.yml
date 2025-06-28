@@ -1,0 +1,15 @@
+services:
+  cloudflare-ddns:
+    cap_drop: [all]
+    container_name: cloudflare-ddns
+    image: favonia/cloudflare-ddns:latest
+    network_mode: host # cloudflare-ddns requires network_mode: host to get the origin IP
+    read_only: true
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    env_file:
+      - .env
+    environment:
+      - CF_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - DOMAINS=${CLOUDFLARE_DOMAINS}
+      - PROXIED=${CLOUDFLARE_PROXIED}

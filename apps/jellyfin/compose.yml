@@ -1,0 +1,22 @@
+services:
+  jellyfin:
+    container_name: jellyfin
+    image: linuxserver/jellyfin:latest
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    devices:
+      - /dev/dri:/dev/dri # Hardware acceleration device mount
+    env_file:
+      - ../../.env
+      - .env
+    environment:
+      - PGID=${PGID} # PGID to run as
+      - PUID=${PUID} # PUID to run as
+      - TZ=${TZ} # Timezone to use
+    ports:
+      - 1900:1900/udp # Autodiscovery for DLNA
+      - 7359:7359/udp # Autodiscovery
+      - 8096:8096 # WebUI
+    volumes:
+      - ${MEDIALIBRARY_PATH}:/data # Media library path
+      - jellyfin:/config # Configuration path
