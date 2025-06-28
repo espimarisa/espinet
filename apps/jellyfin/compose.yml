@@ -39,7 +39,3 @@ services:
 networks:
   external:
     external: true
-
-volumes:
-  jellyfin:
-    external: true
