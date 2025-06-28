@@ -1,12 +1,15 @@
 include:
-  - ./apps/cloudflare-ddns/compose.yml # cloudflare-ddns (Automatic DNS record updating)
-  - ./apps/jellyfin/compose.yml # Jellyfin (Home Media Server)
+  - ./apps/caddy/compose.yml # caddy-docker-proxy: Reverse proxy
+  - ./apps/cloudflare-ddns/compose.yml # cloudflare-ddns: Dynamic DNS automation for Cloudflare
+  - ./apps/jellyfin/compose.yml # Jellyfin: Media server
 
 networks:
-  external: # External network (Jellyfin, NextCloud)
+  external: # External network for non-VPN traffic (Caddy, Jellyfin)
     driver: bridge
     name: external-network
 
 volumes:
-  jellyfin: # Jellyfin volume
+  jellyfin:
     name: jellyfin-volume
+  caddy:
+    name: caddy-volume

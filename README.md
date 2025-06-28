@@ -4,8 +4,8 @@ Compose setups, configuration files, and various scripts used in my homelab ("es
 
 ## Apps
 
-- [cloudflare-ddns](./apps/cloudflare-ddns/): Dynamic DNS automation for Cloudflare
-- [jellyfin](./apps/jellyfin/): Media system
+- [Cloudflare-DDNS](./apps/cloudflare-ddns/): Dynamic DNS automation for Cloudflare
+- [Jellyfin](./apps/jellyfin/): Media server
 
 ## License
 

@@ -1,0 +1,15 @@
+services:
+  caddy:
+    container_name: caddy
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    restart: unless-stopped
+    ports:
+      - 80:80 # HTTP port
+      - 443:443 # HTTPS port
+    environment:
+      - CADDY_INGRESS_NETWORKS=external # Listen on the "external" network created in root/compose.yml
+    networks:
+      - external
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Map to Docker socket
+      - caddy:/data # Caddy data path
