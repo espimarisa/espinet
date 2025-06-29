@@ -2,7 +2,7 @@ services:
   # Nextcloud.
   nextcloud:
     container_name: nextcloud
-    image: nextcloud:fpm-alpine
+    image: nextcloud:apache
     depends_on:
       nextcloud-mariadb:
         condition: service_healthy
@@ -36,14 +36,14 @@ services:
       - TZ=${TZ} # Timezone to use.
       - UMASK=022 # Only allow us to read/write.
     healthcheck:
-      test: ["CMD", "php", "-f", "/var/www/html/occ", "status"]
+      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 120s
     labels:
       caddy: ${URL_PUBLISHED_NEXTCLOUD} # Tell Caddy to reverse proxy to our URL_PUBLISHED_NEXTCLOUD.
-      caddy.reverse_proxy: nextcloud:9000 # Tell Caddy to reverse proxy nextcloud internal traffic.
+      caddy.reverse_proxy: nextcloud:80 # Tell Caddy to reverse proxy port 80.
     logging:
       driver: json-file
       options:
