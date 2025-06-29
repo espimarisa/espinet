@@ -9,6 +9,7 @@ services:
       - CF_API_TOKEN=${CLOUDFLARE_API_TOKEN} # Cloudflare API token with scoped Zone editing.
       - DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add records for.
       - PROXIED=false # Do not proxy any domains; breaking CF ToS is a no-no :(
+      - IP6_PROVIDER=none # Google Fiber is toxic asf
     logging:
       driver: json-file
       options:

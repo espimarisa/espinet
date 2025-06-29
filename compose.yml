@@ -12,6 +12,8 @@ networks:
 volumes:
   jellyfin:
     name: jellyfin-volume # Jellyfin config volume.
+  jellyfin-dpkeys:
+    name: jellyfin-dpkeys # Jellyfin dpkeys volume.
   caddy:
     name: caddy-volume # Caddy data volume.
   nextcloud:

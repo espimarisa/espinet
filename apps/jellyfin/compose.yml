@@ -29,6 +29,7 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
+      - ${PATH_MEDIA_LIBRARY}:/media # Jellyfin media library location.
+      - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys # DPKEYS persistence
       - jellyfin:/config # Jellyfin config storage location; volume created by root/compose.yml.
       - jellyfin:/config/cache # Jellyfin cache storage location; volume created by root/compose.yml.
-      - ${PATH_MEDIA_LIBRARY}:/media # Jellyfin media library location.
