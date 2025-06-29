@@ -18,10 +18,10 @@ services:
       - MYSQL_HOST=nextcloud-mariadb # Nextcloud database hostname.
       - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD} # Nextcloud database password.
       - MYSQL_USER=${NEXTCLOUD_MARIADB_USER} # Nextcloud database user.
+      - NC_default_phone_region=us # Phone number validation.
       - NC_skeletondirectory= # Get rid of Skeleton crap.
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD} # Nextcloud admin user password to set.
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER} # Nextcloud admin username to set.
-      - NEXTCLOUD_DEFAULT_PHONE_REGION=US # Phone number validation.
       - NEXTCLOUD_HOSTNAME=${URL_PUBLISHED_NEXTCLOUD} # Explicitly set hostname.
       - NEXTCLOUD_INIT_HTACCESS=true # Always update htaccess after updates.
       - NEXTCLOUD_TRUSTED_DOMAINS=${URL_PUBLISHED_NEXTCLOUD} # Trust our published Nextcloud domain.
@@ -48,6 +48,7 @@ services:
       start_period: 120s
     labels:
       caddy: ${URL_PUBLISHED_NEXTCLOUD} # Tell Caddy to reverse proxy to our URL_PUBLISHED_NEXTCLOUD.
+      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS
       caddy.reverse_proxy: nextcloud:80 # Tell Caddy to reverse proxy port 80.
     logging:
       driver: json-file

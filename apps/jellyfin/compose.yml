@@ -19,6 +19,7 @@ services:
       timeout: 10s
     labels:
       caddy: ${URL_PUBLISHED_JELLYFIN} # Tell Caddy to reverse proxy to URL_PUBLISHED_JELLYFIN.
+      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS
       caddy.reverse_proxy: jellyfin:8096 # Tell Caddy to reverse proxy Jellyfin traffic.
     logging:
       driver: json-file

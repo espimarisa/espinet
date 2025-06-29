@@ -4,8 +4,6 @@ services:
     image: lucaslorentz/caddy-docker-proxy:ci-alpine
     environment:
       - CADDY_INGRESS_NETWORKS=external # Only attempt to proxy things on the 'external' network.
-    labels:
-      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS
     logging:
       driver: json-file
       options:
