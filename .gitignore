@@ -29,6 +29,7 @@ _site/
 .Trashes/
 .turbo/
 .VolumeIcon.icns
+.vscode/
 *.bak
 *.cache
 *.cachefile

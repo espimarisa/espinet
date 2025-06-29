@@ -22,6 +22,7 @@ services:
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD} # Nextcloud admin user password to set.
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER} # Nextcloud admin username to set.
       - NEXTCLOUD_DEFAULT_PHONE_REGION=US # Phone number validation.
+      - NEXTCLOUD_HOSTNAME=${URL_PUBLISHED_NEXTCLOUD} # Explicitly set hostname.
       - NEXTCLOUD_INIT_HTACCESS=true # Always update htaccess after updates.
       - NEXTCLOUD_TRUSTED_DOMAINS=${URL_PUBLISHED_NEXTCLOUD} # Trust our published Nextcloud domain.
       - OVERWRITECLIURL=https://${URL_PUBLISHED_NEXTCLOUD} # Use URL_PUBLISHED_NEXTCLOUD as URL.
