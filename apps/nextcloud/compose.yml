@@ -11,14 +11,17 @@ services:
     env_file:
       - ../../.env
     environment:
+      - LOGLEVEL=1 # Loglevel adjustment.
       - MAIL_DOMAIN=${NEXTCLOUD_MAIL_DOMAIN} # Nextcloud mailing domain.
       - MAIL_FROM_ADDRESS=${NEXTCLOUD_MAIL_FROM_ADDRESS} # Nextcloud mailing from address.
       - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE} # Nextcloud database name.
       - MYSQL_HOST=nextcloud-mariadb # Nextcloud database hostname.
       - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD} # Nextcloud database password.
       - MYSQL_USER=${NEXTCLOUD_MARIADB_USER} # Nextcloud database user.
+      - NC_skeletondirectory= # Get rid of Skeleton crap.
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD} # Nextcloud admin user password to set.
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER} # Nextcloud admin username to set.
+      - NEXTCLOUD_DEFAULT_PHONE_REGION=US # Phone number validation.
       - NEXTCLOUD_INIT_HTACCESS=true # Always update htaccess after updates.
       - NEXTCLOUD_TRUSTED_DOMAINS=${URL_PUBLISHED_NEXTCLOUD} # Trust our published Nextcloud domain.
       - OVERWRITECLIURL=https://${URL_PUBLISHED_NEXTCLOUD} # Use URL_PUBLISHED_NEXTCLOUD as URL.
@@ -33,6 +36,7 @@ services:
       - SMTP_NAME=${NEXTCLOUD_SMTP_NAME} # Nextcloud external mailing SMTP name.
       - SMTP_PASSWORD=${NEXTCLOUD_SMTP_PASSWORD} # Nextcloud external mailing SMTP password.
       - SMTP_SECURE=ssl # Use SSL for logging into the external mail server.
+      - TRUSTED_PROXIES=172.19.0.0/16 # Reverse proxy header support.
       - TZ=${TZ} # Timezone to use.
       - UMASK=022 # Only allow us to read/write.
     healthcheck:
