@@ -1,7 +1,7 @@
 services:
   jellyfin:
     container_name: jellyfin
-    image: jellyfin:latest
+    image: jellyfin/jellyfin:latest
     user: ${PUID}:${PGID}
     devices:
       - /dev/dri:/dev/dri # /dev/dri mapping for hardware acceleration.
