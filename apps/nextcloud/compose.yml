@@ -73,9 +73,9 @@ services:
         - mariadb-admin
         - ping
         - -h
-        - localhost
-        - -u ${NEXTCLOUD_MARIADB_USER}
-        - -p ${NEXTCLOUD_MARIADB_PASSWORD}
+        - "localhost"
+        - "-u${NEXTCLOUD_MARIADB_USER}"
+        - "-p${NEXTCLOUD_MARIADB_PASSWORD}"
       timeout: 10s
     logging:
       driver: json-file
