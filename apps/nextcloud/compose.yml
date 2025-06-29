@@ -21,6 +21,9 @@ services:
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER} # Nextcloud admin username to set.
       - NEXTCLOUD_INIT_HTACCESS=true # Always update htaccess after updates.
       - NEXTCLOUD_TRUSTED_DOMAINS=${URL_PUBLISHED_NEXTCLOUD} # Trust our published Nextcloud domain.
+      - OVERWRITECLIURL=https://${URL_PUBLISHED_NEXTCLOUD} # Use URL_PUBLISHED_NEXTCLOUD as URL.
+      - OVERWRITEHOST=${URL_PUBLISHED_NEXTCLOUD} # Use URL_PUBLISHED_NEXTCLOUD as host.
+      - OVERWRITEPROTOCOL=https # Use HTTPS.
       - PGID=${PGID} # Group ID to run under.
       - PHP_MEMORY_LIMIT=8G # Limit Nextcloud to 8GB of RAM usage.
       - PHP_UPLOAD_LIMIT=8G # Limit uploads to 8GB at a time.
@@ -32,6 +35,12 @@ services:
       - SMTP_SECURE=ssl # Use SSL for logging into the external mail server.
       - TZ=${TZ} # Timezone to use.
       - UMASK=022 # Only allow us to read/write.
+    healthcheck:
+      test: ["CMD", "php", "-f", "/var/www/html/occ", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
     labels:
       caddy: ${URL_PUBLISHED_NEXTCLOUD} # Tell Caddy to reverse proxy to our URL_PUBLISHED_NEXTCLOUD.
       caddy.reverse_proxy: nextcloud:9000 # Tell Caddy to reverse proxy nextcloud internal traffic.
