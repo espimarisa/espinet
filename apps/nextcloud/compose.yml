@@ -1,115 +1,115 @@
 services:
+  # Nextcloud.
   nextcloud:
     container_name: nextcloud
     image: nextcloud:fpm-alpine
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     depends_on:
-      - mariadb
-      - redis
+      nextcloud-mariadb:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_healthy
     env_file:
       - ../../.env
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_HOST: mariadb
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
-      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER}
-      OVERWRITECONDITION: '{"Host": "${URL_PUBLISHED_NEXTCLOUD}"}'
-      OVERWRITEPROTOCOL: https
-      PGID: ${PGID}
-      PUID: ${PUID}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      TRUSTED_DOMAINS: "${URL_PUBLISHED_NEXTCLOUD}"
-      TRUSTED_PROXIES: caddy
-      TZ: ${TZ}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -q -O /dev/null http://localhost:9000/status || exit 1",
-        ]
-      interval: 30s
-      retries: 3
-      start_period: 60s
-      timeout: 10s
+      - MAIL_DOMAIN=${NEXTCLOUD_MAIL_DOMAIN} # Nextcloud mailing domain.
+      - MAIL_FROM_ADDRESS=${NEXTCLOUD_MAIL_FROM_ADDRESS} # Nextcloud mailing from address.
+      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE} # Nextcloud database name.
+      - MYSQL_HOST=nextcloud-mariadb # Nextcloud database hostname.
+      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD} # Nextcloud database password.
+      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER} # Nextcloud database user.
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD} # Nextcloud admin user password to set.
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER} # Nextcloud admin username to set.
+      - NEXTCLOUD_INIT_HTACCESS=true # Always update htaccess after updates.
+      - NEXTCLOUD_TRUSTED_DOMAINS=${URL_PUBLISHED_NEXTCLOUD} # Trust our published Nextcloud domain.
+      - PGID=${PGID} # Group ID to run under.
+      - PHP_MEMORY_LIMIT=8G # Limit Nextcloud to 8GB of RAM usage.
+      - PHP_UPLOAD_LIMIT=8G # Limit uploads to 8GB at a time.
+      - PUID=${PUID} # User ID to run under.
+      - REDIS_HOST=nextcloud-redis # Nextcloud Redis cache hostname.
+      - SMTP_HOST=${NEXTCLOUD_SMTP_HOST} # Nextcloud external mailing SMTP host.
+      - SMTP_NAME=${NEXTCLOUD_SMTP_NAME} # Nextcloud external mailing SMTP name.
+      - SMTP_PASSWORD=${NEXTCLOUD_SMTP_PASSWORD} # Nextcloud external mailing SMTP password.
+      - SMTP_SECURE=ssl # Use SSL for logging into the external mail server.
+      - TZ=${TZ} # Timezone to use.
+      - UMASK=022 # Only allow us to read/write.
     labels:
-      caddy: ${URL_PUBLISHED_NEXTCLOUD}
-      caddy.reverse_proxy: "nextcloud:9000"
-    networks:
-      - external
-      - internal
-    volumes:
-      - nextcloud:/var/www/html
-      - ${PATH_NEXTCLOUD_DATA}:/var/www/html/data
+      caddy: ${URL_PUBLISHED_NEXTCLOUD} # Tell Caddy to reverse proxy to our URL_PUBLISHED_NEXTCLOUD.
+      caddy.reverse_proxy: nextcloud:9000 # Tell Caddy to reverse proxy nextcloud internal traffic.
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
         max-file: "5"
-
-  mariadb:
-    container_name: mariadb
-    image: mariadb:10.6
+        max-size: 10m
+    networks:
+      - external # Created by root/compose.yml.
+      - nextcloud-internal # Internal Nextcloud network; used by database.
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
+    volumes:
+      - ${PATH_NEXTCLOUD_DATA}:/var/www/html/data # Nextcloud data path.
+      - nextcloud:/var/www/html # Nextcloud configuration volume.
+      - type: tmpfs # Map /tmp for tmpfs usage.
+        target: /tmp
+        tmpfs:
+          size: 1000000000 # Limit to 1GB.
+
+  # Nextcloud database.
+  nextcloud-mariadb:
+    container_name: nextcloud-mariadb
+    image: mariadb:10.6
     env_file:
       - ../../.env
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      PGID: ${PGID}
-      PUID: ${PUID}
-      TZ: ${TZ}
-    networks:
-      - internal
-    volumes:
-      - mariadb:/var/lib/mysql
+      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE} # Nextcloud database name.
+      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD} # Nextcloud database password.
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MARIADB_ROOT_PASSWORD} # Nextcloud database root password.
+      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER} # Nextcloud database user.
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mariadb-admin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u${MYSQL_USER}",
-          "-p${MYSQL_PASSWORD}",
-        ]
       interval: 30s
       retries: 5
       start_period: 30s
+      test:
+        - CMD
+        - mariadb-admin
+        - ping
+        - -h
+        - localhost
+        - -u ${NEXTCLOUD_MARIADB_USER}
+        - -p ${NEXTCLOUD_MARIADB_PASSWORD}
       timeout: 10s
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
-        max-file: "5"
+        max-file: 5
+        max-size: 10m
+    networks:
+      - nextcloud-internal # Only listen on the internal Nextcloud network.
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - nextcloud-mariadb:/var/lib/mysql # Nextcloud MariaDB data volume.
 
-  redis:
+  # Nextcloud Redis cache.
+  nextcloud-redis:
     container_name: nextcloud-redis
     image: redis:alpine
-    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
       interval: 30s
-      timeout: 10s
       retries: 3
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-file: "5"
-        max-size: "10m"
+        max-file: 5
+        max-size: 10m
     networks:
-      - internal
+      - nextcloud-internal
+    restart: unless-stopped
     volumes:
-      - redis:/data
+      - nextcloud-redis:/data
 
 networks:
-  internal:
+  nextcloud-internal:
     driver: bridge
-    name: nextcloud-internal-network
+    name: nextcloud-internal-network # Internal Nextcloud network.

@@ -1,19 +1,14 @@
-# apps/jellyfin/compose.yml
 services:
   jellyfin:
     container_name: jellyfin
-    image: linuxserver/jellyfin:latest
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
+    image: jellyfin:latest
+    user: ${PUID}:${PGID}
     devices:
-      - /dev/dri:/dev/dri
+      - /dev/dri:/dev/dri # /dev/dri mapping for hardware acceleration.
     env_file:
       - ../../.env
     environment:
-      JELLYFIN_PublishedServerUrl: "https://${URL_PUBLISHED_JELLYFIN}"
-      PGID: ${PGID}
-      PUID: ${PUID}
-      TZ: ${TZ}
+      - JELLYFIN_PublishedServerUrl=http://${URL_PUBLISHED_JELLYFIN} # Override PublishedServerUrl to public URL.
     healthcheck:
       interval: 30s
       retries: 3
@@ -21,17 +16,19 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
       timeout: 10s
     labels:
-      caddy: ${URL_PUBLISHED_JELLYFIN}
-      caddy.reverse_proxy: "jellyfin:8096"
+      caddy: ${URL_PUBLISHED_JELLYFIN} # Tell Caddy to reverse proxy to URL_PUBLISHED_JELLYFIN.
+      caddy.reverse_proxy: jellyfin:8096 # Tell Caddy to reverse proxy Jellyfin traffic.
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-file: "5"
-        max-size: "10m"
+        max-file: 5
+        max-size: 10m
     networks:
-      - external
-    ports:
-      - 7359:7359/udp
+      - external # Created by root/compose.yml.
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
-      - ${PATH_MEDIA_LIBRARY}:/data
-      - jellyfin:/config
+      - jellyfin:/config # Jellyfin config storage location; volume created by root/compose.yml.
+      - jellyfin:/config/cache # Jellyfin cache storage location; volume created by root/compose.yml.
+      - ${PATH_MEDIA_LIBRARY}:/media # Jellyfin media library location.

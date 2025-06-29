@@ -2,21 +2,21 @@ include:
   - ./apps/caddy/compose.yml # caddy-docker-proxy: Reverse proxy
   - ./apps/cloudflare-ddns/compose.yml # cloudflare-ddns: Dynamic DNS automation for Cloudflare
   - ./apps/jellyfin/compose.yml # Jellyfin: Media server
-  - ./apps/nextcloud/compose.yml # Nextcloud: Self-hosted cloud storage
+  - ./apps/nextcloud/compose.yml # Nextcloud: Cloud storage
 
 networks:
-  external: # External network for non-VPN traffic (Caddy, Jellyfin, Nextcloud)
+  external: # External network for non-VPN traffic.
     driver: bridge
     name: external-network
 
 volumes:
   jellyfin:
-    name: jellyfin-volume
+    name: jellyfin-volume # Jellyfin config volume.
   caddy:
-    name: caddy-volume
+    name: caddy-volume # Caddy data volume.
   nextcloud:
-    name: nextcloud-volume
-  mariadb:
-    name: mariadb-volume
-  redis:
-    name: nextcloud-redis-volume
+    name: nextcloud-volume # Nextcloud config volume.
+  nextcloud-mariadb:
+    name: nextcloud-mariadb-volume # Nextcloud's MariaDB volume.
+  nextcloud-redis:
+    name: nextcloud-redis-volume # Nextcloud's Redis volume.

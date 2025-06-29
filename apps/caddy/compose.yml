@@ -2,19 +2,19 @@ services:
   caddy:
     container_name: caddy
     image: lucaslorentz/caddy-docker-proxy:ci-alpine
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
-    ports:
-      - 80:80
-      - 443:443
     environment:
-      CADDY_INGRESS_NETWORKS: external
+      - CADDY_INGRESS_NETWORKS=external # Only attempt to proxy things on the 'external' network.
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
     networks:
-      - external
+      - external # Created by root/compose.yml.
+    ports:
+      - 80:80 # HTTP traffic.
+      - 443:443 # HTTPS traffic.
+    restart: unless-stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - caddy:/data
+      - /var/run/docker.sock:/var/run/docker.sock # Mount to the Docker socket.
+      - caddy:/data # Caddy data storage location; volume created by root/compose.yml.
