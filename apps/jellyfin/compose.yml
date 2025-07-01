@@ -6,7 +6,6 @@ services:
     group_add: ["989"] # add 989 to perms to allow access to /dev/dri.
     networks: [external]
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     user: ${PUID}:${PGID}
     devices:
       - /dev/dri/renderD129:/dev/dri/renderD129

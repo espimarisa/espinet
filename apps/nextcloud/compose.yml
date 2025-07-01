@@ -4,7 +4,6 @@ services:
     image: lscr.io/linuxserver/nextcloud:latest
     env_file: ../../.env
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     depends_on:
       nextcloud-mariadb:
         condition: service_healthy
@@ -66,7 +65,6 @@ services:
     env_file: ../../.env
     networks: [nextcloud-internal]
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     environment:
       - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE}
       - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
