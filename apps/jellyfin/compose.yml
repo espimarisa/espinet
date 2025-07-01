@@ -3,7 +3,7 @@ services:
     container_name: jellyfin
     image: lscr.io/linuxserver/jellyfin:latest
     env_file: ../../.env
-    group_add: [989] # add 989 to perms to allow access to /dev/dri.
+    group_add: ["989"] # add 989 to perms to allow access to /dev/dri.
     networks: [external]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]

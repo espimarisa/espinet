@@ -1,13 +1,10 @@
 services:
   gluetun:
     container_name: gluetun
-    image: qmcgaw/gluetun:latest
-    cap_drop: [ALL]
     env_file: ../../.env
+    image: qmcgaw/gluetun:latest
+    privileged: true
     restart: unless-stopped
-    cap_add:
-      - NET_ADMIN # Network configuration.
-      - NET_RAW # Raw socket operations.
     devices:
       - /dev/net/tun:/dev/net/tun # VPN tunneling device.
     environment:
