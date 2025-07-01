@@ -5,9 +5,9 @@ services:
     env_file: ../../.env
     network_mode: service:gluetun
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
+    # depends_on:
+    #   gluetun:
+    #     condition: service_healthy
     environment:
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
       - INTERFACE=tun0 # Killswitch; use tun0 only.

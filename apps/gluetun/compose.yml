@@ -36,6 +36,6 @@ services:
         max-size: 10m
     ports:
       - 8000:8000
-      - 8080:8080
+      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT}
     volumes:
       - gluetun:/gluetun
