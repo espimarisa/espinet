@@ -11,8 +11,6 @@ services:
       - /dev/dri/renderD129:/dev/dri/renderD129
       - /dev/dri/card1:/dev/dri/card1
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
       - JELLYFIN_PublishedServerUrl=https://${URL_PUBLISHED_JELLYFIN}
       - LIBVA_DRIVER_NAME=radeonsi
     healthcheck:

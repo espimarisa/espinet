@@ -25,17 +25,14 @@ services:
       - OVERWRITECLIURL=https://${URL_PUBLISHED_NEXTCLOUD}
       - OVERWRITEHOST=${URL_PUBLISHED_NEXTCLOUD}
       - OVERWRITEPROTOCOL=https
-      - PGID=${PGID}
       - PHP_MEMORY_LIMIT=8G
       - PHP_UPLOAD_LIMIT=8G
-      - PUID=${PUID}
       - REDIS_HOST=nextcloud-valkey
       - SMTP_HOST=${NEXTCLOUD_SMTP_HOST}
       - SMTP_NAME=${NEXTCLOUD_SMTP_NAME}
       - SMTP_PASSWORD=${NEXTCLOUD_SMTP_PASSWORD}
       - SMTP_SECURE=ssl
       - TRUSTED_PROXIES=172.19.0.0/16
-      - TZ=${TZ}
       - UMASK=022
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/index.php"]
