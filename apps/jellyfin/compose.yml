@@ -4,10 +4,12 @@ services:
     image: jellyfin/jellyfin:latest
     user: ${PUID}:${PGID}
     devices:
-      - /dev/dri:/dev/dri # /dev/dri mapping for hardware acceleration.
+      - /dev/dri/renderD129:/dev/dri/renderD129
+      - /dev/dri/card1:/dev/dri/card1
     env_file:
       - ../../.env
     environment:
+      - LIBVA_DRIVER_NAME=radeonsi # enable radeonsi
       - JELLYFIN_PublishedServerUrl=https://${URL_PUBLISHED_JELLYFIN} # Override PublishedServerUrl to public URL.
       - TZ=${TZ}
       - UMASK=022
