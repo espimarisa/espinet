@@ -3,18 +3,20 @@ services:
     container_name: gluetun
     env_file: ../../.env
     image: qmcgaw/gluetun:latest
-    privileged: true
     restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
     devices:
-      - /dev/net/tun:/dev/net/tun # VPN tunneling device.
+      - /dev/net/tun:/dev/net/tun
     environment:
       - FIREWALL_OUTBOUND_SUBNETS=${GLUETUN_VPN_OUTBOUND_SUBNETS}
-      - UPDATER_PERIOD=8h # Check every 8 hours.
+      - UPDATER_PERIOD=8h
       - VPN_DNS_ADDRESS=${GLUETUN_VPN_DNS_ADDRESS}
       - VPN_ENDPOINT_IP=${GLUETUN_VPN_ENDPOINT_IP}
       - VPN_ENDPOINT_PORT=${GLUETUN_VPN_ENDPOINT_PORT}
       - VPN_PORT_FORWARDING_PROVIDER=${GLUETUN_VPN_PROVIDER}
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:${QBITTORRENT_WEBUI_PORT}/api/v2/app/setPreferences 2>&&1' # This is janky.
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:${QBITTORRENT_WEBUI_PORT}/api/v2/app/setPreferences 2>&&1'
       - VPN_PORT_FORWARDING=on
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=wireguard
@@ -33,7 +35,7 @@ services:
         max-file: 5
         max-size: 10m
     ports:
-      - 8000:8000 # Gluetun.
-      - 8080:8080 # qBittorrent.
+      - 8000:8000
+      - 8080:8080
     volumes:
       - gluetun:/gluetun
