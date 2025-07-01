@@ -16,7 +16,7 @@ services:
       - VPN_ENDPOINT_IP=${GLUETUN_VPN_ENDPOINT_IP}
       - VPN_ENDPOINT_PORT=${GLUETUN_VPN_ENDPOINT_PORT}
       - VPN_PORT_FORWARDING_PROVIDER=${GLUETUN_VPN_PROVIDER}
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:${QBITTORRENT_WEBUI_PORT}/api/v2/app/setPreferences 2>&1
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\\\"listen_port\\\":{{PORTS}}}" "http://127.0.0.1:${QBITTORRENT_WEBUI_PORT}/api/v2/app/setPreferences" 2>&1'
       - VPN_PORT_FORWARDING=on
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=wireguard
