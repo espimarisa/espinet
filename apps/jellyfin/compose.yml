@@ -5,19 +5,27 @@ services:
     image: lscr.io/linuxserver/jellyfin:latest
     cap_drop: [ALL]
     env_file: ../../.env
-    group_add: [989] # Allows access to /dev/dri; 989 = "render" group.
+    group_add: [989] # add 989 to perms to allow access to /dev/dri.
     networks: [external]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
+    user: ${PUID}:${PGID}
     cap_add:
-      - NET_BIND_SERVICE # Port binding.
-      - NET_RAW # UDP discovery (DLNA/mDNS).
-      - SYS_NICE # Transcoding prioritization
+      - NET_BIND_SERVICE
+      - NET_RAW
+      - SYS_NICE
+      - CHOWN # Needed by s6-overlay for volume permissions
+      - DAC_OVERRIDE # Needed by s6-overlay for volume permissions
+      - FSETID # Needed by s6-overlay for user/group management
+      - SETGID # Needed by s6-overlay for user/group management
+      - SETUID # Needed by s6-overlay for user/group management
+      - KILL # Needed by s6-overlay for process supervision
+      - MKNOD # Might be needed for tmpfs/device creation
     devices:
-      - /dev/dri/card1:/dev/dri/card1 # RX6600 is card1; IGP is card0;
-      - /dev/dri/renderD129:/dev/dri/renderD129 # RX6600 is renderD129; IGP is renderD128.
+      - /dev/dri/renderD129:/dev/dri/renderD129
+      - /dev/dri/card1:/dev/dri/card1
     environment:
-      - LIBVA_DRIVER_NAME=radeonsi # enable radeonsi.
+      - LIBVA_DRIVER_NAME=radeonsi
     healthcheck:
       interval: 30s
       retries: 3
@@ -25,9 +33,9 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
       timeout: 10s
     labels:
-      caddy: ${URL_PUBLISHED_JELLYFIN} # Tell Caddy to reverse proxy to URL_PUBLISHED_JELLYFIN.
-      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS.
-      caddy.reverse_proxy: jellyfin:8096 # Tell Caddy to reverse proxy Jellyfin traffic.
+      caddy: ${URL_PUBLISHED_JELLYFIN}
+      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains"
+      caddy.reverse_proxy: jellyfin:8096
     logging:
       driver: json-file
       options:
@@ -37,6 +45,8 @@ services:
       - 1900:1900/udp # DLNA discovery.
       - 7359:7359/udp # Local client discovery.
     volumes:
-      - ${PATH_MEDIA_LIBRARY}:/media # Media library location.
-      - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys # DPKEYS persistence.
+      - ${PATH_MEDIA_LIBRARY}:/media
+      - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys
       - jellyfin:/config
+      - type: tmpfs
+        target: /tmp

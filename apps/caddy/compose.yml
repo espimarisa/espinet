@@ -8,15 +8,16 @@ services:
     read_only: true
     restart: unless-stopped
     environment:
-      - CADDY_INGRESS_NETWORKS=external # Only attempt to proxy things on the external network.
+      - CADDY_INGRESS_NETWORKS=external
+      - CADDY_GLOBAL_OPTIONS=config.root /data
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
     ports:
-      - 80:80 # HTTP traffic.
-      - 443:443 # HTTPS traffic.
+      - 80:80
+      - 443:443
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - caddy:/data
