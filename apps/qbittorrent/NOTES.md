@@ -1,5 +1,16 @@
 # Notes
 
+## Authentication
+
+Be sure to disable local authentication. The WebUI spits out a temporary password every bootup, so we need to change it.
+
+1. Access the qBittorrent WebUI.
+2. Navigate to Tools > Options > WebUI
+3. Enable Bypass authentication for clients on localhost/whitelisted IP subnets.
+   - `172.20.0.0/16,192.168.1.0/24`
+
+## Killswitch
+
 After initial setup, be sure to enable the application-level killswitch.
 
 1. Access the qBittorrent WebUI.
