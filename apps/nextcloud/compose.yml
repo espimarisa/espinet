@@ -43,7 +43,7 @@ services:
     labels:
       caddy: ${URL_PUBLISHED_NEXTCLOUD}
       caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains"
-      caddy.reverse_proxy: nextcloud:443
+      caddy.reverse_proxy: nextcloud:80
     logging:
       driver: json-file
       options:
