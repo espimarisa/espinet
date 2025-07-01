@@ -1,20 +1,23 @@
+# apps/jellyfin/compose.yml
 services:
   jellyfin:
     container_name: jellyfin
-    image: jellyfin/jellyfin:latest
-    user: ${PUID}:${PGID}
+    image: lscr.io/linuxserver/jellyfin:latest
+    cap_drop: [ALL]
+    env_file: ../../.env
+    group_add: [989] # Allows access to /dev/dri; 989 = "render" group.
+    networks: [external]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    cap_add:
+      - NET_BIND_SERVICE # Port binding.
+      - NET_RAW # UDP discovery (DLNA/mDNS).
+      - SYS_NICE # Transcoding prioritization
     devices:
-      - /dev/dri/renderD129:/dev/dri/renderD129
-      - /dev/dri/card1:/dev/dri/card1
-    group_add:
-      - "989"
-    env_file:
-      - ../../.env
+      - /dev/dri/card1:/dev/dri/card1 # RX6600 is card1; IGP is card0;
+      - /dev/dri/renderD129:/dev/dri/renderD129 # RX6600 is renderD129; IGP is renderD128.
     environment:
-      - LIBVA_DRIVER_NAME=radeonsi # enable radeonsi
-      - JELLYFIN_PublishedServerUrl=https://${URL_PUBLISHED_JELLYFIN} # Override PublishedServerUrl to public URL.
-      - TZ=${TZ}
-      - UMASK=022
+      - LIBVA_DRIVER_NAME=radeonsi # enable radeonsi.
     healthcheck:
       interval: 30s
       retries: 3
@@ -23,22 +26,17 @@ services:
       timeout: 10s
     labels:
       caddy: ${URL_PUBLISHED_JELLYFIN} # Tell Caddy to reverse proxy to URL_PUBLISHED_JELLYFIN.
-      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS
+      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS.
       caddy.reverse_proxy: jellyfin:8096 # Tell Caddy to reverse proxy Jellyfin traffic.
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
-    networks:
-      - external # Created by root/compose.yml.
     ports:
-      - 1900:1900/udp # DLNA discovery
+      - 1900:1900/udp # DLNA discovery.
       - 7359:7359/udp # Local client discovery.
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
     volumes:
-      - ${PATH_MEDIA_LIBRARY}:/media # Jellyfin media library location.
-      - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys # DPKEYS persistence
-      - jellyfin:/config # Jellyfin config storage location; volume created by root/compose.yml.
+      - ${PATH_MEDIA_LIBRARY}:/media # Media library location.
+      - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys # DPKEYS persistence.
+      - jellyfin:/config

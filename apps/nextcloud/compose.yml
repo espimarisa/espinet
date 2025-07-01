@@ -1,84 +1,72 @@
 services:
-  # Nextcloud.
   nextcloud:
     container_name: nextcloud
-    image: nextcloud:apache
+    image: lscr.io/linuxserver/nextcloud:latest
+    cap_drop: [ALL]
+    env_file: ../../.env
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    cap_add:
+      - NET_BIND_SERVICE # Port binding.
+      - SYS_NICE # PHP process scheduling.
     depends_on:
       nextcloud-mariadb:
         condition: service_healthy
-      nextcloud-redis:
+      nextcloud-valkey:
         condition: service_healthy
-    env_file:
-      - ../../.env
     environment:
-      - LOGLEVEL=1 # Loglevel adjustment.
-      - MAIL_DOMAIN=${NEXTCLOUD_MAIL_DOMAIN} # Nextcloud mailing domain.
-      - MAIL_FROM_ADDRESS=${NEXTCLOUD_MAIL_FROM_ADDRESS} # Nextcloud mailing from address.
-      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE} # Nextcloud database name.
-      - MYSQL_HOST=nextcloud-mariadb # Nextcloud database hostname.
-      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD} # Nextcloud database password.
-      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER} # Nextcloud database user.
-      - NC_default_phone_region="us"" # Phone number validation.
-      - NC_skeletondirectory="''" # Get rid of Skeleton crap.
-      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD} # Nextcloud admin user password to set.
-      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER} # Nextcloud admin username to set.
-      - NEXTCLOUD_HOSTNAME=${URL_PUBLISHED_NEXTCLOUD} # Explicitly set hostname.
-      - NEXTCLOUD_INIT_HTACCESS=true # Always update htaccess after updates.
-      - NEXTCLOUD_TRUSTED_DOMAINS=${URL_PUBLISHED_NEXTCLOUD} # Trust our published Nextcloud domain.
-      - OVERWRITECLIURL=https://${URL_PUBLISHED_NEXTCLOUD} # Use URL_PUBLISHED_NEXTCLOUD as URL.
-      - OVERWRITEHOST=${URL_PUBLISHED_NEXTCLOUD} # Use URL_PUBLISHED_NEXTCLOUD as host.
-      - OVERWRITEPROTOCOL=https # Use HTTPS.
-      - PGID=${PGID} # Group ID to run under.
-      - PHP_MEMORY_LIMIT=8G # Limit Nextcloud to 8GB of RAM usage.
-      - PHP_UPLOAD_LIMIT=8G # Limit uploads to 8GB at a time.
-      - PUID=${PUID} # User ID to run under.
-      - REDIS_HOST=nextcloud-redis # Nextcloud Redis cache hostname.
-      - SMTP_HOST=${NEXTCLOUD_SMTP_HOST} # Nextcloud external mailing SMTP host.
-      - SMTP_NAME=${NEXTCLOUD_SMTP_NAME} # Nextcloud external mailing SMTP name.
-      - SMTP_PASSWORD=${NEXTCLOUD_SMTP_PASSWORD} # Nextcloud external mailing SMTP password.
-      - SMTP_SECURE=ssl # Use SSL for logging into the external mail server.
-      - TRUSTED_PROXIES=172.19.0.0/16 # Reverse proxy header support.
-      - TZ=${TZ} # Timezone to use.
-      - UMASK=022 # Only allow us to read/write.
+      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE}
+      - MYSQL_HOST=nextcloud-mariadb
+      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
+      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER}
+      - NC_default_phone_region=US # Set US as default_phone_region.
+      - NC_skeletondirectory= # Disable skeleton directory.
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
+      - PHP_MEMORY_LIMIT=8G # PHP memory limit.
+      - PHP_UPLOAD_LIMIT=8G # PHP upload limit.
+      - REDIS_HOST=nextcloud-valkey
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
       interval: 30s
-      timeout: 10s
       retries: 5
       start_period: 120s
+      test: ["CMD", "curl", "-f", "http://localhost/index.php"]
+      timeout: 10s
     labels:
       caddy: ${URL_PUBLISHED_NEXTCLOUD} # Tell Caddy to reverse proxy to our URL_PUBLISHED_NEXTCLOUD.
-      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS
-      caddy.reverse_proxy: nextcloud:80 # Tell Caddy to reverse proxy port 80.
+      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS.
+      caddy.reverse_proxy: nextcloud:443
     logging:
       driver: json-file
       options:
         max-file: "5"
         max-size: 10m
     networks:
-      - external # Created by root/compose.yml.
-      - nextcloud-internal # Internal Nextcloud network; used by database.
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
+      - external
+      - nextcloud-internal
     volumes:
-      - ${PATH_NEXTCLOUD_DATA}:/var/www/html/data # Nextcloud data path.
-      - nextcloud:/var/www/html # Nextcloud configuration volume.
-      - type: tmpfs # Map /tmp for tmpfs usage.
+      - ${PATH_NEXTCLOUD_DATA}:/data # Nextcloud data path.
+      - nextcloud:/config
+      - type: tmpfs
         target: /tmp
         tmpfs:
           size: 1000000000 # Limit to 1GB.
 
-  # Nextcloud database.
+  # Nextcloud MariaDB database
   nextcloud-mariadb:
     container_name: nextcloud-mariadb
-    image: mariadb:10.6
-    env_file:
-      - ../../.env
+    image: lscr.io/linuxserver/mariadb:latest
+    cap_add: [NET_BIND_SERVICE] # Port binding.
+    cap_drop: [ALL]
+    env_file: ../../.env
+    networks: [nextcloud-internal]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
     environment:
-      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE} # Nextcloud database name.
-      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD} # Nextcloud database password.
-      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MARIADB_ROOT_PASSWORD} # Nextcloud database root password.
-      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER} # Nextcloud database user.
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE}
+      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER}
+      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
     healthcheck:
       interval: 30s
       retries: 5
@@ -97,34 +85,37 @@ services:
       options:
         max-file: 5
         max-size: 10m
-    networks:
-      - nextcloud-internal # Only listen on the internal Nextcloud network.
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     volumes:
-      - nextcloud-mariadb:/var/lib/mysql # Nextcloud MariaDB data volume.
+      - nextcloud-mariadb:/config
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 100000000 # 100MB
 
-  # Nextcloud Redis cache.
-  nextcloud-redis:
-    container_name: nextcloud-redis
-    image: redis:alpine
+  # Nextcloud Valkey/Redis cache
+  nextcloud-valkey:
+    container_name: nextcloud-valkey
+    image: ghcr.io/valkey-io/valkey:latest
+    cap_add: [NET_BIND_SERVICE] # Port binding.
+    cap_drop: [ALL]
+    env_file: ../../.env
+    networks: [nextcloud-internal]
+    restart: unless-stopped
+    environment:
+      - PASSWORD=${NEXTCLOUD_VALKEY_PASSWORD}
     healthcheck:
       interval: 30s
       retries: 3
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${NEXTCLOUD_VALKEY_PASSWORD}", "ping"]
       timeout: 10s
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
-    networks:
-      - nextcloud-internal
-    restart: unless-stopped
     volumes:
-      - nextcloud-redis:/data
-
-networks:
-  nextcloud-internal:
-    driver: bridge
-    name: nextcloud-internal-network # Internal Nextcloud network.
+      - nextcloud-valkey:/data # Valkey data; created in root/compose.yml.
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 100000000 # 100MB

@@ -2,20 +2,19 @@ services:
   cloudflare-ddns:
     container_name: cloudflare-ddns
     image: favonia/cloudflare-ddns:latest
-    cap_drop: [all]
-    env_file:
-      - ../../.env
+    network_mode: host # cloudflare-ddns requires network_mode: host to get our origin IP.
+    cap_drop: [ALL]
+    env_file: ../../.env
+    read_only: true
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
     environment:
       - CF_API_TOKEN=${CLOUDFLARE_API_TOKEN} # Cloudflare API token with scoped Zone editing.
       - DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add records for.
-      - PROXIED=false # Do not proxy any domains; breaking CF ToS is a no-no :(
-      - IP6_PROVIDER=none # Google Fiber is toxic asf
+      - PROXIED=false # Do not proxy any domains.
+      - IP6_PROVIDER=none # Disable IPV6.
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
-    network_mode: host # cloudflare-ddns requires network_mode: host to get our origin IP.
-    read_only: true
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]

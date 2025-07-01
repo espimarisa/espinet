@@ -1,0 +1,45 @@
+services:
+  qbittorrent:
+    container_name: qbittorrent
+    image: lscr.io/linuxserver/qbittorrent:latest
+    cap_add: [NET_BIND_SERVICE] # Port binding.
+    cap_drop: [ALL]
+    env_file: ../../.env
+    network_mode: service:gluetun # Route all traffic thru gluetun.
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - INTERFACE=tun0 # Killswitch; use tun0 only.
+      - PASSWORD=${QBITTORRENT_PASSWORD} # qBittorrent WebUI password to set.
+      - USER=${QBITTORRENT_USER} # qBittorrent WebUI username to set.
+      - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
+    volumes:
+      - ${PATH_DOWNLOADS_DIRECTORY}/downloads:/downloads # Where torrent downloads go.
+      - gluetun:/gluetun:ro # Read-only access to Gluetun's volume.
+      - qbittorrent:/config # qBittorrent configuration, defined in root/compose.yml.
+
+  gluetun-qbittorrent-port-manager:
+    image: ghcr.io/ngixy/gluetun-qbittorrent-port-manager:latest
+    container_name: gluetun-qbittorrent-port-manager
+    restart: unless-stopped
+    network_mode: service:gluetun # Use gluetun's network.
+    cap_add: []
+    cap_drop:
+      - ALL
+    depends_on:
+      gluetun:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_healthy
+    env_file:
+      - ../../.env
+    environment:
+      - GLUETUN_CONTROL_SERVER_HOST=localhost
+      - GLUETUN_CONTROL_SERVER_PORT=8000
+      - QBITTORRENT_WEBUI_PASSWORD=${QBITTORRENT_PASSWORD}
+      - QBITTORRENT_WEBUI_USERNAME=${QBITTORRENT_USER}
+      - RECHECK_TIME=60 # How often to check Gluetun for a new port.
+    volumes:
+      - gluetun:/gluetun:ro # Read-only access to Gluetun's volume.

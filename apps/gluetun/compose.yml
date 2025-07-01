@@ -1,0 +1,42 @@
+services:
+  gluetun:
+    container_name: gluetun
+    image: qmcgaw/gluetun:latest
+    cap_drop: [ALL]
+    env_file: ../../.env
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN # Network configuration.
+      - NET_RAW # Raw socket operations.
+    devices:
+      - /dev/net/tun:/dev/net/tun # VPN tunneling device.
+    environment:
+      - FIREWALL_OUTBOUND_SUBNETS=${GLUETUN_VPN_OUTBOUND_SUBNETS}
+      - UPDATER_PERIOD=8h # Check every 8 hours.
+      - VPN_DNS_ADDRESS=${GLUETUN_VPN_DNS_ADDRESS}
+      - VPN_ENDPOINT_IP=${GLUETUN_VPN_ENDPOINT_IP}
+      - VPN_ENDPOINT_PORT=${GLUETUN_VPN_ENDPOINT_PORT}
+      - VPN_PORT_FORWARDING_PROVIDER=${GLUETUN_VPN_PROVIDER}
+      - VPN_PORT_FORWARDING=on
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
+      - WIREGUARD_ADDRESSES=${GLUETUN_VPN_WIREGUARD_ADDRESSES}
+      - WIREGUARD_PRIVATE_KEY=${GLUETUN_VPN_WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    ports:
+      - 8000:8000 # Gluetun.
+      - 8080:8080 # qBittorrent.
+    volumes:
+      - gluetun:/gluetun
+      - /etc/gluetun/temp:/etc/gluetun/temp # For port forwarding.

@@ -1,24 +1,33 @@
 include:
-  - ./apps/caddy/compose.yml # caddy-docker-proxy: Reverse proxy
-  - ./apps/cloudflare-ddns/compose.yml # cloudflare-ddns: Dynamic DNS automation for Cloudflare
-  - ./apps/jellyfin/compose.yml # Jellyfin: Media server
-  - ./apps/nextcloud/compose.yml # Nextcloud: Cloud storage
+  - ./apps/caddy/compose.yml
+  - ./apps/cloudflare-ddns/compose.yml
+  - ./apps/gluetun/compose.yml
+  - ./apps/jellyfin/compose.yml
+  - ./apps/nextcloud/compose.yml
+  - ./apps/qbittorrent/compose.yml
 
 networks:
-  external: # External network for non-VPN traffic.
+  external:
     driver: bridge
     name: external-network
+  nextcloud-internal:
+    driver: bridge
+    name: nextcloud-internal-network
 
 volumes:
-  jellyfin:
-    name: jellyfin-volume # Jellyfin config volume.
-  jellyfin-dpkeys:
-    name: jellyfin-dpkeys # Jellyfin dpkeys volume.
   caddy:
-    name: caddy-volume # Caddy data volume.
+    name: caddy-volume
+  gluetun:
+    name: gluetun-volume
+  jellyfin:
+    name: jellyfin-volume
+  jellyfin-dpkeys:
+    name: jellyfin-dpkeys-volume
+  qbittorrent:
+    name: qbittorrent-volume
   nextcloud:
-    name: nextcloud-volume # Nextcloud config volume.
+    name: nextcloud-volume
   nextcloud-mariadb:
-    name: nextcloud-mariadb-volume # Nextcloud's MariaDB volume.
-  nextcloud-redis:
-    name: nextcloud-redis-volume # Nextcloud's Redis volume.
+    name: nextcloud-mariadb-volume
+  nextcloud-valkey:
+    name: nextcloud-valkey-volume

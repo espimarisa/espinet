@@ -1,17 +1,27 @@
-# Notes on Jellyfin
+# Notes
 
-Jellyfin is lovely and has come a long way. I've not ran into too many problems with it, but I do have modern hardware.
+## Post-install
 
-## Metadata
+1. Set published server URL to the public Jellyfin URL.
+2. Install Intro Skipper `https://intro-skipper.org/manifest.json`
 
-I personally use TVDB for Anime and TV and TMDB for Movies. I've not ran into too many problems, but my media library strictly follows Jellyfin's expected standards and has been made to do so with various 'ARR apps over the years.
+## Enable VAAPI
 
-There exist much more powerful solutions for metadata and automation, but I don't really want to automate downloading as I'm quite picky on what release to use, and my media library is pretty much complete at this point.
+1. Navigate to Admin > Dashboard > Playback.
+2. Select "Video Acceleration API (VAAPI) as the Hardware Acceleration option.
+3. Set the VAAPI device path to `/dev/dri/renderD129`.
+4. Enable hardware decoding for the following supported formats:
+   - H264
+   - HEVC
+   - MPEG2
+   - VC1
+   - VP8
+   - HEVC 10bit
+   - VP9 10bit
+5. Enable 10-Bit hardware decoding for HEVC and VP9.
 
-## Hardware Acceleration
+## Enable Tone Mapping
 
-VAAPI seems to work fine out of the box with passing /dev/dri/renderD128 through and configuring Jellyfin to work with it. I am using my spare Radeon 6600 for this task, and it seems to hold up fine, and does much better than the onboard UHD 770 or my old 1060 3GB. Yay for AV1 decode support!
-
-## Tone Mapping/HDR
-
-Untested, previously was a pain to setup. Will update with more information in the future.
+1. Navigate to Admin > Dashboard > Playback.
+2. Enable tone mapping.
+3. Make sure VPP tone mapping is disabled.

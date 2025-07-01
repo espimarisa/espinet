@@ -4,10 +4,12 @@ Compose setups, configuration files, and various scripts used in my homelab ("es
 
 ## Apps
 
-- [Caddy](./apps/caddy/): Reverse proxy
-- [Cloudflare-DDNS](./apps/cloudflare-ddns/): Dynamic DNS automation for Cloudflare
-- [Jellyfin](./apps/jellyfin/): Media server
-- [Nextcloud](./apps/nextcloud/): Cloud storage
+- [Caddy](./apps/caddy/)
+- [Cloudflare-DDNS](./apps/cloudflare-ddns/)
+- [Gluetun](./apps/gluetun/)
+- [Jellyfin](./apps/jellyfin/)
+- [Nextcloud](./apps/nextcloud/)
+- [qBittorrent](./apps/qbittorrent/)
 
 ## License
 
