@@ -6,6 +6,8 @@ services:
     devices:
       - /dev/dri/renderD129:/dev/dri/renderD129
       - /dev/dri/card1:/dev/dri/card1
+    group_add:
+      - "989"
     env_file:
       - ../../.env
     environment:
