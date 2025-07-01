@@ -1,35 +1,19 @@
-# apps/qbittorrent/compose.yml
 services:
   qbittorrent:
     container_name: qbittorrent
     image: lscr.io/linuxserver/qbittorrent:latest
-    cap_drop: [ALL]
     env_file: ../../.env
     network_mode: service:gluetun
     restart: unless-stopped
-    cap_add:
-      - CHOWN
-      - DAC_OVERRIDE
-      - FSETID
-      - KILL
-      - MKNOD
-      - NET_BIND_SERVICE
-      - SETGID
-      - SETUID
     depends_on:
       gluetun:
         condition: service_healthy
     environment:
-      - INTERFACE=tun0 # Killswitch; use tun0 only.
-      - PASSWORD=${QBITTORRENT_PASSWORD}
-      - USER=${QBITTORRENT_USER}
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
+      - INTERFACE=tun0 # Killswitch; use tun0 only.
+      - USER=${QBITTORRENT_USER}
+      - PASSWORD=${QBITTORRENT_PASSWORD}
     volumes:
+      - qbittorrent:/config
       - ${PATH_DOWNLOADS_DIRECTORY}/downloads:/downloads
       - gluetun:/gluetun:ro
-      - qbittorrent:/config
-      - type: tmpfs
-        target: /tmp
-        tmpfs:
-          size: 2G # Increase /tmp for qBittorrent, might need more.
-

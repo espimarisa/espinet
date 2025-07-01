@@ -2,14 +2,10 @@ services:
   caddy:
     container_name: caddy
     image: lucaslorentz/caddy-docker-proxy:ci-alpine
-    cap_add: [NET_BIND_SERVICE] # Port binding.
-    cap_drop: [ALL]
     networks: [external]
-    read_only: true
     restart: unless-stopped
     environment:
       - CADDY_INGRESS_NETWORKS=external
-      - CADDY_GLOBAL_OPTIONS=config.root /data
     logging:
       driver: json-file
       options:
@@ -21,5 +17,3 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - caddy:/data
-      - type: tmpfs
-        target: /tmp
