@@ -38,6 +38,7 @@ services:
       - SMTP_PASSWORD=${MAIL_SMTP_PASSWORD}
       - SMTP_SECURE=ssl
       - TRUSTED_PROXIES=172.19.0.0/16
+      - UMASK=022
     healthcheck:
       interval: 30s
       retries: 5
