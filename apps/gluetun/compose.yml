@@ -23,12 +23,6 @@ services:
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
       - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
-    healthcheck:
-      interval: 15s
-      retries: 3
-      start_period: 60s
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      timeout: 5s
     logging:
       driver: json-file
       options:
