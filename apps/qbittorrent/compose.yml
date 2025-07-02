@@ -43,4 +43,5 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - gluetun:/gluetun:ro
