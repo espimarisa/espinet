@@ -2,6 +2,7 @@ services:
   nextcloud:
     container_name: nextcloud
     image: nextcloud:apache
+    restart: unless-stopped
     depends_on:
       nextcloud-mariadb:
         condition: service_healthy
@@ -55,9 +56,6 @@ services:
     networks:
       - external
       - nextcloud-internal
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
     volumes:
       - ${PATH_NEXTCLOUD_DATA}:/var/www/html/data
       - nextcloud:/var/www/html
@@ -69,6 +67,7 @@ services:
   nextcloud-mariadb:
     container_name: nextcloud-mariadb
     image: mariadb:latest
+    restart: unless-stopped
     env_file:
       - ../../.env
     environment:
@@ -96,7 +95,6 @@ services:
         max-size: 10m
     networks:
       - nextcloud-internal
-    restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     volumes:
@@ -105,6 +103,7 @@ services:
   nextcloud-redis:
     container_name: nextcloud-redis
     image: redis:alpine
+    restart: unless-stopped
     healthcheck:
       interval: 30s
       retries: 3
@@ -117,6 +116,5 @@ services:
         max-size: 10m
     networks:
       - nextcloud-internal
-    restart: unless-stopped
     volumes:
       - nextcloud-redis:/data
