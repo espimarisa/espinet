@@ -29,5 +29,5 @@ volumes:
     name: nextcloud-volume
   nextcloud-mariadb:
     name: nextcloud-mariadb-volume
-  nextcloud-valkey:
-    name: nextcloud-valkey-volume
+  nextcloud-redis:
+    name: nextcloud-redis-volume

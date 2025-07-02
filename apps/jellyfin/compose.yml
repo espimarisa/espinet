@@ -1,18 +1,18 @@
 services:
   jellyfin:
     container_name: jellyfin
-    image: lscr.io/linuxserver/jellyfin:latest
-    env_file: ../../.env
-    group_add: ["989"] # allow access to render
-    networks: [external]
+    image: jellyfin/jellyfin:latest
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
+    user: ${PUID}:${PGID}
     devices:
-      - /dev/dri/renderD129:/dev/dri/renderD129
-      - /dev/dri/card1:/dev/dri/card1
+      - /dev/dri:/dev/dri
+    env_file:
+      - ../../.env
     environment:
       - JELLYFIN_PublishedServerUrl=https://${URL_PUBLISHED_JELLYFIN}
       - LIBVA_DRIVER_NAME=radeonsi
+    group_add:
+      - 989
     healthcheck:
       interval: 30s
       retries: 3
@@ -28,9 +28,13 @@ services:
       options:
         max-file: 5
         max-size: 10m
+    networks:
+      - external
     ports:
       - 1900:1900/udp
       - 7359:7359/udp
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ${PATH_MEDIA_LIBRARY}:/media
       - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys

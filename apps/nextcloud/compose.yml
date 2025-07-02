@@ -1,21 +1,23 @@
 services:
   nextcloud:
     container_name: nextcloud
-    image: lscr.io/linuxserver/nextcloud:latest
-    env_file: ../../.env
-    restart: unless-stopped
+    image: nextcloud:apache
     depends_on:
       nextcloud-mariadb:
         condition: service_healthy
-      nextcloud-valkey:
+      nextcloud-redis:
         condition: service_healthy
+    env_file:
+      - ../../.env
     environment:
       - LOGLEVEL=1
-      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE}
+      - MAIL_DOMAIN=${MAIL_DOMAIN}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}
+      - MYSQL_DATABASE=${NEXTCLOUD_MYSQL_DATABASE}
       - MYSQL_HOST=nextcloud-mariadb
-      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
-      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER}
-      - NC_default_phone_region=US
+      - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
+      - MYSQL_USER=${NEXTCLOUD_MYSQL_USER}
+      - NC_default_phone_region="US"
       - NC_skeletondirectory=
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
       - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
@@ -25,21 +27,22 @@ services:
       - OVERWRITECLIURL=https://${URL_PUBLISHED_NEXTCLOUD}
       - OVERWRITEHOST=${URL_PUBLISHED_NEXTCLOUD}
       - OVERWRITEPROTOCOL=https
+      - PGID=${PGID}
       - PHP_MEMORY_LIMIT=8G
       - PHP_UPLOAD_LIMIT=8G
-      - REDIS_HOST=nextcloud-valkey
-      - SMTP_HOST=${NEXTCLOUD_SMTP_HOST}
-      - SMTP_NAME=${NEXTCLOUD_SMTP_NAME}
-      - SMTP_PASSWORD=${NEXTCLOUD_SMTP_PASSWORD}
+      - PUID=${PUID}
+      - REDIS_HOST=nextcloud-redis
+      - SMTP_HOST=${MAIL_SMTP_HOST}
+      - SMTP_NAME=${MAIL_SMTP_NAME}
+      - SMTP_PASSWORD=${MAIL_SMTP_PASSWORD}
       - SMTP_SECURE=ssl
       - TRUSTED_PROXIES=172.19.0.0/16
-      - UMASK=022
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/index.php"]
       interval: 30s
-      timeout: 10s
       retries: 5
       start_period: 120s
+      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
+      timeout: 10s
     labels:
       caddy: ${URL_PUBLISHED_NEXTCLOUD}
       caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains"
@@ -52,21 +55,27 @@ services:
     networks:
       - external
       - nextcloud-internal
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
-      - ${PATH_NEXTCLOUD_DATA}:/data
-      - nextcloud:/config
+      - ${PATH_NEXTCLOUD_DATA}:/var/www/html/data
+      - nextcloud:/var/www/html
+      - target: /tmp
+        tmpfs:
+          size: 1000000000
+        type: tmpfs
 
   nextcloud-mariadb:
     container_name: nextcloud-mariadb
-    image: lscr.io/linuxserver/mariadb:latest
-    env_file: ../../.env
-    networks: [nextcloud-internal]
-    restart: unless-stopped
+    image: mariadb:latest
+    env_file:
+      - ../../.env
     environment:
-      - MYSQL_DATABASE=${NEXTCLOUD_MARIADB_DATABASE}
-      - MYSQL_PASSWORD=${NEXTCLOUD_MARIADB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MARIADB_ROOT_PASSWORD}
-      - MYSQL_USER=${NEXTCLOUD_MARIADB_USER}
+      - MYSQL_DATABASE=${NEXTCLOUD_MYSQL_DATABASE}
+      - MYSQL_PASSWORD=${NEXTCLOUD_MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${NEXTCLOUD_MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${NEXTCLOUD_MYSQL_USER}
     healthcheck:
       interval: 30s
       retries: 5
@@ -75,36 +84,39 @@ services:
         - CMD
         - mariadb-admin
         - ping
-        - -h
-        - "localhost"
-        - "-u${NEXTCLOUD_MARIADB_USER}"
-        - "-p${NEXTCLOUD_MARIADB_PASSWORD}"
+        - "-h"
+        - localhost
+        - "-u${NEXTCLOUD_MYSQL_USER}"
+        - "-p${NEXTCLOUD_MYSQL_PASSWORD}"
       timeout: 10s
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
-    volumes:
-      - nextcloud-mariadb:/config
-
-  nextcloud-valkey:
-    container_name: nextcloud-valkey
-    image: ghcr.io/valkey-io/valkey:latest
-    env_file: ../../.env
-    networks: [nextcloud-internal]
+    networks:
+      - nextcloud-internal
     restart: unless-stopped
-    environment:
-      - PASSWORD=${NEXTCLOUD_VALKEY_PASSWORD}
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - nextcloud-mariadb:/var/lib/mysql
+
+  nextcloud-redis:
+    container_name: nextcloud-redis
+    image: redis:alpine
     healthcheck:
       interval: 30s
       retries: 3
-      test: ["CMD", "redis-cli", "-a", "${NEXTCLOUD_VALKEY_PASSWORD}", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       timeout: 10s
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
+    networks:
+      - nextcloud-internal
+    restart: unless-stopped
     volumes:
-      - nextcloud-valkey:/data
+      - nextcloud-redis:/data

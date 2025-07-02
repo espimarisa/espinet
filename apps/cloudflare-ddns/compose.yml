@@ -3,11 +3,14 @@ services:
     container_name: cloudflare-ddns
     image: favonia/cloudflare-ddns:latest
     network_mode: host # cloudflare-ddns requires network_mode: host to get our origin IP.
-    cap_drop: [ALL]
-    env_file: ../../.env
     read_only: true
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
+    cap_drop:
+      - ALL
+    env_file:
+      - ../../.env
+    security_opt:
+      - no-new-privileges:true
     environment:
       - CF_API_TOKEN=${CLOUDFLARE_API_TOKEN} # Cloudflare API token with scoped Zone editing.
       - DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add records for.

@@ -2,13 +2,43 @@ services:
   qbittorrent:
     container_name: qbittorrent
     image: lscr.io/linuxserver/qbittorrent:5.1.0-r0-ls399 # **HEAVY SIGH** https://github.com/qbittorrent/qBittorrent/issues/22909
-    env_file: ../../.env
-    network_mode: service:gluetun
-    restart: unless-stopped
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    env_file:
+      - ../../.env
     environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
       - INTERFACE=tun0 # Killswitch; use tun0 only.
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
+    network_mode: service:gluetun
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     volumes:
-      - ${PATH_DOWNLOADS_DIRECTORY}/downloads:/downloads
-      - gluetun:/gluetun:ro
+      - ${PATH_DOWNLOADS_DIRECTORY}/torrents:/downloads
       - qbittorrent:/config
+
+  qbittorrent-natmap:
+    image: ghcr.io/soxfor/qbittorrent-natmap:latest
+    container_name: qbittorrent-natmap
+    restart: unless-stopped
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+    network_mode: service:gluetun
+    environment:
+      - QBITTORRENT_USER=admin
+      - QBITTORRENT_PASS=
+      - QBITTORRENT_PORT=${QBITTORRENT_WEBUI_PORT}
+      - QBITTORRENT_SERVER=${WIREGUARD_ADDRESSES}
+      - VPN_GATEWAY=${VPN_DNS_ADDRESS}
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
