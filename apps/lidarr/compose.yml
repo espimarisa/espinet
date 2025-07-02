@@ -29,5 +29,5 @@ services:
       - no-new-privileges:true
     volumes:
       - lidarr:/config
-      - ${PATH_MEDIA_LIBRARY}/music:/library
+      - ${PATH_MEDIA_LIBRARY}/music:/media
       - ${PATH_DOWNLOADS_DIRECTORY}/deemix:/downloads
