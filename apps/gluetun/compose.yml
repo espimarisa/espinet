@@ -21,16 +21,17 @@ services:
       - WIREGUARD_ENDPOINT_PORT=${WIREGUARD_ENDPOINT_PORT}
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
       - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
     ports:
-      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent
       - 6595:6595 # Deemix
       - 7878:7878 # Radarr
       - 8000:8000 # Gluetun
+      - 8080:8080 # qBittorrent
       - 8686:8686 # Lidarr
       - 8989:8989 # Sonarr
     security_opt:
