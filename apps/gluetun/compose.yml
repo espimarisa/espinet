@@ -27,7 +27,13 @@ services:
         max-file: 5
         max-size: 10m
     ports:
-      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT}
-      - 8000:8000
+      - ${QBITTORRENT_WEBUI_PORT}:${QBITTORRENT_WEBUI_PORT} # qBittorrent
+      - 6595:6595 # Deemix
+      - 7878:7878 # Radarr
+      - 8000:8000 # Gluetun
+      - 8686:8686 # Lidarr
+      - 8989:8989 # Sonarr
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - gluetun:/gluetun

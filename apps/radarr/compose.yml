@@ -1,0 +1,30 @@
+services:
+  radarr:
+    container_name: radarr
+    image: lscr.io/linuxserver/radarr:latest
+    network_mode: service:gluetun
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    env_file:
+      - ../../.env
+    environment:
+      - WEBUI_PORT=7878
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 60s
+      test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
+      timeout: 10s
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - radarr:/config
+      - ${PATH_MEDIA_LIBRARY}:/media
+      - ${PATH_DOWNLOADS_DIRECTORY}:/downloads

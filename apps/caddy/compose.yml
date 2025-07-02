@@ -15,6 +15,8 @@ services:
     ports:
       - 80:80
       - 443:443
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - caddy:/data

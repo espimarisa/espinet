@@ -1,5 +1,9 @@
 # Notes
 
+## Vuetorrent
+
+Located at `/vuetorrent` thanks to DOCKER_MODS.
+
 ## Authentication
 
 Be sure to disable local authentication. The WebUI spits out a temporary password every bootup, so we need to change it.

@@ -33,6 +33,8 @@ services:
     ports:
       - 1900:1900/udp
       - 7359:7359/udp
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ${PATH_MEDIA_LIBRARY}:/media
       - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys

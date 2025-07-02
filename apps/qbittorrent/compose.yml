@@ -1,7 +1,8 @@
 services:
   qbittorrent:
     container_name: qbittorrent
-    image: lscr.io/linuxserver/qbittorrent:5.1.0-r0-ls399 # https://github.com/qbittorrent/qBittorrent/issues/22909
+    image: lscr.io/linuxserver/qbittorrent:5.1.0-r0-ls399
+    network_mode: service:gluetun
     restart: unless-stopped
     devices:
       - /dev/net/tun:/dev/net/tun
@@ -11,28 +12,35 @@ services:
     env_file:
       - ../../.env
     environment:
+      - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent # /vuetorrent
       - INTERFACE=tun0 # Killswitch; use tun0 only.
       - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT}
-    network_mode: service:gluetun
     volumes:
       - ${PATH_DOWNLOADS_DIRECTORY}/torrents:/downloads
+      - gluetun:/gluetun:ro
       - qbittorrent:/config
 
   qbittorrent-natmap:
     image: ghcr.io/soxfor/qbittorrent-natmap:latest
     container_name: qbittorrent-natmap
+    network_mode: service:gluetun
     restart: unless-stopped
     depends_on:
       gluetun:
         condition: service_healthy
       qbittorrent:
         condition: service_started
-    network_mode: service:gluetun
+    env_file:
+      - ../../.env
     environment:
-      - QBITTORRENT_PASS=${QBITTORRENT_WEBUI_USER}
-      - QBITTORRENT_PORT=${QBITTORRENT_WEBUI_PORT}
-      - QBITTORRENT_SERVER=${WIREGUARD_ADDRESSES}
+      - QBITTORRENT_PASS=${QBITTORRENT_WEBUI_PASSWORD}
+      - QBITTORRENT_PORT=6881
+      - QBITTORRENT_SERVER=localhost
       - QBITTORRENT_USER=${QBITTORRENT_WEBUI_USER}
-      - VPN_GATEWAY=${VPN_DNS_ADDRESS}
+      - QBITTORRENT_WEBUI_PASSWORD=${QBITTORRENT_WEBUI_PASSWORD}
+      - QBITTORRENT_WEBUI_USERNAME=${QBITTORRENT_WEBUI_USER}
+      - VPN_GATEWAY=localhost
+    security_opt:
+      - no-new-privileges:true
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - gluetun:/gluetun:ro

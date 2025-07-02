@@ -9,8 +9,6 @@ services:
       - ALL
     env_file:
       - ../../.env
-    security_opt:
-      - no-new-privileges:true
     environment:
       - CF_API_TOKEN=${CLOUDFLARE_API_TOKEN} # Cloudflare API token with scoped Zone editing.
       - DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add records for.
@@ -21,3 +19,5 @@ services:
       options:
         max-file: 5
         max-size: 10m
+    security_opt:
+      - no-new-privileges:true

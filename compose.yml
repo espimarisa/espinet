@@ -3,8 +3,12 @@ include:
   - ./apps/cloudflare-ddns/compose.yml
   - ./apps/gluetun/compose.yml
   - ./apps/jellyfin/compose.yml
+  - ./apps/lidarr/compose.yml
   - ./apps/nextcloud/compose.yml
   - ./apps/qbittorrent/compose.yml
+  - ./apps/radarr/compose.yml
+  - ./apps/sonarr/compose.yml
+  - ./apps/deemix/compose.yml
 
 networks:
   external:
@@ -17,12 +21,16 @@ networks:
 volumes:
   caddy:
     name: caddy-volume
+  deemix:
+    name: deemix-volume
   gluetun:
     name: gluetun-volume
   jellyfin:
     name: jellyfin-volume
   jellyfin-dpkeys:
     name: jellyfin-dpkeys-volume
+  lidarr:
+    name: lidarr-volume
   qbittorrent:
     name: qbittorrent-volume
   nextcloud:
@@ -31,3 +39,7 @@ volumes:
     name: nextcloud-mariadb-volume
   nextcloud-redis:
     name: nextcloud-redis-volume
+  radarr:
+    name: radarr-volume
+  sonarr:
+    name: sonarr-volume

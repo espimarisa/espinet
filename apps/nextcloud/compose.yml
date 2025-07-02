@@ -57,6 +57,8 @@ services:
     networks:
       - external
       - nextcloud-internal
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - ${PATH_NEXTCLOUD_DATA}:/var/www/html/data
       - nextcloud:/var/www/html
@@ -117,5 +119,7 @@ services:
         max-size: 10m
     networks:
       - nextcloud-internal
+    security_opt:
+      - no-new-privileges:true
     volumes:
       - nextcloud-redis:/data

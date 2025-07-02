@@ -1,0 +1,33 @@
+services:
+  lidarr:
+    container_name: lidarr
+    image: ghcr.io/hotio/lidarr:pr-plugins
+    network_mode: service:gluetun
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    env_file:
+      - ../../.env
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - UMASK=022
+      - WEBUI_PORT=8686
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 60s
+      test: ["CMD", "curl", "-f", "http://localhost:8686/ping"]
+      timeout: 10s
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - lidarr:/config
+      - ${PATH_MEDIA_LIBRARY}/music:/library
+      - ${PATH_DOWNLOADS_DIRECTORY}/deemix:/downloads
