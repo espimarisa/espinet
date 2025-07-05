@@ -2,19 +2,18 @@ services:
   radarr:
     container_name: radarr
     image: lscr.io/linuxserver/radarr:latest
-    network_mode: service:gluetun
+    env_file: ../../.env
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    env_file:
-      - ../../.env
+    security_opt: [no-new-privileges:true]
     environment:
-      - WEBUI_PORT=7878
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK=${UMASK} # Default umask permissions to set.
     healthcheck:
-      interval: 30s
+      interval: 5m
       retries: 3
-      start_period: 60s
+      start_period: 1m
       test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
       timeout: 10s
     logging:
@@ -22,9 +21,8 @@ services:
       options:
         max-file: 5
         max-size: 10m
-    security_opt:
-      - no-new-privileges:true
     volumes:
-      - radarr:/config
-      - ${PATH_MEDIA_LIBRARY}:/media
-      - ${PATH_DOWNLOADS_DIRECTORY}:/downloads
+      - ${ROOT_DOWNLOADS_DIRECTORY}/radarr:/downloads # Path to store downloaded files.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/anime-movies:/anime-movies # Path to the anime movies library.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/movies:/movies # Path to the movies library.
+      - radarr:/config # Radarr data volume.

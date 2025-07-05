@@ -1,21 +1,31 @@
 services:
   qbittorrent:
     container_name: qbittorrent
-    image: lscr.io/linuxserver/qbittorrent:5.1.0-r0-ls399
-    network_mode: service:gluetun
+    image: lscr.io/linuxserver/qbittorrent:latest
+    env_file: ../../.env
+    network_mode: service:gluetun # Only connect to the VPN network.
     restart: unless-stopped
-    devices:
-      - /dev/net/tun:/dev/net/tun
+    security_opt: [no-new-privileges:true]
     depends_on:
       gluetun:
-        condition: service_started
-    env_file:
-      - ../../.env
+        condition: service_healthy # Do not start unless Gluetun is healthy.
     environment:
-      - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent # /vuetorrent
-      - INTERFACE=tun0 # Killswitch; use tun0 only.
-      - WEBUI_PORT=8080
+      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest # Auto-install vuetorrent at /.
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK=${UMASK} # Default umask permissions to set.
+    healthcheck:
+      interval: 5m
+      retries: 3
+      start_period: 1m
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"] # Ping the WebUI.
+      timeout: 10s
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
     volumes:
-      - ${PATH_DOWNLOADS_DIRECTORY}/torrents:/downloads
-      - gluetun:/gluetun:ro
-      - qbittorrent:/config
+      - ${ROOT_DOWNLOADS_DIRECTORY}:/downloads # Root path to downloads directory.
+      - qbittorrent:/config # qBittorrent data volume.

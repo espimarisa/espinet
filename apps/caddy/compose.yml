@@ -2,21 +2,30 @@ services:
   caddy:
     container_name: caddy
     image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    env_file: ../../.env
+    networks: [caddy] # Connect to the Caddy network for external access.
     restart: unless-stopped
-    networks:
-      - external
+    security_opt: [no-new-privileges:true]
     environment:
-      - CADDY_INGRESS_NETWORKS=external
+      - CADDY_INGRESS_NETWORKS=caddy # Only proxy ingress on the caddy network.
+    healthcheck:
+      interval: 5m
+      retries: 3
+      start_period: 1m
+      test: ["CMD", "wget", "--spider", "http://localhost:2019/config/"] # Check the Caddy analytics endpoint.
+      timeout: 10s
+    labels:
+      caddy.acme_ca: ${ACME_URL:-https://acme.zerossl.com/v2/DV90} # ACME URL to use; if blank defaults to ZeroSSL.
+      caddy.email: ${ACME_EMAIL} # Email to use for ACME DNS challenges.
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
     ports:
-      - 80:80
-      - 443:443
-    security_opt:
-      - no-new-privileges:true
+      - 443:443 # HTTPS traffic.
+      - 443:443/udp # HTTPS UDP traffic.
+      - 80:80 # HTTP traffic.
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - caddy:/data
+      - /var/run/docker.sock:/var/run/docker.sock # Access to the Docker socket for listening to traffic.
+      - caddy:/data # Caddy data volume.

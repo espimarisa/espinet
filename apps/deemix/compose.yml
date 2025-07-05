@@ -2,31 +2,30 @@ services:
   deemix:
     container_name: deemix
     image: ghcr.io/bambanah/deemix:latest
-    network_mode: service:gluetun
+    env_file: ../../.env
+    network_mode: service:gluetun # Only connect to the VPN network.
     restart: unless-stopped
+    security_opt: [no-new-privileges:true]
     depends_on:
       gluetun:
-        condition: service_healthy
-    env_file:
-      - ../../.env
+        condition: service_healthy # Do not start unless Gluetun is healthy.
     environment:
-      - DEEMIX_SINGLE_USER=true
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - UMASK=022
+      - DEEMIX_SINGLE_USER=true # Enables single-user mode.
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK_SET=${UMASK} # Default umask permissions to set.
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6595/"]
-      interval: 30s
-      timeout: 10s
+      interval: 5m
       retries: 3
-      start_period: 30s
+      start_period: 1m
+      test: ["CMD", "curl", "-f", "http://localhost:6595/"] # Ping the WebUI.
+      timeout: 10s
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
-    security_opt:
-      - no-new-privileges:true
     volumes:
-      - ${PATH_DOWNLOADS_DIRECTORY}/deemix:/downloads
-      - deemix:/config
+      - ${ROOT_DOWNLOADS_DIRECTORY}/deemix:/downloads # Path to store downloads into.
+      - deemix:/config # Deemix data volume.

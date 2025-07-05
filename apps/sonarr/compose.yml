@@ -2,19 +2,18 @@ services:
   sonarr:
     container_name: sonarr
     image: lscr.io/linuxserver/sonarr:latest
-    network_mode: service:gluetun
+    env_file: ../../.env
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    env_file:
-      - ../../.env
+    security_opt: [no-new-privileges:true]
     environment:
-      - WEBUI_PORT=8989
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK=${UMASK} # Default umask permissions to set.
     healthcheck:
-      interval: 30s
+      interval: 5m
       retries: 3
-      start_period: 60s
+      start_period: 1m
       test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
       timeout: 10s
     logging:
@@ -22,9 +21,8 @@ services:
       options:
         max-file: 5
         max-size: 10m
-    security_opt:
-      - no-new-privileges:true
     volumes:
-      - sonarr:/config
-      - ${PATH_MEDIA_LIBRARY}:/media
-      - ${PATH_DOWNLOADS_DIRECTORY}:/downloads
+      - ${ROOT_DOWNLOADS_DIRECTORY}/sonarr:/downloads # Path to store downloaded files into.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/anime:/anime # Path to the anime library.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/tv:/tv # Path to the TV library.
+      - sonarr:/config # Sonarr data volume.

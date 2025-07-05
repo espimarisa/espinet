@@ -1,45 +1,42 @@
 include:
-  - ./apps/caddy/compose.yml
-  - ./apps/cloudflare-ddns/compose.yml
-  - ./apps/gluetun/compose.yml
-  - ./apps/jellyfin/compose.yml
-  - ./apps/lidarr/compose.yml
-  - ./apps/nextcloud/compose.yml
-  - ./apps/qbittorrent/compose.yml
-  - ./apps/radarr/compose.yml
-  - ./apps/sonarr/compose.yml
-  - ./apps/deemix/compose.yml
+  - ./apps/caddy/compose.yml # Web server and reverse proxy.
+  - ./apps/cloudflare-ddns/compose.yml # Dynamic DNS record updating to Cloudflare.
+  - ./apps/deemix/compose.yml # Deezer music downloader.
+  - ./apps/gluetun/compose.yml # VPN.
+  - ./apps/jellyfin/compose.yml # Media server.
+  - ./apps/lidarr/compose.yml # PVR for music.
+  - ./apps/qbittorrent/compose.yml # Torrenting client.
+  - ./apps/radarr/compose.yml # PVR for anime-movies/movies.
+  - ./apps/sonarr/compose.yml # PVR for anime/tv.
 
 networks:
-  external:
+  caddy: # Network for external access and reverse proxying.
     driver: bridge
-    name: external-network
-  nextcloud-internal:
-    driver: bridge
-    name: nextcloud-internal-network
+    external: true
+    name: caddy-network
 
 volumes:
-  caddy:
+  caddy: # Caddy data volume.
+    external: true
     name: caddy-volume
-  deemix:
+  deemix: # Deemix data volume.
+    external: true
     name: deemix-volume
-  gluetun:
+  gluetun: # Gluetun data volume.
+    external: true
     name: gluetun-volume
-  jellyfin:
+  jellyfin: # Jellyfin data volume.
+    external: true
     name: jellyfin-volume
-  jellyfin-dpkeys:
-    name: jellyfin-dpkeys-volume
-  lidarr:
+  lidarr: # Lidarr data volume.
+    external: true
     name: lidarr-volume
-  qbittorrent:
+  qbittorrent: # qBittorrent data volume.
+    external: true
     name: qbittorrent-volume
-  nextcloud:
-    name: nextcloud-volume
-  nextcloud-mariadb:
-    name: nextcloud-mariadb-volume
-  nextcloud-redis:
-    name: nextcloud-redis-volume
-  radarr:
+  radarr: # Radarr data volume.
+    external: true
     name: radarr-volume
-  sonarr:
+  sonarr: # Sonarr data volume.
+    external: true
     name: sonarr-volume

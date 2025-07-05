@@ -2,22 +2,18 @@ services:
   lidarr:
     container_name: lidarr
     image: ghcr.io/hotio/lidarr:pr-plugins
-    network_mode: service:gluetun
+    env_file: ../../.env
     restart: unless-stopped
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    env_file:
-      - ../../.env
+    security_opt: [no-new-privileges:true]
     environment:
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - UMASK=022
-      - WEBUI_PORT=8686
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK=${UMASK} # Default umask permissions to set.
     healthcheck:
-      interval: 30s
+      interval: 5m
       retries: 3
-      start_period: 60s
+      start_period: 1m
       test: ["CMD", "curl", "-f", "http://localhost:8686/ping"]
       timeout: 10s
     logging:
@@ -25,9 +21,7 @@ services:
       options:
         max-file: 5
         max-size: 10m
-    security_opt:
-      - no-new-privileges:true
     volumes:
-      - lidarr:/config
-      - ${PATH_MEDIA_LIBRARY}/music:/media
-      - ${PATH_DOWNLOADS_DIRECTORY}/deemix:/downloads
+      - ${ROOT_DOWNLOADS_DIRECTORY}/lidarr:/downloads # Path to store downloads into.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/music:/library # Path to the music library.
+      - lidarr:/config # Lidarr data volume.

@@ -2,39 +2,30 @@ services:
   gluetun:
     container_name: gluetun
     image: qmcgaw/gluetun:latest
-    privileged: true # gluetun is a bit cranky without this
+    cap_add: [NET_ADMIN] # Required for configuring networking.
+    env_file: ../../.env
     restart: unless-stopped
-    env_file:
-      - ../../.env
-    cap_add:
-      - NET_ADMIN
+    security_opt: [no-new-privileges:true]
+    devices:
+      - /dev/net/tun:/dev/net/tun # Tunneling device for Wireguard support.
     environment:
-      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,192.168.1.0/24
-      - UPDATER_PERIOD=24h
-      - VPN_DNS_ADDRESS=${VPN_DNS_ADDRESS}
-      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
-      - VPN_PORT_FORWARDING=on
-      - VPN_SERVICE_PROVIDER=custom
-      - VPN_TYPE=wireguard
-      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
-      - WIREGUARD_ENDPOINT_IP=${WIREGUARD_ENDPOINT_IP}
-      - WIREGUARD_ENDPOINT_PORT=${WIREGUARD_ENDPOINT_PORT}
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      - WIREGUARD_PUBLIC_KEY=${WIREGUARD_PUBLIC_KEY}
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
+      - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS} # # Subnets allowed to bypass the firewall.
+      - PORT_FORWARD_ONLY=true # Only connect to servers with port forwarding.
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES} # Countries to connect to.
+      - UPDATER_PERIOD=24h # Check for updated information every 24 hours.
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on.
+      - VPN_PORT_FORWARDING=on # Enables port forwarding.
+      - VPN_SERVICE_PROVIDER=protonvpn # VPN service provider to use; I use ProtonVPN.
+      - VPN_TYPE=wireguard # Use Wireguard.
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY} # Private key to use for Wireguard.
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
     ports:
-      - 6595:6595 # Deemix
-      - 7878:7878 # Radarr
-      - 8000:8000 # Gluetun
-      - 8080:8080 # qBittorrent
-      - 8686:8686 # Lidarr
-      - 8989:8989 # Sonarr
-    security_opt:
-      - no-new-privileges:true
+      - 6595:6595 # Deemix.
+      - 8000:8000 # Gluetun control server.
+      - 8080:8080 # qBittorrent.
     volumes:
-      - gluetun:/gluetun
+      - gluetun:/gluetun # Gluetun data volume.

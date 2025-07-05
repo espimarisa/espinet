@@ -1,41 +1,38 @@
 services:
   jellyfin:
     container_name: jellyfin
-    image: jellyfin/jellyfin:latest
+    image: lscr.io/linuxserver/jellyfin:latest
+    env_file: ../../.env
+    networks: [caddy] # Connect to the Caddy network for external access.
     restart: unless-stopped
-    user: ${PUID}:${PGID}
+    security_opt: [no-new-privileges:true]
     devices:
-      - /dev/dri:/dev/dri
-    env_file:
-      - ../../.env
+      - /dev/dri:/dev/dri # Video device access; /dev/dri/renderD128 is iGPU, /dev/dri/renderD129 is usually dGPU for VAAPI.
     environment:
-      - JELLYFIN_PublishedServerUrl=https://${URL_PUBLISHED_JELLYFIN}
-      - LIBVA_DRIVER_NAME=radeonsi
-    group_add:
-      - 989 # required for render permissions
+      - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Sets the published server URL to the external one.
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK=${UMASK} # Default umask permissions to set.
     healthcheck:
-      interval: 30s
+      interval: 5m
       retries: 3
-      start_period: 60s
+      start_period: 1m
       test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
       timeout: 10s
     labels:
-      caddy: ${URL_PUBLISHED_JELLYFIN}
-      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains"
-      caddy.reverse_proxy: jellyfin:8096
+      caddy: ${PUBLISHED_JELLYFIN_URL} # Tells Caddy to reverse-proxy to the external Jellyfin URL.
+      caddy.header: Strict-Transport-Security "max-age=15552000; includeSubDomains" # HSTS support.
+      caddy.reverse_proxy: jellyfin:8096 # Tells Caddy to reverse-proxy Jellyfin traffic.
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
-    networks:
-      - external
-    ports:
-      - 1900:1900/udp
-      - 7359:7359/udp
-    security_opt:
-      - no-new-privileges:true
     volumes:
-      - ${PATH_MEDIA_LIBRARY}:/media
-      - jellyfin-dpkeys:/root/.aspnet/DataProtection-Keys
-      - jellyfin:/config
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/anime-movies:/anime-movies # Path to the anime movies library.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/anime:/anime # Path to the anime library.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/movies:/movies # Path to the movies library.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/music:/music # Path to the music library.
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/tv:/tv # Path to the TV library.
+      - jellyfin:/config # Jellyfin data volume.

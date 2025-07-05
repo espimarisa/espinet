@@ -1,15 +1,8 @@
 # Notes
 
-## Post-install
-
-1. Set published server URL to the public Jellyfin URL.
-2. Install Intro Skipper `https://intro-skipper.org/manifest.json`
-
-## Enable VAAPI
-
 1. Navigate to Admin > Dashboard > Playback.
 2. Select "Video Acceleration API (VAAPI) as the Hardware Acceleration option.
-3. Set the VAAPI device path to `/dev/dri/renderD129`.
+3. Set the VAAPI device path to `/dev/dri/renderD129` (my path to my RX 6600).
 4. Enable hardware decoding for the following supported formats:
    - H264
    - HEVC
