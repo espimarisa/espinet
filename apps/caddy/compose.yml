@@ -1,13 +1,15 @@
 services:
   caddy:
     container_name: caddy
-    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    image: homeall/caddy-reverse-proxy-cloudflare:latest
     env_file: ../../.env
     networks: [caddy] # Connect to the Caddy network for external access.
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
       - CADDY_INGRESS_NETWORKS=caddy # Only proxy ingress on the caddy network.
+      - TZ=${TZ} # The timezone to use.
     healthcheck:
       interval: 5m
       retries: 3
@@ -15,8 +17,8 @@ services:
       test: ["CMD", "wget", "--spider", "http://localhost:2019/config/"] # Check the Caddy analytics endpoint.
       timeout: 10s
     labels:
-      caddy.acme_ca: ${ACME_URL:-https://acme.zerossl.com/v2/DV90} # ACME URL to use; if blank defaults to ZeroSSL.
-      caddy.email: ${ACME_EMAIL} # Email to use for ACME DNS challenges.
+      caddy.acme_dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the TLS DNS challenge.
+      caddy.email: "$ACME_EMAIL" # Email to use for ACME DNS challenges.
     logging:
       driver: json-file
       options:

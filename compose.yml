@@ -1,6 +1,5 @@
 include:
   - ./apps/caddy/compose.yml # Web server and reverse proxy.
-  - ./apps/cloudflare-ddns/compose.yml # Dynamic DNS record updating to Cloudflare.
   - ./apps/deemix/compose.yml # Deezer music downloader.
   - ./apps/gluetun/compose.yml # VPN.
   - ./apps/jellyfin/compose.yml # Media server.

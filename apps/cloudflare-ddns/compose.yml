@@ -13,8 +13,7 @@ services:
       - EMOJI=false # Emojis do not belong in the CLI, what is wrong with you?
       - IP4_DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add records for.
       - IP6_PROVIDER=none # Disable IPV6 support.
-      - PROXIED=false # Do not enable proxying for domains.
-      - QUIET=true # Quiets logs as the container is quite chatty by default.
+      - PROXIED=true # Enable proxying for domains.
       - TZ=${TZ} # Timezone to run with.
       - UPDATE_CRON=@every 24h # Checks for an updated IP address every 24 hours.
     healthcheck:
