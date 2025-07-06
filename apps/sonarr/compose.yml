@@ -23,7 +23,7 @@ services:
         max-file: 5
         max-size: 10m
     volumes:
-      - ${ROOT_DOWNLOADS_DIRECTORY}/sonarr:/downloads # Path to store downloaded files into.
+      - ${ROOT_DOWNLOADS_DIRECTORY}/sonarr:/downloads/sonarr # Path to store downloaded files into.
       - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/anime:/anime # Path to the anime library.
       - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/tv:/tv # Path to the TV library.
       - sonarr:/config # Sonarr data volume.
