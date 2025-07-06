@@ -3,7 +3,6 @@ services:
     container_name: syncthing
     image: lscr.io/linuxserver/syncthing:latest
     env_file: ../../.env
-    networks: [caddy] # # Connect to the Caddy network for external access.
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
@@ -11,20 +10,16 @@ services:
       - PUID=${PUID} # User ID to run under.
       - TZ=${TZ} # Timezone to run with.
       - UMASK=${UMASK} # Default umask permissions to set.
-    labels:
-      caddy: ${PUBLISHED_SYNCTHING_URL} # Tells Caddy to reverse-proxy to the external Syncthing URL.
-      caddy.reverse_proxy: syncthing:8384 # Tells Caddy to reverse-proxy Syncthing's Web UI.
-      caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL.
-      caddy.tls.dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare as the DNS resolver.
-      caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
     ports:
+      - 8384:8384 # Lan Web UI.
       - 22000:22000 # LAN listening port, TCP.
       - 22000:22000/udp # LAN listening port, UDP.
+      - 21027:21027/udp # LAN autodiscovery port, UDP.
     volumes:
       - ${ROOT_SYNCTHING_DIRECTORY}:/data # Syncthing root data directory.
       - syncthing:/config # Syncthing data volume.
