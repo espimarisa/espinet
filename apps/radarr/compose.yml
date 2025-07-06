@@ -3,6 +3,7 @@ services:
     container_name: radarr
     image: lscr.io/linuxserver/radarr:latest
     env_file: ../../.env
+    network_mode: service:gluetun # Only connect to the VPN network.
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:

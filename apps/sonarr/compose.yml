@@ -3,6 +3,7 @@ services:
     container_name: sonarr
     image: lscr.io/linuxserver/sonarr:latest
     env_file: ../../.env
+    network_mode: service:gluetun # Only connect to the VPN network.
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
