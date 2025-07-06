@@ -13,8 +13,7 @@ Compose setups, configuration files, and various scripts used in my homelab ("es
 - [qBittorrent](./apps/qbittorrent/compose.yml) - Torrenting client.
 - [Radarr](./apps/radarr/compose.yml) - PVR for anime-movies/movies.
 - [Sonarr](./apps/sonarr/compose.yml) - PVR for anime/tv.
-
-networks:
+- [Syncthing](./apps/syncthing/compose.yml) - File synchronization.
 
 ## License
 

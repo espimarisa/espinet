@@ -17,8 +17,8 @@ services:
       test: ["CMD", "wget", "--spider", "http://localhost:2019/config/"] # Check the Caddy analytics endpoint.
       timeout: 10s
     labels:
-      caddy.acme_dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the TLS DNS challenge.
-      caddy.email: "$ACME_EMAIL" # Email to use for ACME DNS challenges.
+      caddy.acme_dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare as the TLS DNS challenge.
+      caddy.email: ${ACME_EMAIL} # Email to use for ACME DNS challenges.
     logging:
       driver: json-file
       options:
