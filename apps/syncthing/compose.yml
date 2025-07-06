@@ -3,11 +3,13 @@ services:
     container_name: syncthing
     image: lscr.io/linuxserver/syncthing:latest
     env_file: ../../.env
+    network_mode: host # Use host network mode.
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
       - PGID=${PGID} # Group ID to run under.
       - PUID=${PUID} # User ID to run under.
+      - STGUIADDRESS= # Use default WebUI listener.
       - TZ=${TZ} # Timezone to run with.
       - UMASK=${UMASK} # Default umask permissions to set.
     logging:
@@ -21,5 +23,4 @@ services:
       - 22000:22000/udp # LAN listening port, UDP.
       - 21027:21027/udp # LAN autodiscovery port, UDP.
     volumes:
-      - ${ROOT_SYNCTHING_DIRECTORY}:/data # Syncthing root data directory.
-      - syncthing:/config # Syncthing data volume.
+      - ${ROOT_SYNCTHING_DIRECTORY}:/Sync # Syncthing root data directory.
