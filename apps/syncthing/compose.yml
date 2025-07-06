@@ -9,7 +9,6 @@ services:
     environment:
       - PGID=${PGID} # Group ID to run under.
       - PUID=${PUID} # User ID to run under.
-      - STGUIADDRESS= # Use default WebUI listener.
       - TZ=${TZ} # Timezone to run with.
       - UMASK=${UMASK} # Default umask permissions to set.
     logging:
