@@ -16,10 +16,6 @@ services:
       options:
         max-file: 5
         max-size: 10m
-    ports:
-      - 8384:8384 # Lan Web UI.
-      - 22000:22000 # LAN listening port, TCP.
-      - 22000:22000/udp # LAN listening port, UDP.
-      - 21027:21027/udp # LAN autodiscovery port, UDP.
-    volumes:
-      - ${ROOT_SYNCTHING_DIRECTORY}:/Sync # Syncthing root data directory.
+  volumes:
+    - ${ROOT_SYNCTHING_DIRECTORY}/config:/config # Syncthing's configuration and database.
+    - ${ROOT_SYNCTHING_DIRECTORY}/data:/Sync # Syncthing data.

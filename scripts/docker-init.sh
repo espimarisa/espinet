@@ -9,7 +9,6 @@ docker volume create lidarr-volume
 docker volume create qbittorrent-volume
 docker volume create radarr-volume
 docker volume create sonarr-volume
-docker volume create syncthing-volume
 
 # Creates networks.
 docker network create -d bridge caddy-network

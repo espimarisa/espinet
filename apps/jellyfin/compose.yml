@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     devices:
-      - /dev/dri:/dev/dri # Video device access; /dev/dri/renderD128 is iGPU, /dev/dri/renderD129 is usually dGPU for VAAPI.
+      - /dev/dri:/dev/dri # Video device access; use /dev/dri/renderD128 for AMD.
     environment:
       - DOCKER_MODS=linuxserver/mods:jellyfin-amd|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # Enable latest mesa; add intro skipper.
       - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Sets the published server URL to the external one.

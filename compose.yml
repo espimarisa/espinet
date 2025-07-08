@@ -40,6 +40,3 @@ volumes:
   sonarr: # Sonarr data volume.
     external: true
     name: sonarr-volume
-  syncthing: # Syncthing data volume.
-    external: true
-    name: syncthing-volume
