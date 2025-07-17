@@ -19,7 +19,7 @@ services:
             - ND_LASTFM_ENABLED=true # Enable Last.fm support.
             - ND_LASTFM_SECRET=${LASTFM_API_SECRET} # Last.fm API secret.
             - ND_PASSWORDENCRYPTIONKEY=${NAVIDROME_ENCRYPTION_KEY} # Encryption key to use for setting user passwords.
-            - ND_SCANNER_SCHEDULE="0 5 * * *" # Automatically scan every day at 5:00 AM.
+            - ND_SCANNER_SCHEDULE=@daily # Automatically scan every day.
             - ND_SPOTIFY_ID=${SPOTIFY_CLIENT_ID} # Spotify Client ID for artist images.
             - ND_SPOTIFY_SECRET=${SPOTIFY_CLIENT_SECRET} # Spotify Client secret for artist images.
         healthcheck:
