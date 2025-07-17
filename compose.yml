@@ -1,42 +1,46 @@
 include:
-  - ./apps/caddy/compose.yml # Web server and reverse proxy.
-  - ./apps/deemix/compose.yml # Deezer music downloader.
-  - ./apps/gluetun/compose.yml # VPN.
-  - ./apps/jellyfin/compose.yml # Media server.
-  - ./apps/lidarr/compose.yml # PVR for music.
-  - ./apps/qbittorrent/compose.yml # Torrenting client.
-  - ./apps/radarr/compose.yml # PVR for anime-movies/movies.
-  - ./apps/sonarr/compose.yml # PVR for anime/tv.
-  - ./apps/syncthing/compose.yml # File sync.
+    - ./apps/caddy/compose.yml # Web server and reverse proxy.
+    - ./apps/deemix/compose.yml # Deezer music downloader.
+    - ./apps/gluetun/compose.yml # VPN.
+    - ./apps/jellyfin/compose.yml # Media server.
+    - ./apps/lidarr/compose.yml # PVR for music.
+    - ./apps/navidrome/compose.yml # Music media server.
+    - ./apps/qbittorrent/compose.yml # Torrenting client.
+    - ./apps/radarr/compose.yml # PVR for anime-movies/movies.
+    - ./apps/sonarr/compose.yml # PVR for anime/tv.
+    - ./apps/syncthing/compose.yml # File sync.
 
 networks:
-  caddy: # Network for external access and reverse proxying.
-    driver: bridge
-    external: true
-    name: caddy-network
+    caddy: # Network for external access and reverse proxying.
+        driver: bridge
+        external: true
+        name: caddy-network
 
 volumes:
-  caddy: # Caddy data volume.
-    external: true
-    name: caddy-volume
-  deemix: # Deemix data volume.
-    external: true
-    name: deemix-volume
-  gluetun: # Gluetun data volume.
-    external: true
-    name: gluetun-volume
-  jellyfin: # Jellyfin data volume.
-    external: true
-    name: jellyfin-volume
-  lidarr: # Lidarr data volume.
-    external: true
-    name: lidarr-volume
-  qbittorrent: # qBittorrent data volume.
-    external: true
-    name: qbittorrent-volume
-  radarr: # Radarr data volume.
-    external: true
-    name: radarr-volume
-  sonarr: # Sonarr data volume.
-    external: true
-    name: sonarr-volume
+    caddy: # Caddy data volume.
+        external: true
+        name: caddy-volume
+    deemix: # Deemix data volume.
+        external: true
+        name: deemix-volume
+    gluetun: # Gluetun data volume.
+        external: true
+        name: gluetun-volume
+    jellyfin: # Jellyfin data volume.
+        external: true
+        name: jellyfin-volume
+    lidarr: # Lidarr data volume.
+        external: true
+        name: lidarr-volume
+    qbittorrent: # qBittorrent data volume.
+        external: true
+        name: qbittorrent-volume
+    navidrome: # Navidrome data volume.
+        external: true
+        name: navidrome-volume
+    radarr: # Radarr data volume.
+        external: true
+        name: radarr-volume
+    sonarr: # Sonarr data volume.
+        external: true
+        name: sonarr-volume

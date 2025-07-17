@@ -3,15 +3,15 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 2
-indent_style = space
+indent_size = 4
+indent_style = tab
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Do not remove trailing whitespace from markdown.
 [*.md]
-trim_trailing_whitespace = false
+trim_trailing_whitespace = false # Do not remove trailing whitespace from markdown.
 
 # YAML standard.
 [*.{yaml,yml}]
-indent_size = 2
+indent_size = 4
+indent_style = space # YAML requires spaces for indentation.

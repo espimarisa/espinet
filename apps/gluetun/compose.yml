@@ -1,34 +1,34 @@
 services:
-  gluetun:
-    container_name: gluetun
-    image: qmcgaw/gluetun:latest
-    cap_add: [NET_ADMIN] # Required for configuring networking.
-    env_file: ../../.env
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
-    devices:
-      - /dev/net/tun:/dev/net/tun # Tunneling device for Wireguard support.
-    environment:
-      - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS} # # Subnets allowed to bypass the firewall.
-      - PORT_FORWARD_ONLY=true # Only connect to servers with port forwarding.
-      - SERVER_COUNTRIES=${SERVER_COUNTRIES} # Countries to connect to.
-      - UPDATER_PERIOD=24h # Check for updated information every 24 hours.
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on.
-      - VPN_PORT_FORWARDING=on # Enables port forwarding.
-      - VPN_SERVICE_PROVIDER=protonvpn # VPN service provider to use; I use ProtonVPN.
-      - VPN_TYPE=wireguard # Use Wireguard.
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY} # Private key to use for Wireguard.
-    logging:
-      driver: json-file
-      options:
-        max-file: 5
-        max-size: 10m
-    ports:
-      - 6595:6595 # Deemix Web UI.
-      - 7878:7878 # Radarr Web UI.
-      - 8000:8000 # Gluetun control server.
-      - 8080:8080 # qBittorrent Web UI.
-      - 8686:8686 # Lidarr Web UI.
-      - 8989:8989 # Sonarr Web UI.
-    volumes:
-      - gluetun:/gluetun # Gluetun data volume.
+    gluetun:
+        container_name: gluetun
+        image: qmcgaw/gluetun:latest
+        cap_add: [NET_ADMIN] # Required for configuring networking.
+        env_file: ../../.env
+        restart: unless-stopped
+        security_opt: [no-new-privileges:true]
+        devices:
+            - /dev/net/tun:/dev/net/tun # Tunneling device for Wireguard support.
+        environment:
+            - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS} # # Subnets allowed to bypass the firewall.
+            - PORT_FORWARD_ONLY=true # Only connect to servers with port forwarding.
+            - SERVER_COUNTRIES=${SERVER_COUNTRIES} # Countries to connect to.
+            - UPDATER_PERIOD=24h # Check for updated information every 24 hours.
+            - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on.
+            - VPN_PORT_FORWARDING=on # Enables port forwarding.
+            - VPN_SERVICE_PROVIDER=protonvpn # VPN service provider to use; I use ProtonVPN.
+            - VPN_TYPE=wireguard # Use Wireguard.
+            - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY} # Private key to use for Wireguard.
+        logging:
+            driver: json-file
+            options:
+                max-file: 5
+                max-size: 10m
+        ports:
+            - 6595:6595 # Deemix Web UI.
+            - 7878:7878 # Radarr Web UI.
+            - 8000:8000 # Gluetun control server.
+            - 8080:8080 # qBittorrent Web UI.
+            - 8686:8686 # Lidarr Web UI.
+            - 8989:8989 # Sonarr Web UI.
+        volumes:
+            - gluetun:/gluetun # Gluetun data volume.
