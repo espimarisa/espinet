@@ -1,44 +1,43 @@
 services:
-    navidrome:
-        container_name: navidrome
-        image: deluan/navidrome:latest
-        env_file: ../../.env
-        networks: [caddy] # Connect to the Caddy network for external access.
-        restart: unless-stopped
-        security_opt: [no-new-privileges:true]
-        environment:
-            - ND_AUTOTRANSCODEDOWNLOAD=true # Use the client's configuration for downloads.
-            - ND_BASEURL=/ # Configures Navidrome for reverse proxy access.
-            - ND_COVERJPEGQUALITY=100 # Use maximum quality for resized cover art.
-            - ND_DEFAULTDOWNLOADABLESHARE=true # Default to allowing shares to be downloaded.
-            - ND_ENABLEGRAVATAR=true # Enable gravatar images.
-            - ND_ENABLEINSIGHTSCOLLECTOR=false # Opt-out of telemetry.
-            - ND_ENABLESHARING=true # Enable sharing.
-            - ND_ENABLETRANSCODINGCONFIG=true # Enable transcoding configuration in the UI.
-            - ND_LASTFM_APIKEY=${LASTFM_API_KEY} # Last.fm API key.
-            - ND_LASTFM_ENABLED=true # Enable Last.fm support.
-            - ND_LASTFM_SECRET=${LASTFM_API_SECRET} # Last.fm API secret.
-            - ND_PASSWORDENCRYPTIONKEY=${NAVIDROME_ENCRYPTION_KEY} # Encryption key to use for setting user passwords.
-            - ND_SCANNER_SCHEDULE=@daily # Automatically scan every day.
-            - ND_SPOTIFY_ID=${SPOTIFY_CLIENT_ID} # Spotify Client ID for artist images.
-            - ND_SPOTIFY_SECRET=${SPOTIFY_CLIENT_SECRET} # Spotify Client secret for artist images.
-        healthcheck:
-            interval: 5m
-            retries: 3
-            start_period: 1m
-            test: ["CMD", "curl", "-f", "http://localhost:4533/ping"] # Undocumented; https://www.reddit.com/r/navidrome/comments/xeqdq6/comment/mnt8h53
-            timeout: 10s
-        labels:
-            caddy: ${PUBLISHED_NAVIDROME_URL} # Tells Caddy to reverse-proxy to the external Navidrome URL.
-            caddy.reverse_proxy: navidrome:4533 # Tells Caddy to reverse-proxy Navidrome traffic.
-            caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL.
-            caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver.
-            caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
-        logging:
-            driver: json-file
-            options:
-                max-file: 5
-                max-size: 10m
-        volumes:
-            - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/music:/music:ro # Path to the music library directory.
-            - navidrome:/data # Navidrome data volume.
+  navidrome:
+    container_name: navidrome
+    image: deluan/navidrome:latest
+    env_file: ../../.env
+    networks: [caddy] # Connect to the Caddy network for external access.
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    environment:
+      - ND_AUTOTRANSCODEDOWNLOAD=true # Use the client's configuration for downloads.
+      - ND_COVERJPEGQUALITY=100 # Use maximum quality for resized cover art.
+      - ND_DEFAULTDOWNLOADABLESHARE=true # Default to allowing shares to be downloaded.
+      - ND_ENABLEGRAVATAR=true # Enable gravatar images.
+      - ND_ENABLEINSIGHTSCOLLECTOR=false # Opt-out of telemetry.
+      - ND_ENABLESHARING=true # Enable sharing.
+      - ND_ENABLETRANSCODINGCONFIG=true # Enable transcoding configuration in the UI.
+      - ND_LASTFM_APIKEY=${LASTFM_API_KEY} # Last.fm API key.
+      - ND_LASTFM_ENABLED=true # Enable Last.fm support.
+      - ND_LASTFM_SECRET=${LASTFM_API_SECRET} # Last.fm API secret.
+      - ND_PASSWORDENCRYPTIONKEY=${NAVIDROME_ENCRYPTION_KEY} # Encryption key to use for setting user passwords.
+      - ND_SCANNER_SCHEDULE=@daily # Automatically scan every day.
+      - ND_SPOTIFY_ID=${SPOTIFY_CLIENT_ID} # Spotify Client ID for artist images.
+      - ND_SPOTIFY_SECRET=${SPOTIFY_CLIENT_SECRET} # Spotify Client secret for artist images.
+    healthcheck:
+      interval: 5m
+      retries: 3
+      start_period: 1m
+      test: ["CMD", "curl", "-f", "http://localhost:4533/ping"] # Undocumented; https://www.reddit.com/r/navidrome/comments/xeqdq6/comment/mnt8h53
+      timeout: 10s
+    labels:
+      caddy: ${PUBLISHED_NAVIDROME_URL} # Tells Caddy to reverse-proxy to the external Navidrome URL.
+      caddy.reverse_proxy: navidrome:4533 # Tells Caddy to reverse-proxy Navidrome traffic.
+      caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL.
+      caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver.
+      caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    volumes:
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}/music:/music:ro # Path to the music library directory.
+      - navidrome:/data # Navidrome data volume.

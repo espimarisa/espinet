@@ -1,21 +1,21 @@
 services:
-    syncthing:
-        container_name: syncthing
-        image: lscr.io/linuxserver/syncthing:latest
-        env_file: ../../.env
-        network_mode: host # Use host network mode.
-        restart: unless-stopped
-        security_opt: [no-new-privileges:true]
-        environment:
-            - PGID=${PGID} # Group ID to run under.
-            - PUID=${PUID} # User ID to run under.
-            - TZ=${TZ} # Timezone to run with.
-            - UMASK=${UMASK} # Default umask permissions to set.
-        logging:
-            driver: json-file
-            options:
-                max-file: 5
-                max-size: 10m
-        volumes:
-            - ${ROOT_SYNCTHING_DIRECTORY}/config:/config # Syncthing's configuration and database.
-            - ${ROOT_SYNCTHING_DIRECTORY}/data:/Sync # Syncthing data.
+  syncthing:
+    container_name: syncthing
+    image: lscr.io/linuxserver/syncthing:latest
+    env_file: ../../.env
+    network_mode: host # Use host network mode.
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    environment:
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK=${UMASK} # Default umask permissions to set.
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    volumes:
+      - ${ROOT_SYNCTHING_DIRECTORY}/config:/config # Syncthing's configuration and database.
+      - ${ROOT_SYNCTHING_DIRECTORY}/data:/Sync # Syncthing data.

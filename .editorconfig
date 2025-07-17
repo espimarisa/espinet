@@ -3,15 +3,29 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 4
+indent_size = 2
 indent_style = tab
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.md]
-trim_trailing_whitespace = false # Do not remove trailing whitespace from markdown.
+# Batch files require crlf.
+[*.bat]
+end_of_line = crlf
 
-# YAML standard.
-[*.{yaml,yml}]
+# Follow checkstyle 3-space guidelines.
+[*.java]
+indent_size = 3
+
+# Do not remove trailing whitespace from markdown.
+[*.md]
+trim_trailing_whitespace = false
+
+# Follow PEP-8 guidelines; use spaces.
+[*.py]
 indent_size = 4
-indent_style = space # YAML requires spaces for indentation.
+indent_style = space
+
+# YAML requires spaces for indentation.
+[*.{yaml,yml}]
+indent_size = 2
+indent_style = space

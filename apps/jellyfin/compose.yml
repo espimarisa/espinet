@@ -1,37 +1,37 @@
 services:
-    jellyfin:
-        container_name: jellyfin
-        image: lscr.io/linuxserver/jellyfin:latest
-        env_file: ../../.env
-        networks: [caddy] # Connect to the Caddy network for external access.
-        restart: unless-stopped
-        security_opt: [no-new-privileges:true]
-        devices:
-            - /dev/dri:/dev/dri # Video device access; use /dev/dri/renderD128 for AMD.
-        environment:
-            - DOCKER_MODS=linuxserver/mods:jellyfin-amd|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # Enable latest mesa; add intro skipper.
-            - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Sets the published server URL to the external one.
-            - PGID=${PGID} # Group ID to run under.
-            - PUID=${PUID} # User ID to run under.
-            - TZ=${TZ} # Timezone to run with.
-            - UMASK=${UMASK} # Default umask permissions to set.
-        healthcheck:
-            interval: 5m
-            retries: 3
-            start_period: 1m
-            test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
-            timeout: 10s
-        labels:
-            caddy: ${PUBLISHED_JELLYFIN_URL} # Tells Caddy to reverse-proxy to the external Jellyfin URL.
-            caddy.reverse_proxy: jellyfin:8096 # Tells Caddy to reverse-proxy Jellyfin traffic.
-            caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL.
-            caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver.
-            caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
-        logging:
-            driver: json-file
-            options:
-                max-file: 5
-                max-size: 10m
-        volumes:
-            - ${ROOT_MEDIA_LIBRARY_DIRECTORY}:/library # Root path to the media library directory.
-            - jellyfin:/config # Jellyfin data volume.
+  jellyfin:
+    container_name: jellyfin
+    image: lscr.io/linuxserver/jellyfin:latest
+    env_file: ../../.env
+    networks: [caddy] # Connect to the Caddy network for external access.
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    devices:
+      - /dev/dri:/dev/dri # Video device access; use /dev/dri/renderD128 for AMD.
+    environment:
+      - DOCKER_MODS=linuxserver/mods:jellyfin-amd|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # Enable latest mesa; add intro skipper.
+      - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Sets the published server URL to the external one.
+      - PGID=${PGID} # Group ID to run under.
+      - PUID=${PUID} # User ID to run under.
+      - TZ=${TZ} # Timezone to run with.
+      - UMASK=${UMASK} # Default umask permissions to set.
+    healthcheck:
+      interval: 5m
+      retries: 3
+      start_period: 1m
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      timeout: 10s
+    labels:
+      caddy: ${PUBLISHED_JELLYFIN_URL} # Tells Caddy to reverse-proxy to the external Jellyfin URL.
+      caddy.reverse_proxy: jellyfin:8096 # Tells Caddy to reverse-proxy Jellyfin traffic.
+      caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL.
+      caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver.
+      caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    volumes:
+      - ${ROOT_MEDIA_LIBRARY_DIRECTORY}:/library # Root path to the media library directory.
+      - jellyfin:/config # Jellyfin data volume.
