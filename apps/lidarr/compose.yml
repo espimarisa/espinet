@@ -1,7 +1,7 @@
 services:
     lidarr:
         container_name: lidarr
-        image: blampe/lidarr:latest # use blampe's lidarr release until upstream fixes (so probably never lmao).
+        image: blampe/lidarr:lidarr-plugins-2.13.1.4678 # use blampe's lidarr release until upstream fixes (so probably never lmao).
         env_file: ../../.env
         network_mode: service:gluetun # Only connect to the VPN network.
         restart: unless-stopped
