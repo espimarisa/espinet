@@ -3,7 +3,6 @@ services:
         container_name: navidrome
         image: deluan/navidrome:latest
         env_file: ../../.env
-        user: ${PUID}:${PGID}
         networks: [caddy] # Connect to the Caddy network for external access.
         restart: unless-stopped
         security_opt: [no-new-privileges:true]
