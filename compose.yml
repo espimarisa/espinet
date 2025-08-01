@@ -1,7 +1,7 @@
 include:
+  - ./apps/backup/compose.yml
   - ./apps/caddy/compose.yml
   - ./apps/cloudflare-ddns/compose.yml
-  - ./apps/docker-volume-backup/compose.yml
   - ./apps/gluetun/compose.yml
   - ./apps/jellyfin/compose.yml
   - ./apps/qbittorrent/compose.yml
@@ -16,6 +16,9 @@ networks:
     name: caddy-network
 
 volumes:
+  backup:
+    external: true
+    name: backup-volume
   caddy:
     external: true
     name: caddy-volume

@@ -22,6 +22,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"] # Ping the WebUI for a nasty healthcheck.
       timeout: 10s
     labels:
+      docker-volume-backup.stop-during-backup: true # Tells docker-volume-backup to stop during backups.
       docker-volume-backup.volume: /config # Tells docker-volume-backup to backup the /config volume.
     logging:
       driver: json-file

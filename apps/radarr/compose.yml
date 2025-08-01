@@ -18,6 +18,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
       timeout: 10s
     labels:
+      docker-volume-backup.stop-during-backup: true # Tells docker-volume-backup to stop during backups.
       docker-volume-backup.volume: /config # Tells docker-volume-backup to backup the /config volume.
     logging:
       driver: json-file
