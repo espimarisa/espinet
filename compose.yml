@@ -1,5 +1,4 @@
 include:
-  - ./apps/backup/compose.yml
   - ./apps/caddy/compose.yml
   - ./apps/cloudflare-ddns/compose.yml
   - ./apps/gluetun/compose.yml
