@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Creates volumes.
-docker volume create backup-volume
 docker volume create caddy-volume
 docker volume create gluetun-volume
 docker volume create jellyfin-volume
