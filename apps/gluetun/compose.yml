@@ -17,7 +17,7 @@ services:
       - VPN_PORT_FORWARDING=on
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
     logging:
       driver: json-file
       options:
