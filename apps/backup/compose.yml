@@ -1,6 +1,5 @@
 services:
   backup:
-    command: backup "/volumes/jellyfin" "/volumes/qbittorrent" "/volumes/radarr" "/volumes/sonarr" "/volumes/syncthing"
     container_name: backup
     image: offen/docker-volume-backup:latest
     env_file: ../../.env
@@ -18,20 +17,8 @@ services:
         max-size: 10m
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - jellyfin-volume:/volumes/jellyfin:ro
-      - qbittorrent-volume:/volumes/qbittorrent:ro
-      - radarr-volume:/volumes/radarr:ro
-      - sonarr-volume:/volumes/sonarr:ro
-      - syncthing-volume:/volumes/syncthing:ro
-
-volumes:
-  jellyfin-volume:
-    external: true
-  qbittorrent-volume:
-    external: true
-  radarr-volume:
-    external: true
-  sonarr-volume:
-    external: true
-  syncthing-volume:
-    external: true
+      - jellyfin:/backup/jellyfin-volume:ro
+      - qbittorrent:/backup/qbittorrent-volume:ro
+      - radarr:/backup/radarr-volume:ro
+      - sonarr:/backup/sonarr-volume:ro
+      - syncthing:/backup/syncthing-volume:ro
