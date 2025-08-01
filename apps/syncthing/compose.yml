@@ -11,8 +11,6 @@ services:
       - PUID=${PUID}
       - TZ=${TZ}
       - UMASK=${UMASK}
-    labels:
-      docker-volume-backup.stop-during-backup: true # Tells docker-volume-backup to stop during backups.
     logging:
       driver: json-file
       options:

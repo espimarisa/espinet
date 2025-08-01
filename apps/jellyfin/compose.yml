@@ -26,7 +26,6 @@ services:
       caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL for certificates instead of LE.
       caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver for ACME challenges.
       caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
-      docker-volume-backup.stop-during-backup: true # Tells docker-volume-backup to stop during backups.
     logging:
       driver: json-file
       options:
