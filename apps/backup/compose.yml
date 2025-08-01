@@ -1,12 +1,12 @@
 services:
   backup:
+    command: backup "/volumes/jellyfin" "/volumes/qbittorrent" "/volumes/radarr" "/volumes/sonarr" "/volumes/syncthing"
     container_name: backup
     image: offen/docker-volume-backup:latest
     env_file: ../../.env
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
-      - BACKUP_SOURCES=/volumes/jellyfin-volume /volumes/qbittorrent /volumes/radarr /volumes/sonarr /volumes/syncthing
       - WEBDAV_PASSWORD=${BACKUP_WEBDAV_PASSWORD}
       - WEBDAV_PATH=${BACKUP_WEBDAV_PATH}
       - WEBDAV_URL=${BACKUP_WEBDAV_URL}
