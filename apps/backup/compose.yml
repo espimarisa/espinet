@@ -23,3 +23,15 @@ services:
       - radarr-volume:/volumes/radarr:ro
       - sonarr-volume:/volumes/sonarr:ro
       - syncthing-volume:/volumes/syncthing:ro
+
+volumes:
+  jellyfin-volume:
+    external: true
+  qbittorrent-volume:
+    external: true
+  radarr-volume:
+    external: true
+  sonarr-volume:
+    external: true
+  syncthing-volume:
+    external: true
