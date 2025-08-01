@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
+      - BACKUP_SOURCES=/volumes/jellyfin-volume /volumes/qbittorrent /volumes/radarr /volumes/sonarr /volumes/syncthing
       - WEBDAV_PASSWORD=${BACKUP_WEBDAV_PASSWORD}
       - WEBDAV_PATH=${BACKUP_WEBDAV_PATH}
       - WEBDAV_URL=${BACKUP_WEBDAV_URL}
@@ -16,5 +17,9 @@ services:
         max-file: 5
         max-size: 10m
     volumes:
-      - backup:/backup
-      - /var/run/docker.sock:/var/run/docker.sock:ro # Required for stopping containers.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - jellyfin-volume:/volumes/jellyfin:ro
+      - qbittorrent-volume:/volumes/qbittorrent:ro
+      - radarr-volume:/volumes/radarr:ro
+      - sonarr-volume:/volumes/sonarr:ro
+      - syncthing-volume:/volumes/syncthing:ro
