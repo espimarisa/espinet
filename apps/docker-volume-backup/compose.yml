@@ -1,0 +1,19 @@
+services:
+  backup:
+    container_name: backup
+    image: offen/docker-volume-backup:latest
+    env_file: ../../.env
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    environment:
+      - WEBDAV_PASSWORD=${BACKUP_WEBDAV_PASSWORD}
+      - WEBDAV_PATH=${BACKUP_WEBDAV_PATH}
+      - WEBDAV_URL=${BACKUP_WEBDAV_URL}
+      - WEBDAV_USERNAME=${BACKUP_WEBDAV_USERNAME}
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Required for stopping containers.

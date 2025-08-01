@@ -1,6 +1,7 @@
 include:
   - ./apps/caddy/compose.yml
   - ./apps/cloudflare-ddns/compose.yml
+  - ./apps/docker-volume-backup/compose.yml
   - ./apps/gluetun/compose.yml
   - ./apps/jellyfin/compose.yml
   - ./apps/qbittorrent/compose.yml
