@@ -1,6 +1,6 @@
 # espinet
 
-Compose setups, configuration files, and various scripts used in my homelab.
+Compose setups, configuration files, and scripts taken from my homelab setup.
 
 ## License
 

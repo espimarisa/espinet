@@ -12,10 +12,10 @@ services:
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
       - EMOJI=false # Emojis do not belong in the CLI, what is wrong with you?
       - IP4_DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add records for.
-      - IP6_PROVIDER=none # Disable IPV6 support.
-      - PROXIED=true # Enable proxying for domains.
-      - TZ=${TZ} # Timezone to run with.
-      - UPDATE_CRON=@every 24h # Checks for an updated IP address every 24 hours.
+      - IP6_PROVIDER=none # Disable IPV6 support (for now)
+      - PROXIED=true # Enable proxying content through Cloudflare - be sure to make a rule to not cache Jellyfin content!
+      - TZ=${TZ}
+      - UPDATE_CRON=@every 8h # Checks for an updated IP address every 8 hours.
     healthcheck:
       interval: 5m
       retries: 3

@@ -1,0 +1,24 @@
+# Artifacts, cache, logs, and temporary files
+*.log*
+*.map
+*.tsbuildinfo
+**/_site
+**/.astro
+**/.cache
+**/.git
+**/.jekyll-cache
+**/.next
+**/.npm
+**/.sass-cache
+**/.temp
+**/.tmp
+**/.turbo
+**/cache
+**/logs
+
+# Lockfiles
+*.lock
+*.lockb
+
+# Binaries and dependencies
+**/node_modules
