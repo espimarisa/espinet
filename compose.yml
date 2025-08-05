@@ -3,6 +3,7 @@ include:
   - ./apps/cloudflare-ddns/compose.yml
   - ./apps/gluetun/compose.yml
   - ./apps/jellyfin/compose.yml
+  - ./apps/lidarr/compose.yml
   - ./apps/qbittorrent/compose.yml
   - ./apps/radarr/compose.yml
   - ./apps/sonarr/compose.yml
@@ -15,9 +16,6 @@ networks:
     name: caddy-network
 
 volumes:
-  backup:
-    external: true
-    name: backup-volume
   caddy:
     external: true
     name: caddy-volume
@@ -27,6 +25,9 @@ volumes:
   jellyfin:
     external: true
     name: jellyfin-volume
+  lidarr:
+    external: true
+    name: lidarr-volume
   qbittorrent:
     external: true
     name: qbittorrent-volume

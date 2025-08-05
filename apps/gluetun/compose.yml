@@ -15,7 +15,7 @@ services:
       - UPDATER_PERIOD=8h # Check for updated information every 8 hours.
       - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on.
       - VPN_PORT_FORWARDING=on
-      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
     logging:
@@ -27,6 +27,7 @@ services:
       - 7878:7878 # Radarr Web UI.
       - 8000:8000 # Gluetun control server.
       - 8080:8080 # qBittorrent Web UI.
+      - 8686:8686 # Lidarr Web UI.
       - 8989:8989 # Sonarr Web UI.
     volumes:
       - gluetun:/gluetun

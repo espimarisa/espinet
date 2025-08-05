@@ -1,9 +1,8 @@
 services:
-  radarr:
-    container_name: radarr
-    image: lscr.io/linuxserver/radarr:latest
+  lidarr:
+    container_name: lidarr
+    image: blampe/lidarr:latest
     env_file: ../../.env
-    network_mode: service:gluetun
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     depends_on:
@@ -18,14 +17,16 @@ services:
       interval: 5m
       retries: 3
       start_period: 2m
-      test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:8686/ping"]
       timeout: 10s
     logging:
       driver: json-file
       options:
         max-file: 5
         max-size: 10m
+    ports:
+      - 8686:8686 # Lidarr Web UI.
     volumes:
       - ${DOWNLOADS_DIRECTORY}:/downloads
       - ${MEDIA_LIBRARY_DIRECTORY}:/library
-      - radarr:/config
+      - lidarr:/config

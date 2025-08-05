@@ -10,7 +10,7 @@ services:
       gluetun:
         condition: service_healthy
     environment:
-      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest # Installs Vuetorrent at /.
+      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest # Automatically installs Vuetorrent to /.
       - PGID=${PGID}
       - PUID=${PUID}
       - TZ=${TZ}
@@ -19,7 +19,7 @@ services:
       interval: 5m
       retries: 3
       start_period: 2m
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"] # Ping the WebUI for a nasty healthcheck.
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       timeout: 10s
     logging:
       driver: json-file

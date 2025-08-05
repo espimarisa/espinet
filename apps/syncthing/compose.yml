@@ -17,5 +17,5 @@ services:
         max-file: 5
         max-size: 10m
     volumes:
-      - ${SYNCTHING_DATA_DIRECTORY}/config:/config # Syncthing's configuration and database.
-      - ${SYNCTHING_DATA_DIRECTORY}/data:/Sync # Syncthing base data directory.
+      - ${SYNCTHING_DIRECTORY}/config:/config # Syncthing's configuration and database.
+      - ${SYNCTHING_DIRECTORY}/data:/Sync # Syncthing base data directory.
