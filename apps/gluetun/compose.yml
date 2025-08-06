@@ -23,5 +23,11 @@ services:
       options:
         max-file: 5
         max-size: 10m
+    ports:
+      - 7878:7878 # Radarr Web UI.
+      - 8000:8000 # Gluetun control server.
+      - 8080:8080 # qBittorrent Web UI.
+      - 8686:8686 # Lidarr Web UI.
+      - 8989:8989 # Sonarr Web UI.
     volumes:
       - gluetun:/gluetun
