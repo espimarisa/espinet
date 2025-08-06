@@ -3,6 +3,7 @@ services:
     container_name: lidarr
     image: blampe/lidarr:latest
     env_file: ../../.env
+    network_mode: service:gluetun
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     depends_on:
