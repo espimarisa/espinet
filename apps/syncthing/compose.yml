@@ -2,21 +2,16 @@ services:
   syncthing:
     container_name: syncthing
     image: lscr.io/linuxserver/syncthing:latest
-    env_file:
-      - ../../.env
+    env_file: ../../.env
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    network_mode: host # Required for autodiscovery, needs ports 8384, 22000, and 21027/udp.
     environment:
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    ports:
-      - 8384:8384/tcp # Syncthing WebUI.
-      - 22000:22000/tcp # Listening port (TCP).
-      - 22000:22000/udp # Listening port (UDP).
-      - 21027:21027/udp # Protocol discovery.
+      - PGID=${PGID} # Group ID to run the container under.
+      - PUID=${PUID} # User ID to run the container under.
+      - TZ=${TZ} # Timezone to run the container under.
+      - UMASK=${UMASK} # Default UMASK permissions to set on newly created files.
     volumes:
       - ${SYNCTHING_DIRECTORY}/config:/config # Syncthing configuration directory.
       - ${SYNCTHING_DIRECTORY}/data:/Sync # Syncthing data directory.
+    security_opt:
+      - no-new-privileges:true # Do not allow privilege escalation.

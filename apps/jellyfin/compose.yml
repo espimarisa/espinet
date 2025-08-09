@@ -2,33 +2,55 @@ services:
   jellyfin:
     container_name: jellyfin
     image: lscr.io/linuxserver/jellyfin:latest
-    devices:
-      - /dev/dri:/dev/dri # Video device passthrough; /dev/dri/renderD128 is GPU0.
-    env_file:
-      - ../../.env
-    networks:
-      - caddy
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    env_file: ../../.env
+    devices:
+      - /dev/dri:/dev/dri # Video device passthrough for HW acceleration, /dev/dri/renderD128 should be GPU0.
+    environment:
+      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # Intel OpenCL and Intro Skipper support.
+      - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Sets the autodiscovery URL.
+      - PGID=${PGID} # The Group ID to run the container under.
+      - PUID=${PUID} # The User ID to run the container under.
+      - TZ=${TZ} # The timezone to run the container under.
+      - UMASK=${UMASK} # Default umask permissions to set on newly created files.
+    networks:
+      - caddy # External Caddy/reverse proxy network.
+      - media # Internal media network.
+    volumes:
+      - ${MEDIA_LIBRARY_DIRECTORY}:/library:ro # Root path to the media library directory, read only.
+      - jellyfin:/config # Jellyfin configuration and data volume.
+      - jellyfin-cache:/config/cache # Seperate Jellyfin cache volume.
     healthcheck:
       interval: 5m
       retries: 3
       start_period: 1m
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"] # Internal Jellyfin healthcheck URL.
       timeout: 10s
     labels:
-      caddy: ${PUBLISHED_JELLYFIN_URL} # Tells Caddy to reverse-proxy to the external Jellyfin URL.
-      caddy.reverse_proxy: jellyfin:8096 # Tells Caddy to reverse-proxy Jellyfin traffic.
-      caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL for certificates instead of LE.
-      caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver for ACME challenges.
-      caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
-    environment:
-      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # OpenCL and Intro Skipper support.
-      - PUID=${PUID}
-      - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Configures the autodiscovery URL.
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - ${MEDIA_LIBRARY_DIRECTORY}:/library # Root media library directory.
-      - jellyfin:/config # Jellyfin cache and configuration volume.
+      caddy: ${PUBLISHED_JELLYFIN_URL} # Tells Caddy to reverse proxy to the external Jellyfin URL.
+      caddy.reverse_proxy: jellyfin:8096 # Tells Caddy to reverse proxy internal traffic on port 8096.
+      caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
+      caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
+      caddy.tls.protocols: tls1.3 # Requires clients to support TLS 1.3.
+    security_opt:
+      - no-new-privileges:true # Do not allow privilege escalation.
+
+networks:
+  caddy:
+    name: caddy-network # External Caddy/reverse proxy network.
+    driver: bridge
+    enable_ipv6: false
+    external: true
+  media:
+    name: media-network # Internal media network.
+    driver: bridge
+    enable_ipv6: false
+    external: true
+
+volumes:
+  jellyfin:
+    name: jellyfin-volume # Jellyfin configuration and data volume.
+    external: true
+  jellyfin-cache:
+    name: jellyfin-cache-volume # Seperate Jellyfin cache volume.
+    external: true

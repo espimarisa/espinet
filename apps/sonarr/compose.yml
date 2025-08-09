@@ -2,27 +2,47 @@ services:
   sonarr:
     container_name: sonarr
     image: lscr.io/linuxserver/sonarr:latest
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    env_file:
-      - ../../.env
-    network_mode: service:gluetun
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    env_file: ../../.env
+    environment:
+      - PGID=${PGID} # Group ID to run the container under.
+      - PUID=${PUID} # User ID to run the container under.
+      - TZ=${TZ} # Timezone to run the container under.
+      - UMASK=${UMASK} # Default UMASK permissions to set on newly created files.
+    networks:
+      - gluetun # Gluetun VPN network.
+      - media # Internal media network.
+    ports:
+      - ${SONARR_WEBUI_PORT:-8989}:8989 # Local Sonarr WebUI.
+    volumes:
+      - ${DOWNLOADS_DIRECTORY}:/downloads # Root path to the downloads directory.
+      - ${MEDIA_LIBRARY_DIRECTORY}:/library # Root path the media library directory.
+      - sonarr:/config # Sonarr configuration and data path/volume.
+    depends_on:
+      qbittorrent:
+        condition: service_healthy # Wait for download clients to become healthy before starting.
     healthcheck:
       interval: 5m
       retries: 3
       start_period: 2m
-      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"] # Sonarr healthcheck endpoint.
       timeout: 10s
-    environment:
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - ${DOWNLOADS_DIRECTORY}:/downloads
-      - ${MEDIA_LIBRARY_DIRECTORY}:/library
-      - sonarr:/config
+    security_opt:
+      - no-new-privileges:true # Do not allow privilege escalation.
+
+networks:
+  gluetun:
+    name: gluetun-network # Gluetun VPN network.
+    driver: bridge
+    enable_ipv6: false
+    external: true
+  media:
+    name: media-network # Internal media network.
+    driver: bridge
+    enable_ipv6: false
+    external: true
+
+volumes:
+  sonarr:
+    name: sonarr-volume # Sonarr configuration and data path/volume.
+    external: true

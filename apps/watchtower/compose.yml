@@ -2,8 +2,20 @@ services:
   watchtower:
     container_name: watchtower
     image: containrrr/watchtower:latest
+    env_file: ../../.env
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    environment:
+      - TZ=${TZ} # Timezone to run the container under.
+      - WATCHTOWER_CLEANUP=true # Clean up orphaned images.
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # Required for performing operations.
+    cap_drop:
+      - ALL # Drop all unrequired permissions.
+    healthcheck:
+      test: ["CMD", "/watchtower", "--health-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    security_opt:
+      - no-new-privileges:true # Do not allow privilege escalation.

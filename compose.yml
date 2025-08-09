@@ -8,37 +8,46 @@ include:
   - ./apps/radarr/compose.yml
   - ./apps/sonarr/compose.yml
   - ./apps/syncthing/compose.yml
-  - ./apps/uptime-kuma/compose.yml
   - ./apps/watchtower/compose.yml
 
 networks:
   caddy:
-    driver: bridge
-    external: true
     name: caddy-network
-
+    driver: bridge
+    enable_ipv6: false
+    external: true
+  gluetun:
+    name: gluetun-network
+    driver: bridge
+    enable_ipv6: false
+    external: true
+  media:
+    name: media-network
+    driver: bridge
+    enable_ipv6: false
+    external: true
 volumes:
   caddy:
-    external: true
     name: caddy-volume
+    external: true
   gluetun:
-    external: true
     name: gluetun-volume
+    external: true
   jellyfin:
-    external: true
     name: jellyfin-volume
+    external: true
+  jellyfin-cache:
+    name: jellyfin-cache-volume
+    external: true
   lidarr:
-    external: true
     name: lidarr-volume
+    external: true
   qbittorrent:
-    external: true
     name: qbittorrent-volume
+    external: true
   radarr:
-    external: true
     name: radarr-volume
-  uptime-kuma:
     external: true
-    name: uptime-kuma
   sonarr:
-    external: true
     name: sonarr-volume
+    external: true

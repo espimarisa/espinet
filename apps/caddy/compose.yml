@@ -2,31 +2,42 @@ services:
   caddy:
     container_name: caddy
     image: homeall/caddy-reverse-proxy-cloudflare:latest
-    env_file:
-      - ../../.env
-    networks:
-      - caddy
+    env_file: ../../.env
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    environment:
+      - CADDY_INGRESS_NETWORKS=caddy # Only proxy traffic from the caddy network.
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
+      - TZ=${TZ} # Timezone to run the container under.
+    networks:
+      - caddy # External Caddy/reverse proxy network.
+    ports:
+      - 80:80 # HTTP traffic.
+      - 443:443 # HTTPS traffic.
+      - 443:443/udp # HTTPS3 traffic.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Required for listening to container traffic.
+      - caddy:/data # Caddy certificate and configuration data.
     healthcheck:
       interval: 5m
       retries: 3
       start_period: 1m
-      test: ["CMD", "wget", "--spider", "http://localhost:2019/config/"] # Check the Caddy analytics endpoint.
+      test: ["CMD", "wget", "--spider", "http://localhost:2019/config/"] # Analytics endpoint.
       timeout: 10s
     labels:
       caddy.acme_dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare for TLS DNS challenges instead of LE.
-      caddy.admin: 0.0.0.0:2019 # Enables the admin WebUI.
+      caddy.admin: 0.0.0.0:2019 # Enables the WebUI.
       caddy.email: ${ACME_EMAIL} # Email to use for public ACME challenges.
-    environment:
-      - CADDY_INGRESS_NETWORKS=caddy # Only proxy services and traffic inside of the caddy network.
-      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
-      - TZ=${TZ}
-    ports:
-      - 443:443/tcp # HTTPS
-      - 443:443/udp # HTTP/3
-      - 80:80/tcp # HTTP
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro # Required for listening to container traffic.
-      - caddy:/data # Caddy certificates and configuration.
+    security_opt:
+      - no-new-privileges:true # Do not allow privilege escalation.
+
+networks:
+  caddy:
+    name: caddy-network # External Caddy/reverse proxy network.
+    driver: bridge
+    enable_ipv6: false
+    external: true
+
+volumes:
+  caddy:
+    name: caddy-volume # Caddy certificate and configuration data.
+    external: true
