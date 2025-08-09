@@ -2,30 +2,27 @@ services:
   qbittorrent:
     container_name: qbittorrent
     image: lscr.io/linuxserver/qbittorrent:latest
-    env_file: ../../.env
-    network_mode: service:gluetun
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     depends_on:
       gluetun:
         condition: service_healthy
-    environment:
-      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest # Automatically installs Vuetorrent to /.
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
+    env_file:
+      - ../../.env
+    network_mode: service:gluetun
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       interval: 5m
       retries: 3
       start_period: 2m
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       timeout: 10s
-    logging:
-      driver: json-file
-      options:
-        max-file: 5
-        max-size: 10m
+    environment:
+      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest # Automatically installs Vuetorrent to /.
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - ${DOWNLOADS_DIRECTORY}:/downloads
       - qbittorrent:/config

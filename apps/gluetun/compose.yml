@@ -2,32 +2,28 @@ services:
   gluetun:
     container_name: gluetun
     image: qmcgaw/gluetun:latest
-    cap_add: [NET_ADMIN] # Required for configuring networking.
-    env_file: ../../.env
+    cap_add:
+      - NET_ADMIN # Required for configuring networking.
+    env_file:
+      - ../../.env
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
     devices:
-      - /dev/net/tun:/dev/net/tun
+      - /dev/net/tun:/dev/net/tun # TUN/TAP network device passthrough.
     environment:
-      - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS} # Subnets allowed to bypass the firewall.
-      - PORT_FORWARD_ONLY=true # Only connect to servers with port forwarding.
-      - SERVER_COUNTRIES=${SERVER_COUNTRIES}
-      - UPDATER_PERIOD=8h # Check for updated information every 8 hours.
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on.
-      - VPN_PORT_FORWARDING=on
-      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
-      - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-    logging:
-      driver: json-file
-      options:
-        max-file: 5
-        max-size: 10m
+      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,192.168.1.0/24 # List of subnets allowed to bypass the firewall.
+      - PORT_FORWARD_ONLY=true # Only connect to servers with port forwarding enabled.
+      - SERVER_COUNTRIES=Switzerland # List of ProtonVPN countries to connect to.
+      - UPDATER_PERIOD=1h # Check for updated information every hour.
+      - VPN_PORT_FORWARDING=on # Enable port forwarding.
+      - VPN_SERVICE_PROVIDER=protonvpn # Use ProtonVPN as the VPN service provider.
+      - VPN_TYPE=wireguard # Use WireGuard instead of OpenVPN.
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY} # The WireGuard private key to authenticate to ProtonVPN with.
     ports:
-      - 7878:7878 # Radarr Web UI.
-      - 8000:8000 # Gluetun control server.
-      - 8080:8080 # qBittorrent Web UI.
-      - 8686:8686 # Lidarr Web UI.
-      - 8989:8989 # Sonarr Web UI.
+      - 7878:7878/tcp # Radarr Web UI.
+      - 8080:8080/tcp # qBittorrent Web UI.
+      - 8686:8686/tcp # Lidarr Web UI.
+      - 8989:8989/tcp # Sonarr Web UI.
     volumes:
-      - gluetun:/gluetun
+      - gluetun:/gluetun # Gluetun configuration volume.

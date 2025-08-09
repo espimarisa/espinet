@@ -2,17 +2,15 @@ services:
   jellyfin:
     container_name: jellyfin
     image: lscr.io/linuxserver/jellyfin:latest
-    env_file: ../../.env
-    networks: [caddy]
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     devices:
-      - /dev/dri:/dev/dri
-    environment:
-      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # OpenCL support; intro skipper button.
-      - PUID=${PUID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
+      - /dev/dri:/dev/dri # Video device passthrough; /dev/dri/renderD128 is GPU0.
+    env_file:
+      - ../../.env
+    networks:
+      - caddy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       interval: 5m
       retries: 3
@@ -25,11 +23,12 @@ services:
       caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL for certificates instead of LE.
       caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver for ACME challenges.
       caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
-    logging:
-      driver: json-file
-      options:
-        max-file: 5
-        max-size: 10m
+    environment:
+      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # OpenCL and Intro Skipper support.
+      - PUID=${PUID}
+      - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Configures the autodiscovery URL.
+      - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
-      - ${MEDIA_LIBRARY_DIRECTORY}:/library
-      - jellyfin:/config
+      - ${MEDIA_LIBRARY_DIRECTORY}:/library # Root media library directory.
+      - jellyfin:/config # Jellyfin cache and configuration volume.

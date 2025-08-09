@@ -2,29 +2,26 @@ services:
   radarr:
     container_name: radarr
     image: lscr.io/linuxserver/radarr:latest
-    env_file: ../../.env
-    network_mode: service:gluetun
-    restart: unless-stopped
-    security_opt: [no-new-privileges:true]
     depends_on:
       gluetun:
         condition: service_healthy
-    environment:
-      - PGID=${PGID}
-      - PUID=${PUID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
+    env_file:
+      - ../../.env
+    network_mode: service:gluetun
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       interval: 5m
       retries: 3
       start_period: 2m
       test: ["CMD", "curl", "-f", "http://localhost:7878/ping"]
       timeout: 10s
-    logging:
-      driver: json-file
-      options:
-        max-file: 5
-        max-size: 10m
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - ${DOWNLOADS_DIRECTORY}:/downloads
       - ${MEDIA_LIBRARY_DIRECTORY}:/library

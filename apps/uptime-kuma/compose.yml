@@ -1,0 +1,19 @@
+services:
+  uptime-kuma:
+    container_name: uptime-kuma
+    image: louislam/uptime-kuma:1
+    env_file:
+      - ../../.env
+    networks:
+      - caddy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      caddy: ${PUBLISHED_STATUS_URL} # Tells Caddy to reverse-proxy to the external Uptime Kuma URL.
+      caddy.reverse_proxy: uptime-kuma:3001 # Tells Caddy to reverse-proxy Uptime Kuma traffic.
+      caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL for certificates instead of LE.
+      caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare as the DNS resolver for ACME challenges.
+      caddy.tls.protocols: tls1.3 # Enforce TLS 1.3.
+    volumes:
+      - uptime-kuma:/app/data # Uptime Kuma configuration directory.

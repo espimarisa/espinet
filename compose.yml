@@ -8,6 +8,8 @@ include:
   - ./apps/radarr/compose.yml
   - ./apps/sonarr/compose.yml
   - ./apps/syncthing/compose.yml
+  - ./apps/uptime-kuma/compose.yml
+  - ./apps/watchtower/compose.yml
 
 networks:
   caddy:
@@ -34,6 +36,9 @@ volumes:
   radarr:
     external: true
     name: radarr-volume
+  uptime-kuma:
+    external: true
+    name: uptime-kuma
   sonarr:
     external: true
     name: sonarr-volume

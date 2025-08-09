@@ -2,14 +2,13 @@ services:
   caddy:
     container_name: caddy
     image: homeall/caddy-reverse-proxy-cloudflare:latest
-    env_file: ../../.env
-    networks: [caddy]
+    env_file:
+      - ../../.env
+    networks:
+      - caddy
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
-    environment:
-      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
-      - CADDY_INGRESS_NETWORKS=caddy # Only proxy services running under the caddy network.
-      - TZ=${TZ}
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       interval: 5m
       retries: 3
@@ -18,16 +17,16 @@ services:
       timeout: 10s
     labels:
       caddy.acme_dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare for TLS DNS challenges instead of LE.
-      caddy.email: ${ACME_EMAIL}
-    logging:
-      driver: json-file
-      options:
-        max-file: 5
-        max-size: 10m
+      caddy.admin: 0.0.0.0:2019 # Enables the admin WebUI.
+      caddy.email: ${ACME_EMAIL} # Email to use for public ACME challenges.
+    environment:
+      - CADDY_INGRESS_NETWORKS=caddy # Only proxy services and traffic inside of the caddy network.
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
+      - TZ=${TZ}
     ports:
-      - 443:443 # HTTPS
-      - 443:443/udp # HTTPS UDP
-      - 80:80 # HTTP
+      - 443:443/tcp # HTTPS
+      - 443:443/udp # HTTP/3
+      - 80:80/tcp # HTTP
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Required for listening to container traffic.
-      - caddy:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Required for listening to container traffic.
+      - caddy:/data # Caddy certificates and configuration.

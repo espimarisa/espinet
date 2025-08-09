@@ -2,20 +2,21 @@ services:
   syncthing:
     container_name: syncthing
     image: lscr.io/linuxserver/syncthing:latest
-    env_file: ../../.env
-    network_mode: host # Use host network mode for local discovery.
+    env_file:
+      - ../../.env
     restart: unless-stopped
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
     environment:
       - PGID=${PGID}
       - PUID=${PUID}
       - TZ=${TZ}
       - UMASK=${UMASK}
-    logging:
-      driver: json-file
-      options:
-        max-file: 5
-        max-size: 10m
+    ports:
+      - 8384:8384/tcp # Syncthing WebUI.
+      - 22000:22000/tcp # Listening port (TCP).
+      - 22000:22000/udp # Listening port (UDP).
+      - 21027:21027/udp # Protocol discovery.
     volumes:
-      - ${SYNCTHING_DIRECTORY}/config:/config # Syncthing's configuration and database.
-      - ${SYNCTHING_DIRECTORY}/data:/Sync # Syncthing base data directory.
+      - ${SYNCTHING_DIRECTORY}/config:/config # Syncthing configuration directory.
+      - ${SYNCTHING_DIRECTORY}/data:/Sync # Syncthing data directory.
