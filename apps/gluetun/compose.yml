@@ -18,6 +18,7 @@ services:
       - UPDATER_PERIOD=1h # Check for updated information every hour.
       - VPN_PORT_FORWARDING=on # Enable port forwarding.
       - VPN_SERVICE_PROVIDER=protonvpn # Use ProtonVPN as the VPN service provider.
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on.
       - VPN_TYPE=wireguard # Use WireGuard instead of OpenVPN.
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY} # The WireGuard private key to authenticate to ProtonVPN with.
     ports:
