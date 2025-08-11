@@ -1,0 +1,68 @@
+services:
+  beszel:
+    container_name: beszel
+    image: ghcr.io/henrygd/beszel/beszel:0.12.3
+    restart: unless-stopped
+    env_file: ../../.env
+    networks:
+      - frontend # Internal network for local web interface access.
+    ports:
+      - ${BESZEL_WEBUI_PORT:-8090}:8090 # Beszel hub WebUI.
+    volumes:
+      - beszel:/beszel_data # Beszel configuration/data.
+      - beszel-socket:/beszel_socket # Beszel socket.
+    healthcheck:
+      interval: 5m
+      retries: 3
+      start_period: 2m
+      test: ["CMD", "/beszel", "health", "--url", "http://localhost:8090"]
+      timeout: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  beszel-agent:
+    container_name: beszel-agent
+    image: ghcr.io/henrygd/beszel/beszel-agent:0.12.3
+    network_mode: host
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      HUB_URL: http://0.0.0.0:8090
+      KEY: "${BESZEL_KEY}" # SSH key to connect to the Beszel hub with; generated in the WebUI post-install.
+      LISTEN: 0.0.0.0:${BESZEL_AGENT_PORT:-45876} # Host port to listen on; defaults to 45876.
+      TOKEN: ${BESZEL_TOKEN} # Token to connect to the Beszel hub with; generated in the WebUI post-install.
+    volumes:
+      - socket-proxy:/var/run # Docker socket proxy.
+      - ${STORAGE_DIRECTORY}:/extra-filesystems/storage:ro # Storage directory for FS monitoring.
+      - beszel-socket:/beszel_socket # Beszel socket.
+    depends_on:
+      beszel:
+        condition: service_healthy # Wait for the Beszel web interface before connecting.
+      socket-proxy:
+        condition: service_healthy # Wait for the Docker socket proxy.
+    healthcheck:
+      interval: 5m
+      retries: 3
+      start_period: 2m
+      test: ["CMD", "/agent", "health"]
+      timeout: 10s
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  frontend:
+    name: frontend-network
+    driver: bridge
+    enable_ipv6: false
+    external: true
+
+volumes:
+  beszel:
+    name: beszel-volume
+    external: true
+  beszel-socket:
+    name: beszel-socket-volume
+    external: true
+  socket-proxy:
+    name: socket-proxy-volume
+    external: true

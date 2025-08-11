@@ -1,20 +1,18 @@
 services:
   qbittorrent:
     container_name: qbittorrent
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: ghcr.io/11notes/qbittorrent:5.1.2
+    command: --profile=/opt --confirm-legal-notice # stfu legal notice god
     env_file: ../../.env
     network_mode: service:gluetun # Use Gluetun for all networking.
+    read_only: true
     restart: unless-stopped
     environment:
-      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest # Automatically installs Vuetorrent at /vuetorrent.
-      - PGID=${PGID} # Group ID to run the container under.
-      - PUID=${PUID} # User ID to run the container under.
-      - TZ=${TZ} # Timezone to run the container under.
-      - UMASK=${UMASK} # Default UMASK permissions to set on newly created files.
-      - WEBUI_PORT=${QBITTORRENT_WEBUI_PORT:-8080} # qBittorrent WebUI port.
+      - TZ=${TZ}
     volumes:
-      - ${DOWNLOADS_DIRECTORY}:/downloads # Root path to the downloads directory.
-      - qbittorrent:/config # qBittorrent configuration and data path/volume.
+      - ${DOWNLOADS_DIRECTORY}:/downloads # Root downloads directory; needs to be writable by 1000:1000.
+      - qbittorrent:/qbittorrent/etc # qBittorrent configuration.
+      - qbittorrent:/qbittorrent/var # qBittorrent database.
     depends_on:
       gluetun:
         condition: service_healthy # Wait for Gluetun to become healthy before starting.
@@ -30,9 +28,9 @@ services:
         ] # Check to see if the qBittorrent WebUI is connectable.
       timeout: 10s
     security_opt:
-      - no-new-privileges:true # Do not allow privilege escalation.
+      - no-new-privileges:true
 
 volumes:
   qbittorrent:
-    name: qbittorrent-volume # qBittorrent configuration and data path/volume.
+    name: qbittorrent-volume
     external: true

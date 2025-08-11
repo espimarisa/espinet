@@ -1,48 +1,48 @@
 services:
   radarr:
     container_name: radarr
-    image: lscr.io/linuxserver/radarr:latest
+    image: ghcr.io/11notes/radarr:5.26.2
+    read_only: true
     restart: unless-stopped
     env_file: ../../.env
     environment:
-      - PGID=${PGID} # Group ID to run the container under.
-      - PUID=${PUID} # User ID to run the container under.
-      - TZ=${TZ} # Timezone to run the container under.
-      - UMASK=${UMASK} # Default UMASK permissions to set on newly created files.
+      - TZ=${TZ}
     networks:
+      - frontend # Internal network for local web interface access.
       - gluetun # Gluetun VPN network.
       - media # Internal media network.
     ports:
-      - ${RADARR_WEBUI_PORT:-7878}:7878 # Local Radarr WebUI.
+      - ${RADARR_WEBUI_PORT:-7878}:7878/tcp # Web interface.
     volumes:
-      - ${DOWNLOADS_DIRECTORY}:/downloads # Root path to the downloads directory.
-      - ${MEDIA_LIBRARY_DIRECTORY}:/library # Root path the media library directory.
-      - radarr:/config # Radarr configuration and data path/volume.
+      - ${DOWNLOADS_DIRECTORY}:/downloads # Root downloads directory; needs to be writable by 1000:1000.
+      - ${MEDIA_LIBRARY_DIRECTORY}:/library # Root media library directory; needs to be writable by 1000:1000.
+      - radarr:/radarr/etc # Configuration/data volume.
     depends_on:
       qbittorrent:
         condition: service_healthy # Wait for download clients to become healthy before starting.
-    healthcheck:
-      interval: 5m
-      retries: 3
-      start_period: 2m
-      test: ["CMD", "curl", "-f", "http://localhost:8989/ping"] # Radarr healthcheck endpoint.
-      timeout: 10s
     security_opt:
-      - no-new-privileges:true # Do not allow privilege escalation.
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:uid=1000,gid=1000 # required for read-only image
 
 networks:
+  frontend:
+    name: frontend-network
+    driver: bridge
+    enable_ipv6: false
+    external: true
   gluetun:
-    name: gluetun-network # Gluetun VPN network.
+    name: gluetun-network
     driver: bridge
     enable_ipv6: false
     external: true
   media:
-    name: media-network # Internal media network.
+    name: media-network
     driver: bridge
     enable_ipv6: false
     external: true
 
 volumes:
   radarr:
-    name: radarr-volume # Radarr configuration and data path/volume.
+    name: radarr-volume
     external: true

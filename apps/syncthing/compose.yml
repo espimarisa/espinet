@@ -1,17 +1,31 @@
 services:
   syncthing:
     container_name: syncthing
-    image: lscr.io/linuxserver/syncthing:latest
+    image: ghcr.io/11notes/syncthing:1.30.0
     env_file: ../../.env
+    read_only: true
     restart: unless-stopped
-    network_mode: host # Required for autodiscovery, needs ports 8384, 22000, and 21027/udp.
     environment:
-      - PGID=${PGID} # Group ID to run the container under.
-      - PUID=${PUID} # User ID to run the container under.
-      - TZ=${TZ} # Timezone to run the container under.
-      - UMASK=${UMASK} # Default UMASK permissions to set on newly created files.
+      - SYNCTHING_API_KEY=${SYNCTHING_API_KEY} # 32-character API key to set upon first boot.
+      - SYNCTHING_PASSWORD=${SYNCTHING_PASSWORD} # Administrator password to set upon first boot.
+      - TZ=${TZ}
+    networks:
+      - frontend # Internal network for local web interface access.
+    ports:
+      - ${SYNCTHING_WEBUI_PORT:-3000}:3000/tcp # WebUI; defaults to 3000.
+      - ${SYNCTHING_PROTOCOL_PORT:-22000}:22000/tcp # Protocol traffic (TCP); defaults to 22000.
+      - ${SYNCTHING_PROTOCOL_PORT:-22000}:22000/udp # Protocol traffic (UDP); defaults to 22000.
+      - ${SYNCTHING_AUTODISCOVERY_PORT:-21027}:21027/udp # Local autodiscovery (UDP); defaults to 21027.
     volumes:
-      - ${SYNCTHING_DIRECTORY}/config:/config # Syncthing configuration directory.
-      - ${SYNCTHING_DIRECTORY}/data:/Sync # Syncthing data directory.
+      - ${SYNCTHING_DIRECTORY}/etc:/syncthing/etc # Configuration directory; needs to be writable by 1000:1000.
+      - ${SYNCTHING_DIRECTORY}/share:/syncthing/share # Share/storage directory; needs to be writable by 1000:1000.
+      - ${SYNCTHING_DIRECTORY}/var:/syncthing/var # Database/index directory; needs to be writable by 1000:1000.
     security_opt:
-      - no-new-privileges:true # Do not allow privilege escalation.
+      - no-new-privileges:true
+
+networks:
+  frontend:
+    name: frontend-network
+    driver: bridge
+    enable_ipv6: false
+    external: true

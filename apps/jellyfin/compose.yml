@@ -1,30 +1,34 @@
 services:
   jellyfin:
     container_name: jellyfin
-    image: lscr.io/linuxserver/jellyfin:latest
-    restart: unless-stopped
+    image: ghcr.io/jellyfin/jellyfin:10.10.7
     env_file: ../../.env
+    hostname: jellyfin
+    restart: unless-stopped
+    user: ${PGID}:${PUID}
     devices:
       - /dev/dri:/dev/dri # Video device passthrough for HW acceleration, /dev/dri/renderD128 should be GPU0.
     environment:
-      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest # Intel OpenCL and Intro Skipper support.
       - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Sets the autodiscovery URL.
-      - PGID=${PGID} # The Group ID to run the container under.
-      - PUID=${PUID} # The User ID to run the container under.
-      - TZ=${TZ} # The timezone to run the container under.
-      - UMASK=${UMASK} # Default umask permissions to set on newly created files.
+      - TZ=${TZ}
     networks:
       - caddy # External Caddy/reverse proxy network.
+      - frontend # Internal network for local web interface access.
       - media # Internal media network.
+    ports:
+      - ${JELLYFIN_HTTP_PORT:-8096}:8096 # Local Jellyfin web interface.
+      - 7359:7359/udp # Local Jellyfin autodiscovery port.
     volumes:
-      - ${MEDIA_LIBRARY_DIRECTORY}:/library:ro # Root path to the media library directory, read only.
-      - jellyfin:/config # Jellyfin configuration and data volume.
-      - jellyfin-cache:/config/cache # Seperate Jellyfin cache volume.
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ${MEDIA_LIBRARY_DIRECTORY}:/library:ro
+      - jellyfin-cache:/cache
+      - jellyfin:/config
     healthcheck:
       interval: 5m
       retries: 3
       start_period: 1m
-      test: ["CMD", "curl", "-f", "http://localhost:8096/health"] # Internal Jellyfin healthcheck URL.
+      test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
       timeout: 10s
     labels:
       caddy: ${PUBLISHED_JELLYFIN_URL} # Tells Caddy to reverse proxy to the external Jellyfin URL.
@@ -33,24 +37,29 @@ services:
       caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
       caddy.tls.protocols: tls1.3 # Requires clients to support TLS 1.3.
     security_opt:
-      - no-new-privileges:true # Do not allow privilege escalation.
+      - no-new-privileges:true
 
 networks:
   caddy:
-    name: caddy-network # External Caddy/reverse proxy network.
+    name: caddy-network
+    driver: bridge
+    enable_ipv6: false
+    external: true
+  frontend:
+    name: frontend-network
     driver: bridge
     enable_ipv6: false
     external: true
   media:
-    name: media-network # Internal media network.
+    name: media-network
     driver: bridge
     enable_ipv6: false
     external: true
 
 volumes:
   jellyfin:
-    name: jellyfin-volume # Jellyfin configuration and data volume.
+    name: jellyfin-volume
     external: true
   jellyfin-cache:
-    name: jellyfin-cache-volume # Seperate Jellyfin cache volume.
+    name: jellyfin-cache-volume
     external: true

@@ -1,0 +1,24 @@
+services:
+  socket-proxy:
+    container_name: socket-proxy
+    image: ghcr.io/11notes/socket-proxy:2.1.4
+    read_only: true
+    restart: unless-stopped
+    env_file: ../../.env
+    environment:
+      - TZ=${TZ}
+      - SOCKET_PROXY_UID=${PUID}
+      - SOCKET_PROXY_GID=${PGID}
+    ports:
+      - 2375:2375/tcp # Socket port.
+    volumes:
+      - /run/docker.sock:/run/docker.sock:ro # Docker socket.
+      - socket-proxy:/run/proxy # Socket proxy.
+    security_opt:
+      - no-new-privileges:true
+    user: 0:${DOCKER_UID:-959} # Docker host user.
+
+volumes:
+  socket-proxy:
+    name: socket-proxy-volume
+    external: true
