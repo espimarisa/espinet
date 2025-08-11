@@ -3,6 +3,7 @@ services:
     container_name: syncthing
     image: ghcr.io/11notes/syncthing:1.30.0
     env_file: ../../.env
+    hostname: syncthing
     read_only: true
     restart: unless-stopped
     environment:

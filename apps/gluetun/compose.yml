@@ -3,6 +3,7 @@ services:
     container_name: gluetun
     image: ghcr.io/qdm12/gluetun:v3.40.0
     env_file: ../../.env
+    hostname: gluetun
     restart: unless-stopped
     devices:
       - /dev/net/tun:/dev/net/tun # TUN/TAP network device passthrough.

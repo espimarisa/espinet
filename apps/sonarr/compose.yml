@@ -2,9 +2,10 @@ services:
   sonarr:
     container_name: sonarr
     image: ghcr.io/11notes/sonarr:4.0.15
+    env_file: ../../.env
+    hostname: sonarr
     read_only: true
     restart: unless-stopped
-    env_file: ../../.env
     environment:
       - TZ=${TZ}
     networks:

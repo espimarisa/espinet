@@ -3,6 +3,7 @@ services:
     container_name: caddy
     image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.08.10
     env_file: ../../.env
+    hostname: caddy
     restart: unless-stopped
     environment:
       - CADDY_INGRESS_NETWORKS=caddy # Only proxy traffic from the caddy network.

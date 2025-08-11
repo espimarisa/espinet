@@ -2,9 +2,10 @@ services:
   radarr:
     container_name: radarr
     image: ghcr.io/11notes/radarr:5.26.2
+    env_file: ../../.env
+    hostname: radarr
     read_only: true
     restart: unless-stopped
-    env_file: ../../.env
     environment:
       - TZ=${TZ}
     networks:

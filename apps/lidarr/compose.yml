@@ -2,8 +2,9 @@ services:
   lidarr:
     container_name: lidarr
     image: blampe/lidarr:latest
-    restart: unless-stopped
     env_file: ../../.env
+    hostname: lidarr
+    restart: unless-stopped
     environment:
       - PGID=${PGID}
       - PUID=${PUID}

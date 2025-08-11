@@ -2,9 +2,10 @@ services:
   socket-proxy:
     container_name: socket-proxy
     image: ghcr.io/11notes/socket-proxy:2.1.4
+    env_file: ../../.env
+    hostname: socket-proxy
     read_only: true
     restart: unless-stopped
-    env_file: ../../.env
     environment:
       - TZ=${TZ}
       - SOCKET_PROXY_UID=${PUID}

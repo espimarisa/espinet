@@ -2,8 +2,9 @@ services:
   beszel:
     container_name: beszel
     image: ghcr.io/henrygd/beszel/beszel:0.12.3
-    restart: unless-stopped
     env_file: ../../.env
+    hostname: beszel
+    restart: unless-stopped
     networks:
       - frontend # Internal network for local web interface access.
     ports:
@@ -23,9 +24,10 @@ services:
   beszel-agent:
     container_name: beszel-agent
     image: ghcr.io/henrygd/beszel/beszel-agent:0.12.3
+    env_file: ../../.env
+    hostname: beszel-agent
     network_mode: host
     restart: unless-stopped
-    env_file: ../../.env
     environment:
       HUB_URL: http://0.0.0.0:8090
       KEY: "${BESZEL_KEY}" # SSH key to connect to the Beszel hub with; generated in the WebUI post-install.

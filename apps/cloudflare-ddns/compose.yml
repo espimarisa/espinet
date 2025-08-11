@@ -3,6 +3,7 @@ services:
     container_name: cloudflare-ddns
     image: favonia/cloudflare-ddns:1.15.1
     env_file: ../../.env
+    hostname: cloudflare-ddns
     network_mode: host # Required to get the origin IP.
     read_only: true
     restart: unless-stopped
