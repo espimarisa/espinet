@@ -22,12 +22,6 @@ services:
     depends_on:
       socket-proxy:
         condition: service_healthy # Wait for the Docker socket proxy.
-    healthcheck:
-      interval: 5m
-      retries: 3
-      start_period: 1m
-      test: ["CMD", "curl", "http://localhost:2019/config"]
-      timeout: 10s
     labels:
       caddy.acme_dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare for TLS DNS challenges instead of LE.
       caddy.email: ${ACME_EMAIL} # Email to use for public ACME challenges.
