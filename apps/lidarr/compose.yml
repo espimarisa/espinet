@@ -15,7 +15,7 @@ services:
       - gluetun # Gluetun VPN network.
       - media # Internal media network.
     ports:
-      - ${LIDARR_WEBUI_PORT:-8989}:8989 # Lidarr WebUI.
+      - ${LIDARR_WEBUI_PORT:-8686}:8686 # Lidarr WebUI.
     volumes:
       - ${DOWNLOADS_DIRECTORY}:/downloads
       - ${MEDIA_LIBRARY_DIRECTORY}:/library
