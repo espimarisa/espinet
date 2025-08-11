@@ -3,11 +3,13 @@ services:
     container_name: jellyfin
     image: ghcr.io/jellyfin/jellyfin:10.10.7
     env_file: ../../.env
+    group_add:
+      - "${RENDER_GID}" # Change this to match your "render" host group id and remove this comment.
     hostname: jellyfin
     restart: unless-stopped
     user: ${PGID}:${PUID}
     devices:
-      - /dev/dri:/dev/dri # Video device passthrough for HW acceleration, /dev/dri/renderD128 should be GPU0.
+      - /dev/dri/renderD128:/dev/dri/renderD128 # Video device passthrough for HW acceleration, /dev/dri/renderD128 should be GPU0.
     environment:
       - JELLYFIN_PublishedServerUrl=https://${PUBLISHED_JELLYFIN_URL} # Sets the autodiscovery URL.
       - TZ=${TZ}
