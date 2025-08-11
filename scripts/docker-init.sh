@@ -12,6 +12,7 @@ docker volume create qbittorrent-volume
 docker volume create radarr-volume
 docker volume create socket-proxy-volume
 docker volume create sonarr-volume
+docker volume create uptime-kuma-volume
 
 # Creates networks.
 docker network create -d bridge caddy-network

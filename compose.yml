@@ -10,6 +10,7 @@ include:
   - ./apps/socket-proxy/compose.yml # Docker-Socket-Proxy: Docker socket proxy
   - ./apps/sonarr/compose.yml # Sonarr: PVR for anime/tv.
   - ./apps/syncthing/compose.yml # Syncthing: Cross-device file synchronization.
+  - ./apps/uptime-kuma/compose.yml # Uptime-Kuma: Uptime monitoring.
 
 networks:
   caddy:
@@ -66,4 +67,7 @@ volumes:
     external: true
   sonarr:
     name: sonarr-volume # Sonarr configuration volume.
+    external: true
+  uptime-kuma:
+    name: uptime-kuma-volume
     external: true

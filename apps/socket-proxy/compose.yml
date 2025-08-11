@@ -5,7 +5,7 @@ services:
     env_file: ../../.env
     hostname: socket-proxy
     read_only: true
-    restart: unless-stopped
+    restart: always # Always keep running.
     environment:
       - TZ=${TZ}
       - SOCKET_PROXY_UID=${PUID}
