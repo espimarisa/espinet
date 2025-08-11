@@ -7,10 +7,10 @@ services:
     network_mode: host # Required to get the origin IP.
     read_only: true
     restart: unless-stopped
+    user: ${PGID}:${PUID}
     environment:
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
       - EMOJI=false
-      - QUIET=true # Adjust the logging priority.
       - IP4_DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add A records for.
       - IP6_PROVIDER=none # Disable IPV6 support (for now).
       - PROXIED=true # Enable proxying service traffic through Cloudflare.
