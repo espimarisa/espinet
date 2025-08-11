@@ -18,11 +18,5 @@ services:
       - UPDATE_CRON=@every 24h # Checks for an updated IP address every 24 hours.
     cap_drop:
       - ALL
-    healthcheck:
-      interval: 5m
-      retries: 3
-      start_period: 1m
-      test: ["CMD", "pgrep", "-x", "ddns"] # Check if the DDNS command is running.
-      timeout: 10s
     security_opt:
       - no-new-privileges:true
