@@ -1,32 +1,24 @@
 services:
   syncthing:
     container_name: syncthing
-    image: ghcr.io/11notes/syncthing:1.30.0
+    image: ghcr.io/11notes/syncthing:2
     env_file: ../../.env
     hostname: syncthing
+    network_mode: host # Required for autodiscovery.
     read_only: true
     restart: unless-stopped
     environment:
-      - SYNCTHING_API_KEY=${SYNCTHING_API_KEY} # 32-character API key to set upon first boot.
-      - SYNCTHING_PASSWORD=${SYNCTHING_PASSWORD} # Administrator password to set upon first boot.
-      - TZ=${TZ}
-    networks:
-      - frontend # Internal network for local web interface access.
+      - SYNCTHING_API_KEY=${SYNCTHING_API_KEY} # 32-character API key to set/use.
+      - SYNCTHING_PASSWORD=${SYNCTHING_PASSWORD} # 32-character administrator password to set/use.
+      - TZ=${TZ} # Timezone to run the container under.
     ports:
-      - ${SYNCTHING_WEBUI_PORT:-3000}:3000/tcp # WebUI; defaults to 3000.
-      - ${SYNCTHING_PROTOCOL_PORT:-22000}:22000/tcp # Protocol traffic (TCP); defaults to 22000.
-      - ${SYNCTHING_PROTOCOL_PORT:-22000}:22000/udp # Protocol traffic (UDP); defaults to 22000.
-      - ${SYNCTHING_AUTODISCOVERY_PORT:-21027}:21027/udp # Local autodiscovery (UDP); defaults to 21027.
+      - 3000:3000/tcp # Local Syncthing web interface.
+      - 22000:22000/tcp # Syncthing protocol traffic.
+      - 22000:22000/udp # Syncthing protocol traffic.
+      - 21027:21027/udp # Local autodiscovery.
     volumes:
-      - ${SYNCTHING_DIRECTORY}/etc:/syncthing/etc # Configuration directory; needs to be writable by 1000:1000.
-      - ${SYNCTHING_DIRECTORY}/share:/syncthing/share # Share/storage directory; needs to be writable by 1000:1000.
-      - ${SYNCTHING_DIRECTORY}/var:/syncthing/var # Database/index directory; needs to be writable by 1000:1000.
+      - ${SYNCTHING_DIRECTORY}/share:/syncthing/share # Syncthing data path, needs to be writable by 1000:1000.
+      - syncthing:/syncthing/etc # Syncthing configuration volume.
+      - syncthing:/syncthing/var # Syncthing database and index volume.
     security_opt:
       - no-new-privileges:true
-
-networks:
-  frontend:
-    name: frontend-network
-    driver: bridge
-    enable_ipv6: false
-    external: true

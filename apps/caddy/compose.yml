@@ -1,49 +1,29 @@
 services:
   caddy:
     container_name: caddy
-    image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.08.10
+    image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.08.12
     env_file: ../../.env
     hostname: caddy
     restart: unless-stopped
     environment:
-      - CADDY_INGRESS_NETWORKS=caddy # Only proxy traffic from the caddy network.
+      - CADDY_INGRESS_NETWORKS=external # Only proxy traffic from the external network.
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
-      - TZ=${TZ}
+      - TZ=${TZ} # Timezone to run the container under.
     networks:
-      - caddy # External Caddy/reverse proxy network.
-      - frontend # Internal network for local web interface access.
+      - external
+      - internal
     ports:
-      - 80:80 # HTTP
-      - 443:443 # HTTPS
-      - 443:443/udp # HTTPS3
+      - 80:80 # HTTP traffic.
+      - 443:443 # HTTPS traffic.
+      - 443:443/udp # HTTPS/3 traffic.
     volumes:
-      - socket-proxy:/var/run # Docker socket proxy.
-      - caddy:/data # Caddy certificate and configuration data.
+      - socket-proxy:/var/run # Docker socket proxy mount.
+      - caddy:/data # Caddy configuration/data volume.
     depends_on:
       socket-proxy:
-        condition: service_healthy # Wait for the Docker socket proxy.
+        condition: service_healthy
     labels:
       caddy.acme_dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare for TLS DNS challenges instead of LE.
       caddy.email: ${ACME_EMAIL} # Email to use for public ACME challenges.
     security_opt:
       - no-new-privileges:true
-
-networks:
-  caddy:
-    name: caddy-network
-    driver: bridge
-    enable_ipv6: false
-    external: true
-  frontend:
-    name: frontend-network
-    driver: bridge
-    enable_ipv6: false
-    external: true
-
-volumes:
-  caddy:
-    name: caddy-volume
-    external: true
-  socket-proxy:
-    name: socket-proxy-volume
-    external: true

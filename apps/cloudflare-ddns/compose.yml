@@ -1,22 +1,22 @@
 services:
   cloudflare-ddns:
     container_name: cloudflare-ddns
-    image: favonia/cloudflare-ddns:1.15.1
+    image: favonia/cloudflare-ddns:1
     env_file: ../../.env
     hostname: cloudflare-ddns
-    network_mode: host # Required to get the origin IP.
+    network_mode: host # Required to get the host network's IP address.
     read_only: true
-    restart: always
-    user: ${PGID}:${PUID}
+    restart: unless-stopped
     environment:
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
-      - EMOJI=false
-      - IP4_DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add A records for.
-      - IP6_PROVIDER=none # Disable IPV6 support (for now).
+      - EMOJI=false # Disable emoji inside of log files.
+      - IP4_DOMAINS=${CLOUDFLARE_DOMAINS} # List of domains to add/update A records for.
+      - IP6_PROVIDER=none # Disable IPV6 support.
       - PROXIED=true # Enable proxying service traffic through Cloudflare.
-      - TZ=${TZ}
-      - UPDATE_CRON=@every 24h # Checks for an updated IP address every 24 hours.
+      - TZ=${TZ} # Timezone to run the container under.
+      - UPDATE_CRON=@every 8h # Checks for an updated IP address every 8 hours.
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
+    user: ${PGID}:${PUID}

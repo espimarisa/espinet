@@ -1,73 +1,54 @@
 include:
-  - ./apps/beszel/compose.yml # Caddy: Web server and reverse proxy.
-  - ./apps/caddy/compose.yml # Caddy: Web server and reverse proxy.
-  - ./apps/cloudflare-ddns/compose.yml # Cloudflare-DDNS: Dynamic DNS record updating to Cloudflare.
-  - ./apps/gluetun/compose.yml # Gluetun: VPN client.
-  - ./apps/jellyfin/compose.yml # Jellyfin: Media server.
-  - ./apps/lidarr/compose.yml # Lidarr: PVR for music.
-  - ./apps/qbittorrent/compose.yml # qBittorrent: BitTorrent client.
-  - ./apps/radarr/compose.yml # Radarr: PVR for movies.
-  - ./apps/socket-proxy/compose.yml # Docker-Socket-Proxy: Docker socket proxy
-  - ./apps/sonarr/compose.yml # Sonarr: PVR for anime/tv.
-  - ./apps/syncthing/compose.yml # Syncthing: Cross-device file synchronization.
-  - ./apps/uptime-kuma/compose.yml # Uptime-Kuma: Uptime monitoring.
+  - ./apps/caddy/compose.yml
+  - ./apps/cloudflare-ddns/compose.yml
+  - ./apps/gluetun/compose.yml
+  - ./apps/jellyfin/compose.yml
+  - ./apps/qbittorrent/compose.yml
+  - ./apps/radarr/compose.yml
+  - ./apps/socket-proxy/compose.yml
+  - ./apps/sonarr/compose.yml
+  - ./apps/syncthing/compose.yml
 
 networks:
-  caddy:
-    name: caddy-network # External Caddy/reverse proxy network.
+  external:
+    name: external-network
     driver: bridge
-    enable_ipv6: false
-    external: true
-  frontend:
-    name: frontend-network # Internal network for local web interfaces.
-    driver: bridge
-    enable_ipv6: false
     external: true
   gluetun:
-    name: gluetun-network # Gluetun VPN network.
+    name: gluetun-network
     driver: bridge
-    enable_ipv6: false
     external: true
-  media:
-    name: media-network # Internal media network.
+  internal:
+    name: internal-network
     driver: bridge
-    enable_ipv6: false
     external: true
 
 volumes:
   beszel:
-    name: beszel-volume # Beszel configuration and data volume
-    external: true
-  beszel-socket:
-    name: beszel-socket-volume # Beszel socket volume.
-    external: true
   caddy:
-    name: caddy-volume # Caddy certificate and configuration data volume.
+    name: caddy-volume
     external: true
   gluetun:
-    name: gluetun-volume # Gluetun configuration volume.
+    name: gluetun-volume
     external: true
   jellyfin:
-    name: jellyfin-volume # Jellyfin configuration volume.
+    name: jellyfin-volume
     external: true
   jellyfin-cache:
-    name: jellyfin-cache-volume # Jellyfin cache volume.
-    external: true
-  lidarr:
-    name: lidarr-volume # Lidarr configuration volume.
+    name: jellyfin-cache-volume
     external: true
   qbittorrent:
-    name: qbittorrent-volume # qBittorrent configuration volume.
+    name: qbittorrent-volume
     external: true
   radarr:
-    name: radarr-volume # Radarr configuration volume.
+    name: radarr-volume
     external: true
   socket-proxy:
-    name: socket-proxy-volume # Docker socket proxy volume.
+    name: socket-proxy-volume
     external: true
   sonarr:
-    name: sonarr-volume # Sonarr configuration volume.
+    name: sonarr-volume
     external: true
-  uptime-kuma:
-    name: uptime-kuma-volume
+  syncthing:
+    name: syncthing-volume
     external: true

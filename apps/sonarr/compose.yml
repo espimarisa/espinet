@@ -1,49 +1,26 @@
 services:
   sonarr:
     container_name: sonarr
-    image: ghcr.io/11notes/sonarr:4.0.15
+    image: ghcr.io/11notes/sonarr:4
     env_file: ../../.env
     hostname: sonarr
     read_only: true
     restart: unless-stopped
     environment:
-      - TZ=${TZ}
+      - TZ=${TZ} # Timezone to run the container under.
     networks:
-      - frontend # Internal network for local web interface access.
-      - gluetun # Gluetun VPN network.
-      - media # Internal media network.
+      - gluetun
+      - internal
     ports:
-      - ${SONARR_WEBUI_PORT:-8989}:8989/tcp # Web interface.
+      - ${SONARR_WEBUI_PORT:-8989}:8989/tcp # Local Sonarr web interface.
     volumes:
-      - ${DOWNLOADS_DIRECTORY}:/downloads # Root downloads directory; needs to be writable by 1000:1000.
-      - ${MEDIA_LIBRARY_DIRECTORY}:/library # Root media library directory; needs to be writable by 1000:1000.
-      - sonarr:/sonarr/etc # Configuration/data volume.
+      - ${DOWNLOADS_DIRECTORY}:/downloads # Root downloads path; needs to be writable by 1000:1000.
+      - ${MEDIA_LIBRARY_DIRECTORY}:/library # Root media library path; needs to be writable by 1000:1000.
+      - sonarr:/sonarr/etc # Sonarr configuration/data volume.
     depends_on:
       qbittorrent:
-        condition: service_healthy # Wait for download clients to become healthy before starting.
+        condition: service_healthy # Wait for qBittorrent to become healthy before starting.
     security_opt:
       - no-new-privileges:true
     tmpfs:
-      - /tmp:uid=1000,gid=1000 # required for read-only image
-
-networks:
-  frontend:
-    name: frontend-network
-    driver: bridge
-    enable_ipv6: false
-    external: true
-  gluetun:
-    name: gluetun-network
-    driver: bridge
-    enable_ipv6: false
-    external: true
-  media:
-    name: media-network
-    driver: bridge
-    enable_ipv6: false
-    external: true
-
-volumes:
-  sonarr:
-    name: sonarr-volume
-    external: true
+      - /tmp:uid=1000,gid=1000 # Required for read-only images.

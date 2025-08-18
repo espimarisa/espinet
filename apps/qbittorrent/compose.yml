@@ -1,7 +1,7 @@
 services:
   qbittorrent:
     container_name: qbittorrent
-    image: ghcr.io/11notes/qbittorrent:5.1.2
+    image: ghcr.io/11notes/qbittorrent:5
     command: --profile=/opt --confirm-legal-notice # stfu legal notice god
     env_file: ../../.env
     network_mode: service:gluetun # Use Gluetun for all networking.
@@ -17,20 +17,15 @@ services:
       gluetun:
         condition: service_healthy # Wait for Gluetun to become healthy before starting.
     healthcheck:
-      interval: 5m
+      interval: 1m
       retries: 3
-      start_period: 2m
+      start_period: 1m
       test: [
           "CMD",
           "curl",
           "-f",
           "http://localhost:${QBITTORRENT_WEBUI_PORT:-8080}",
-        ] # Check to see if the qBittorrent WebUI is connectable.
-      timeout: 10s
+        ]
+      timeout: 5s
     security_opt:
       - no-new-privileges:true
-
-volumes:
-  qbittorrent:
-    name: qbittorrent-volume
-    external: true
