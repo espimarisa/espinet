@@ -16,16 +16,5 @@ services:
     depends_on:
       gluetun:
         condition: service_healthy # Wait for Gluetun to become healthy before starting.
-    healthcheck:
-      interval: 1m
-      retries: 3
-      start_period: 1m
-      test: [
-          "CMD",
-          "curl",
-          "-f",
-          "http://localhost:${QBITTORRENT_WEBUI_PORT:-8080}",
-        ]
-      timeout: 5s
     security_opt:
       - no-new-privileges:true
