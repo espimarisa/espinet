@@ -11,11 +11,6 @@ services:
       - SYNCTHING_API_KEY=${SYNCTHING_API_KEY} # 32-character API key to set/use.
       - SYNCTHING_PASSWORD=${SYNCTHING_PASSWORD} # 32-character administrator password to set/use.
       - TZ=${TZ} # Timezone to run the container under.
-    ports:
-      - 3000:3000/tcp # Local Syncthing web interface.
-      - 22000:22000/tcp # Syncthing protocol traffic.
-      - 22000:22000/udp # Syncthing protocol traffic.
-      - 21027:21027/udp # Local autodiscovery.
     volumes:
       - ${SYNCTHING_DIRECTORY}/share:/syncthing/share # Syncthing data path, needs to be writable by 1000:1000.
       - syncthing:/syncthing/etc # Syncthing configuration volume.

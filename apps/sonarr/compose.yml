@@ -19,7 +19,7 @@ services:
       - sonarr:/sonarr/etc # Sonarr configuration/data volume.
     depends_on:
       qbittorrent:
-        condition: service_healthy # Wait for qBittorrent to become healthy before starting.
+        condition: service_started # Wait for qBittorrent to become healthy before starting.
     security_opt:
       - no-new-privileges:true
     tmpfs:

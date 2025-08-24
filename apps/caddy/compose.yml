@@ -1,7 +1,7 @@
 services:
   caddy:
     container_name: caddy
-    image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.08.12
+    image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.08.19
     env_file: ../../.env
     hostname: caddy
     restart: unless-stopped
