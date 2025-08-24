@@ -16,6 +16,7 @@ services:
       - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER:-protonvpn} # The VPN service provider to use.
       - VPN_TYPE=wireguard # Use Wireguard for VPN connections.
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY} # WireGuard private key to authenticate to the service provider with.
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on.
     networks:
       - gluetun
       - internal
