@@ -1,24 +1,46 @@
-# Artifacts, cache, logs, and temporary files
-*.log*
-*.map
+# Build and output directories.
+_site/
+.next/
+.output/
+.svelte-kit/
+**/build/
+**/dist*/
+**/out/
+coverage/
+storybook-static/
+
+# Cache directories.
+.cache/
+.parcel-cache/
+.turbo/
+.vite/
+
+# Dependency directories.
+bower_components/
+deps/
+node_modules/
+vendor/
+
+# LaTeX.
+_minted*/
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.ps
+*.synctex.gz
+
+# Lockfiles.
+bun.lock
+bun.lockb
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Other generated content.
 *.tsbuildinfo
-**/_site
-**/.astro
-**/.cache
-**/.git
-**/.jekyll-cache
-**/.next
-**/.npm
-**/.sass-cache
-**/.temp
-**/.tmp
-**/.turbo
-**/cache
-**/logs
-
-# Lockfiles
-*.lock
-*.lockb
-
-# Binaries and dependencies
-**/node_modules
+package/

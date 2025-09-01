@@ -1,0 +1,29 @@
+services:
+    picard:
+        container_name: "picard"
+        image: "mikenye/picard:2.13.3"
+        restart: "no" # Do not automatically restart Picard; run as-needed.
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        environment:
+            GROUP_ID: "${PGID}" # GID to run the container under.
+            TZ: "${TZ}" # Timezone to run the container under.
+            UMASK: "${UMASK}" # Default umask permissions to set on newly created files.
+            USER_ID: "${PUID}" # UID to run the container under.
+        networks:
+            - "media" # Internal media network.
+        ports:
+            - "${PICARD_PORT:-5800}:5800/tcp" # Picard web interface.
+        volumes:
+            - "music:/storage" # Music library.
+            - "picard:/config" # Configuration and data volume.
+
+volumes:
+    music:
+        name: "music-volume"
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}/music" # Path to the music library. *sigh* Picard is shit.
+            o: "bind"
+            type: "none"
+    picard: # Picard configuration and data volume.
+        external: true
+        name: "picard-volume"

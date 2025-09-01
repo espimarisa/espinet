@@ -1,0 +1,31 @@
+services:
+    thelounge:
+        container_name: "thelounge"
+        image: "ghcr.io/thelounge/thelounge:4"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        user: ${PUID}:${PGID} # The user to run the container under.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "15s"
+            test: ["CMD", "curl", "-f", "http://localhost:9000"]
+            timeout: "3s"
+        networks:
+            - "external" # External Caddy network.
+            - "frontend" # Internal frontend network.
+        labels:
+            caddy: "${PUBLISHED_THELOUNGE_URL}" # Tells Caddy to reverse proxy to the external The Lounge URL.
+            caddy.reverse_proxy: "thelounge:9000" # Tells Caddy to reverse proxy internal traffic on port 8096.
+            caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
+            caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
+        ports:
+            - "${THELOUNGE_PORT:-9000}:9000/tcp" # TheLounge web interface.
+        volumes:
+            - "thelounge:/var/opt/thelounge" # Configuration and data volume.
+            - "/etc/localtime:/etc/localtime:ro" # Timezone synchronization.
+volumes:
+    thelounge:
+        external: true
+        name: "thelounge-volume"

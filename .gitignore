@@ -1,74 +1,60 @@
-# Explicitly allowed files
+# Explicitly allowed files.
 !.env.example*
+!secrets.example.yml
 !bun.lock
 !bun.lockb
 
-# Other lockfiles
-package-lock.json
-pnpm-lock.yaml
-yarn.lock
-
-# Binaries and dependencies
-*.db
-*.diff
-*.sqlite3
-**/node_modules
-
-# Secrets and virtual environments
-*.env*
-*.pem
-**/credentials
-**/env
-**/venv
-
-# Artifacts, cache, logs, and temporary files
-*.bak
-*.cache
-*.cachefile
-*.log*
-*.map
-*.pid
-*.tmp
-*.tsbuildinfo
-**/_site
-**/.astro
-**/.cache
-**/.git
-**/.jekyll-cache
-**/.next
-**/.npm
-**/.sass-cache
-**/.temp
-**/.tmp
-**/.turbo
-**/cache
-**/logs
+# Cache and temporary files.
+._*
+.cache/
 *~
 
-# OS files.
-._*
-.apdisk
-.AppleDB
-.AppleDesktop
-.AppleDouble
-.com.apple.timemachine.donotpresent
+# Database files.
+*.db*
+*.sql
+*.sqlite*
+
+# Dependencies.
+node_modules/
+
+# Diff and patch files.
+*.BACKUP.*
+*.BASE.*
+*.diff
+*.LOCAL.*
+*.orig
+*.patch
+*.REMOTE.*
+
+# Logs and reports.
+*.log*
+*.pid
+*.pid.lock
+logs/
+
+# Operating system files.
+.directory
 .DocumentRevisions-V100
 .DS_Store
-.DS_Store?
-.ehthumbs_vista.db
-.ehthumbs.db
-.fseventsd/
-.fuse_hidden*
-.Icon?
-.LSOverride
+.snapshots/
 .Spotlight-V100
-.TemporaryItems/
-.Trashes/
-.VolumeIcon.icns
-*.icloud
+.Trashes
+[Dd]esktop.ini
+*.cab
 *.lnk
+*.msi
+*.msix
+*.msm
+*.msp
+*.stackdump
+*core
 $RECYCLE.BIN/
-desktop.ini
-ehthumbs.db
-Thumbs.db
-Thumbs.db:encryptable
+ehthumbs*.db
+Thumbs.db*
+
+# Secrets and environment variables.
+.env*
+*.key
+*.p12
+*.pem
+*.pfx

@@ -1,0 +1,35 @@
+services:
+    caddy:
+        container_name: "caddy"
+        image: "ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.08.19"
+        hostname: "caddy"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        depends_on:
+            cloudflare-ddns:
+                condition: "service_started" # Require cloudflare-ddns to be running before starting.
+                restart: true
+            socket-proxy:
+                condition: "service_healthy" # Require socket-proxy to be healthy before starting.
+                restart: true
+        environment:
+            CADDY_INGRESS_NETWORKS: "external" # Only proxy traffic from the external network.
+            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Scoped Cloudflare account token with DNS Zone edit permissions.
+            TZ: "${TZ}" # Timezone to run the container under.
+        networks:
+            - "external" # External network; will reverse proxy.
+        ports:
+            - "${CADDY_HTTP_PORT:-80}:80/tcp" # HTTP traffic.
+            - "${CADDY_HTTPS_PORT:-443}:443/tcp" # HTTPS traffic.
+            - "${CADDY_HTTPS_PORT:-443}:443/udp" # HTTPS/3 traffic.
+        volumes:
+            - "socket-proxy:/var/run" # Socket proxy mount.
+            - "caddy:/data" # Configuration and data volume.
+        labels:
+            caddy.acme_dns: "cloudflare ${CLOUDFLARE_API_TOKEN}" # Use Cloudflare for TLS DNS challenges.
+            caddy.email: "${ACME_EMAIL}" # Email to use for public ACME challenges.
+
+volumes:
+    caddy:
+        external: true
+        name: caddy-volume

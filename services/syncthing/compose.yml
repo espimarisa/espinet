@@ -1,0 +1,27 @@
+services:
+    syncthing:
+        container_name: "syncthing"
+        image: "ghcr.io/11notes/syncthing:2"
+        network_mode: "host" # Required for autodiscovery. Ports 3000, 22000, and 21027 must be free.
+        read_only: true # Prevents write-access to the image.
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        environment:
+            SYNCTHING_API_KEY: "${SYNCTHING_API_KEY}" # 32-character API key to use.
+            SYNCTHING_PASSWORD: "${SYNCTHING_PASSWORD}" # 32-character administrator password to use.
+            TZ: "${TZ}" # Timezone to run the container under.
+        volumes:
+            - "syncthing-data:/syncthing/share" # Stored data volume.
+            - "syncthing:/syncthing/etc" # Configuration volume.
+            - "syncthing:/syncthing/var" # Database and index volume.
+
+volumes:
+    syncthing:
+        external: true
+        name: "syncthing-volume"
+    syncthing-data:
+        name: "syncthing-data-volume"
+        driver_opts:
+            device: "${SYNCTHING_DATA_PATH}" # Root path to store Syncthing data into.
+            o: "bind"
+            type: "none"

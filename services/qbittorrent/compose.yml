@@ -1,0 +1,24 @@
+services:
+    qbittorrent:
+        container_name: "qbittorrent"
+        image: "ghcr.io/11notes/qbittorrent:5"
+        command: "--profile=/opt --confirm-legal-notice" # Shuts the annoying legal notice up.
+        network_mode: "service:gluetun" # Route all networking through Gluetun.
+        read_only: true # Prevents write-access to the image.
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        depends_on:
+            gluetun:
+                condition: "service_healthy" # Require Gluetun to be healthy before connecting.
+                restart: true
+        environment:
+            TZ: "${TZ}" # Timezone to run the container under.
+        volumes:
+            - "downloads:/downloads" # Root downloads volume.
+            - "qbittorrent:/qbittorrent/etc" # qBittorrent configuration volume.
+            - "qbittorrent:/qbittorrent/var" # qBittorrent database volume.
+
+volumes:
+    qbittorrent:
+        name: "qbittorrent-volume"
+        external: true

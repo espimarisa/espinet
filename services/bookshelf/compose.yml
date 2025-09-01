@@ -1,0 +1,28 @@
+services:
+    bookshelf:
+        container_name: "bookshelf"
+        image: "ghcr.io/pennydreadful/bookshelf:hardcover"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        environment:
+            PGID: "${PGID}" # GID to run the container under.
+            PUID: "${PUID}" # UID to run the container under.
+            TZ: "${TZ}" # Timezone to run the container under.
+            UMASK: "${UMASK}" # Default umask permissions to set on newly created files.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "15s"
+            test: ["CMD", "curl", "-f", "http://localhost:8787/health"]
+            timeout: "3s"
+        networks:
+            - "media" # Internal media network.
+        ports:
+            - "${BOOKSHELF_PORT:-8787}:8787/tcp" # Bookshelf web interface.
+        volumes:
+            - "bookshelf:/config" # Configuration and data volume.
+
+volumes:
+    bookshelf:
+        external: true
+        name: "bookshelf-volume"

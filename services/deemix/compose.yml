@@ -1,0 +1,36 @@
+services:
+    deemix:
+        container_name: "deemix"
+        image: "ghcr.io/bambanah/deemix:v4.3.5"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        environment:
+            DEEMIX_SINGLE_USER: true # Use one global user.
+            PGID: "${PGID}" # GID to run the container under.
+            PUID: "${PUID}" # UID to run the container under.
+            TZ: "${TZ}" # Timezone to run the container under.
+            UMASK_SET: "${UMASK}" # Default umask permissions to set on newly created files.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "15s"
+            test: ["CMD", "curl", "-f", "http://localhost:6595/"]
+            timeout: "3s"
+        networks:
+            - "media" # Internal media network.
+        ports:
+            - "${DEEMIX_PORT:-6595}:6595/tcp" # Deemix web interface.
+        volumes:
+            - "deemix:/config" # Configuration and data volume.
+            - "deemix-downloads:/downloads" # Root Deemix downloads volume.
+
+volumes:
+    deemix:
+        external: true
+        name: "deemix-volume"
+    deemix-downloads:
+        name: "deemix-downloads-volume"
+        driver_opts:
+            device: "${DOWNLOADS_PATH}/deemix"
+            o: "bind"
+            type: "none"

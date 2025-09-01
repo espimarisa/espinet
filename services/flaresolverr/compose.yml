@@ -1,0 +1,19 @@
+services:
+    flaresolverr:
+        container_name: "flaresolverr"
+        image: "ghcr.io/flaresolverr/flaresolverr:v3.4.0"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        user: ${PUID}:${PGID} # The user to run the container under.
+        environment:
+            TZ: "${TZ}" # Timezone to run the container under.
+        networks:
+            - "media" # Internal media network.
+        ports:
+            - "${FLARESOLVERR_PORT:-8191}:8191/tcp" # Flaresolverr API.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "15s"
+            test: ["CMD", "curl", "-f", "http://localhost:8191/health"]
+            timeout: "3s"
