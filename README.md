@@ -8,7 +8,7 @@ WIP
 
 ## Setup
 
-```sh
+```bash
 # i'm lazy and don't want to make a script right now
 # obviously replace /storage to the storage path, mine is /storage. zfs rocks 8)
 
