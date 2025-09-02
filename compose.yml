@@ -19,6 +19,7 @@ include:
     - "./services/sonarr/compose.yml" # Anime/TV series manager and PVR.
     - "./services/syncthing/compose.yml" # Cross-device file synchronization.
     - "./services/thelounge/compose.yml" # IRC client.
+    - "./services/unpackerr/compose.yml" # Automatic download extraction.
 
 networks:
     gluetun: # Network used for VPN traffic.

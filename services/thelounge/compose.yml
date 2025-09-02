@@ -9,7 +9,7 @@ services:
             interval: "1m"
             retries: "3"
             start_period: "15s"
-            test: ["CMD", "curl", "-f", "http://localhost:9000"]
+            test: ["CMD", "wget", "--spider", "http://localhost:9000"]
             timeout: "3s"
         networks:
             - "external" # External Caddy network.

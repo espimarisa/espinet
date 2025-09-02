@@ -72,18 +72,8 @@ mkdir -p /storage/downloads/sonarr
 
 ```
 
-## Backup
-
-lol
-
-## Notes
-
-This repository is mirrored to [GitHub][github] from [codeberg][codeberg].
-
 ## License
 
 [zlib][license]
 
 [license]: LICENSE.md "zlib"
-[codeberg]: https://codeberg.org/espi/net "Codeberg repository."
-[github]: https://github.com/espimarisa/homelab "GitHub repository."

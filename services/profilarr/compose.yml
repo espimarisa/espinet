@@ -13,12 +13,6 @@ services:
                 restart: true
         environment:
             TZ: "${TZ}" # Timezone to run the container under.
-        healthcheck:
-            interval: "1m"
-            retries: "3"
-            start_period: "15s"
-            test: ["CMD", "curl", "-f", "http://localhost:6868"]
-            timeout: "3s"
         networks:
             - "media" # Internal media network.
         ports:
