@@ -2,13 +2,20 @@ services:
     syncthing:
         container_name: syncthing
         image: ghcr.io/11notes/syncthing:2
-        network_mode: host # Required for autodiscovery. Ports 3000, 22000, and 21027 must be free.
         read_only: true
         restart: unless-stopped
         environment:
             SYNCTHING_API_KEY: ${SYNCTHING_API_KEY} # 32-character API key to use.
             SYNCTHING_PASSWORD: ${SYNCTHING_PASSWORD} # 32-character administrator password to use.
             TZ: ${TZ}
+        networks:
+            - frontend
+            - internal
+        ports:
+            - ${SYNCTHING_PORT}:3000/tcp # Syncthing web interface.
+            - ${SYNCTHING_TRAFFIC_PORT:-22000}:22000/tcp # Syncthing traffic, TCP.
+            - ${SYNCTHING_TRAFFIC_PORT:-22000}:22000/udp # Syncthing traffic, UDP.
+            - ${SYNCTHING_AUTODISCOVERY_PORT:-21027}:21027/udp # Syncthing autodiscovery.
         volumes:
             - syncthing-etc:/syncthing/etc # Configuration volume.
             - syncthing-share:/syncthing/share # Stored data volume.
