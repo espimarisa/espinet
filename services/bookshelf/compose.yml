@@ -15,6 +15,7 @@ services:
             - ${BOOKSHELF_PORT:-8787}:8787/tcp # Bookshelf web interface.
         volumes:
             - bookshelf:/config # Configuration and data volume.
+            - downloads:/downloads # Root downloads volume.
             - media-library:/library # Root media library volume.
         healthcheck:
             interval: 1m
