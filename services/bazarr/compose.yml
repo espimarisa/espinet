@@ -15,13 +15,6 @@ services:
         volumes:
             - bazarr:/config # Configuration and database volume.
             - media-library:/library # Root media library volume.
-        healthcheck:
-            interval: 1m
-            retries: 3
-            start_period: 15s
-            test:
-                ["CMD", "curl", "-f", "http://localhost:6767/api/system/health"]
-            timeout: 3s
         security_opt:
             - no-new-privileges:true
 
