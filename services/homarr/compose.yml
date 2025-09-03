@@ -16,12 +16,6 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock # Docker socket mount.
             - homarr:/homarr/appdata # Configuration and data volume.
-        healthcheck:
-            interval: 1m
-            retries: 3
-            start_period: 15s
-            test: ["CMD", "curl", "-f", "http://localhost:7575"]
-            timeout: 3s
         labels:
             caddy: ${PUBLISHED_HOMARR_URL} # Tells Caddy to reverse proxy to the external Homarr URL.
             caddy.reverse_proxy: homarr:7575 # Tells Caddy to reverse proxy internal traffic on port 7575.

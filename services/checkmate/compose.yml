@@ -4,13 +4,14 @@ services:
         image: ghcr.io/bluewave-labs/checkmate-backend-mono:v3.1.5
         restart: unless-stopped
         environment:
-            CLIENT_HOST: http://localhost # Checkmate client host.
+            CLIENT_HOST: https://${PUBLISHED_CHECKMATE_URL} # Checkmate client host.
             DB_CONNECTION_STRING: mongodb://checkmate-db:27017/uptime_db # Checkmate database connecton URL.
             DOCKER_HOST: tcp://socket-proxy:2375 # Connect to the Docker socket proxy.
             JWT_SECRET: ${CHECKMATE_JWT} # JWT to use to secure Checkmate.
-            UPTIME_APP_API_BASE_URL: http://localhost:52345/api/v1 # Checkmate API URL.
-            UPTIME_APP_CLIENT_HOST: http://localhost # Checkmate API host.
+            UPTIME_APP_API_BASE_URL: https://${PUBLISHED_CHECKMATE_URL}/api/v1 # Checkmate API URL.
+            UPTIME_APP_CLIENT_HOST: https://${PUBLISHED_CHECKMATE_URL} # Checkmate API host.
         networks:
+            - external
             - frontend
             - internal
         ports:
@@ -19,6 +20,12 @@ services:
             checkmate-db:
                 condition: service_healthy # Require Checkmate's database to be healthy before connecting.
                 restart: true
+        labels:
+            caddy: ${PUBLISHED_CHECKMATE_URL} # Tells Caddy to reverse proxy to the external Checkmate URL.
+            caddy.reverse_proxy: checkmate:52345 # Tells Caddy to reverse proxy internal traffic on port 52345.
+            caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
+            caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: tls1.3 # Requires clients to support TLS 1.3.
         security_opt:
             - no-new-privileges:true
 
