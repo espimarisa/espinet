@@ -10,19 +10,28 @@ services:
             SYNCTHING_PASSWORD: ${SYNCTHING_PASSWORD} # 32-character administrator password to use.
             TZ: ${TZ}
         volumes:
-            - syncthing-data:/syncthing/share # Stored data volume.
-            - syncthing:/syncthing/etc # Configuration volume.
-            - syncthing:/syncthing/var # Database and index volume.
+            - syncthing-etc:/syncthing/etc # Configuration volume.
+            - syncthing-share:/syncthing/share # Stored data volume.
+            - syncthing-var:/syncthing/var # Database and index volume.
         security_opt:
             - no-new-privileges:true
 
 volumes:
-    syncthing:
-        external: true
-        name: syncthing-volume
-    syncthing-data:
-        name: syncthing-data-volume
+    syncthing-etc:
+        name: syncthing-etc-volume
         driver_opts:
-            device: ${SYNCTHING_DATA_PATH}
+            device: ${SYNCTHING_DATA_PATH}/etc
+            o: bind
+            type: none
+    syncthing-var:
+        name: syncthing-var-volume
+        driver_opts:
+            device: ${SYNCTHING_DATA_PATH}/var
+            o: bind
+            type: none
+    syncthing-share:
+        name: syncthing-share-volume
+        driver_opts:
+            device: ${SYNCTHING_DATA_PATH}/share
             o: bind
             type: none
