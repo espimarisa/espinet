@@ -9,6 +9,7 @@ services:
         networks:
             - external
             - frontend
+            - gluetun
             - internal
             - media
         ports:

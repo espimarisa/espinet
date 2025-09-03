@@ -8,6 +8,7 @@ services:
         environment:
             TZ: ${TZ}
         networks:
+            - gluetun
             - media
         ports:
             - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.

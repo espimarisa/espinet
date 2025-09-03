@@ -8,6 +8,7 @@ services:
         environment:
             TZ: ${TZ}
         networks:
+            - gluetun
             - media
         ports:
             - ${LIDARR_PORT:-8686}:8686/tcp # Lidarr web interface.

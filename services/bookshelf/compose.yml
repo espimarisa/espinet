@@ -9,6 +9,7 @@ services:
             TZ: ${TZ}
             UMASK: ${UMASK}
         networks:
+            - gluetun
             - media
         ports:
             - ${BOOKSHELF_PORT:-8787}:8787/tcp # Bookshelf web interface.
