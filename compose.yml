@@ -2,12 +2,14 @@ include:
     - "./services/bazarr/compose.yml" # Subtitle manager.
     - "./services/bookshelf/compose.yml" # Book manager and PVR (fork of Readarr).
     - "./services/caddy/compose.yml" # Reverse proxy and web server.
+    - "./services/checkmate/compose.yml" # Uptime and server status monitoring.
     - "./services/cleanuparr/compose.yml" # 'ARR cleanup tool.
     - "./services/cloudflare-ddns/compose.yml" # Dynamic DNS updates to Cloudflare.
     - "./services/deemix/compose.yml" # Deezer download client.
     - "./services/flaresolverr/compose.yml" # Bypass Cloudflare and DDoS-Guard.
     - "./services/gluetun/compose.yml" # VPN client.
     - "./services/jellyfin/compose.yml" # Media server.
+    - "./services/homarr/compose.yml" # Homepage and analytics.
     - "./services/lidarr/compose.yml" # Music manager and PVR.
     - "./services/mam-ip-helper/compose.yml" # Automatically update linked MyAnonaMouse IP.
     - "./services/picard/compose.yml" # Music tagger; web version.
@@ -34,6 +36,10 @@ networks:
         driver: "bridge"
         external: true
         name: "frontend-network"
+    internal: # Network used for internal-only connections.
+        driver: "bridge"
+        external: true
+        name: "internal-network"
     media: # Network used for shared media stack applications.
         driver: "bridge"
         external: true

@@ -1,29 +1,30 @@
 services:
     bazarr:
-        container_name: "bazarr"
-        image: "lscr.io/linuxserver/bazarr:1.5.2"
-        restart: "unless-stopped"
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        container_name: bazarr
+        image: lscr.io/linuxserver/bazarr:1.5.2
+        restart: unless-stopped
         environment:
-            PGID: "${PGID}" # GID to run the container under.
-            PUID: "${PUID}" # UID to run the container under.
-            TZ: "${TZ}" # Timezone to run the container under.
-            UMASK: "${UMASK}" # Default umask permissions to set on newly created files.
-        healthcheck:
-            interval: "1m"
-            retries: "3"
-            start_period: "30s"
-            test: ["CMD", "curl", "-f", "http://localhost:6767/health"]
-            timeout: "3s"
+            PGID: ${PGID}
+            PUID: ${PUID}
+            TZ: ${TZ}
+            UMASK: ${UMASK}
         networks:
-            - "media" # Internal media network.
+            - media
         ports:
-            - "${BAZARR_PORT:-6767}:6767" # Bazarr web interface.
+            - ${BAZARR_PORT:-6767}:6767/tcp # Bazarr web interface.
         volumes:
-            - "bazarr:/config" # Configuration and database volume.
-            - "media-library:/library" # Root media library volume.
+            - bazarr:/config # Configuration and database volume.
+            - media-library:/library # Root media library volume.
+        healthcheck:
+            interval: 1m
+            retries: 3
+            start_period: 15s
+            test: ["CMD", "curl", "-f", "http://localhost:6767/health"]
+            timeout: 3s
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     bazarr:
         external: true
-        name: "bazarr-volume"
+        name: bazarr-volume

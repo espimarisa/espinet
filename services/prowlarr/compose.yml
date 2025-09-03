@@ -1,37 +1,38 @@
 services:
     prowlarr:
-        container_name: "prowlarr"
-        image: "ghcr.io/11notes/prowlarr:2"
-        read_only: true # Prevents write-access to the image.
-        restart: "unless-stopped"
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
-        tmpfs: "/tmp:uid=1000,gid=1000" # Required for read-only images.
+        container_name: prowlarr
+        image: ghcr.io/11notes/prowlarr:2
+        read_only: true
+        restart: unless-stopped
+        tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
+        environment:
+            TZ: ${TZ}
+        networks:
+            - media
+        ports:
+            - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
+        volumes:
+            - prowlarr:/prowlarr/etc # Configuration and data volume.
         depends_on:
             bookshelf:
-                condition: "service_healthy" # Require Bookshelf to be healthy before connecting.
+                condition: service_healthy # Require Bookshelf to be healthy before connecting.
                 restart: true
             flaresolverr:
-                condition: "service_healthy" # Require Flaresolverr to be healthy before connecting.
+                condition: service_healthy # Require Flaresolverr to be healthy before connecting.
                 restart: true
             lidarr:
-                condition: "service_healthy" # Require Lidarr to be healthy before connecting.
+                condition: service_healthy # Require Lidarr to be healthy before connecting.
                 restart: true
             radarr:
-                condition: "service_healthy" # Require Radarr to be healthy before connecting.
+                condition: service_healthy # Require Radarr to be healthy before connecting.
                 restart: true
             sonarr:
-                condition: "service_healthy" # Require Sonarr to be healthy before connecting.
+                condition: service_healthy # Require Sonarr to be healthy before connecting.
                 restart: true
-        environment:
-            TZ: "${TZ}" # Timezone to run the container under.
-        networks:
-            - "media" # Internal media network.
-        ports:
-            - "${PROWLARR_PORT:-9696}:9696/tcp" # Prowlarr web interface.
-        volumes:
-            - "prowlarr:/prowlarr/etc" # Configuration and data volume.
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     prowlarr:
         external: true
-        name: "prowlarr-volume"
+        name: prowlarr-volume

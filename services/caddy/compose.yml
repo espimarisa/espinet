@@ -1,33 +1,31 @@
 services:
     caddy:
-        container_name: "caddy"
-        image: "ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.08.19"
-        hostname: "caddy"
-        restart: "unless-stopped"
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
-        depends_on:
-            cloudflare-ddns:
-                condition: "service_started" # Require cloudflare-ddns to be running before starting.
-                restart: true
-            socket-proxy:
-                condition: "service_healthy" # Require socket-proxy to be healthy before starting.
-                restart: true
+        container_name: caddy
+        image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.02
+        restart: unless-stopped
         environment:
-            CADDY_INGRESS_NETWORKS: "external" # Only proxy traffic from the external network.
-            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Scoped Cloudflare account token with DNS Zone edit permissions.
-            TZ: "${TZ}" # Timezone to run the container under.
+            CADDY_INGRESS_NETWORKS: external # Only proxy traffic from the external network.
+            CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN} # Scoped Cloudflare account token with DNS Zone edit permissions.
+            DOCKER_HOST: tcp://socket-proxy:2375 # Connect to the Docker socket proxy.
+            TZ: ${TZ}
         networks:
-            - "external" # External network; will reverse proxy.
+            - internal
+            - external
         ports:
-            - "${CADDY_HTTP_PORT:-80}:80/tcp" # HTTP traffic.
-            - "${CADDY_HTTPS_PORT:-443}:443/tcp" # HTTPS traffic.
-            - "${CADDY_HTTPS_PORT:-443}:443/udp" # HTTPS/3 traffic.
+            - 80:80/tcp # HTTP traffic.
+            - 443:443/tcp # HTTPS traffic.
+            - 443:443/udp # HTTPS/3 traffic.
         volumes:
-            - "socket-proxy:/var/run" # Socket proxy mount.
-            - "caddy:/data" # Configuration and data volume.
+            - caddy:/data # Configuration and data volume.
+        depends_on:
+            socket-proxy:
+                condition: service_healthy # Require socket-proxy to be healthy before starting.
+                restart: true
         labels:
-            caddy.acme_dns: "cloudflare ${CLOUDFLARE_API_TOKEN}" # Use Cloudflare for TLS DNS challenges.
-            caddy.email: "${ACME_EMAIL}" # Email to use for public ACME challenges.
+            caddy.acme_dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare for TLS DNS challenges.
+            caddy.email: ${ACME_EMAIL} # Email to use for public ACME challenges.
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     caddy:

@@ -1,23 +1,24 @@
 services:
     radarr:
-        container_name: "radarr"
-        image: "ghcr.io/11notes/radarr:5"
-        read_only: true # Prevents write-access to the image.
-        restart: "unless-stopped"
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
-        tmpfs: "/tmp:uid=1000,gid=1000" # Required for read-only images.
+        container_name: radarr
+        image: ghcr.io/11notes/radarr:5
+        read_only: true
+        restart: unless-stopped
+        tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
         environment:
-            TZ: "${TZ}" # Timezone to run the container under.
+            TZ: ${TZ}
         networks:
-            - "media" # Internal media network.
+            - media
         ports:
-            - "${RADARR_PORT:-7878}:7878/tcp" # Radarr web interface.
+            - ${RADARR_PORT:-7878}:7878/tcp # Radarr web interface.
         volumes:
-            - "downloads:/downloads" # Root downloads volume.
-            - "media-library:/library" # Root media library volume.
-            - "radarr:/radarr/etc" # Configuration and data volume.
+            - downloads:/downloads # Root downloads volume.
+            - media-library:/library # Root media library volume.
+            - radarr:/radarr/etc # Configuration and data volume.
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     radarr:
         external: true
-        name: "radarr-volume"
+        name: radarr-volume

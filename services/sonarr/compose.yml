@@ -1,23 +1,24 @@
 services:
     sonarr:
-        container_name: "sonarr"
-        image: "ghcr.io/11notes/sonarr:4"
-        read_only: true # Prevents write-access to the image.
-        restart: "unless-stopped"
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
-        tmpfs: "/tmp:uid=1000,gid=1000" # Required for read-only images.
+        container_name: sonarr
+        image: ghcr.io/11notes/sonarr:4
+        read_only: true
+        restart: unless-stopped
+        tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
         environment:
-            TZ: "${TZ}" # Timezone to run the container under.
+            TZ: ${TZ}
         networks:
-            - "media" # Internal media network.
+            - media
         ports:
-            - "${SONARR_PORT:-8989}:8989/tcp" # Sonarr web interface.
+            - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.
         volumes:
-            - "downloads:/downloads" # Root downloads volume.
-            - "media-library:/library" # Root media library volume.
-            - "sonarr:/sonarr/etc" # Configuration and data volume.
+            - downloads:/downloads # Root downloads volume.
+            - media-library:/library # Root media library volume.
+            - sonarr:/sonarr/etc # Configuration and data volume.
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     sonarr:
         external: true
-        name: "sonarr-volume"
+        name: sonarr-volume

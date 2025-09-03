@@ -1,15 +1,15 @@
 services:
     mam-ip-helper:
-        container_name: "mam-ip-helper"
-        image: "tyzen9/myanonamouse-ip-helper:1.0.0"
-        network_mode: "service:gluetun" # Route all networking through Gluetun.
-        read_only: true # Prevents write-access to the image.
-        restart: "no" # Do not restart automatically.
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        container_name: mam-ip-helper
+        image: tyzen9/myanonamouse-ip-helper:1.0.0
+        network_mode: service:gluetun # Route all networking through Gluetun.
+        read_only: true
+        restart: unless-stopped
+        environment:
+            MAM_ID: ${MAM_ID} # MyAnonaMouse ID.
         depends_on:
             gluetun:
-                condition: "service_healthy" # Require Gluetun to be healthy before connecting.
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
                 restart: true
-        environment:
-            MAM_ID: "${MAM_ID}" # MyAnonaMouse ID.
-
+        security_opt:
+            - no-new-privileges:true

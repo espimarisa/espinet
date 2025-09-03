@@ -1,23 +1,24 @@
 services:
     lidarr:
-        container_name: "lidarr"
-        image: "ghcr.io/11notes/lidarr:2"
-        read_only: true # Prevents write-access to the image.
-        restart: "unless-stopped"
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
-        tmpfs: "/tmp:uid=1000,gid=1000" # Required for read-only images.
+        container_name: lidarr
+        image: ghcr.io/11notes/lidarr:2
+        read_only: true
+        restart: unless-stopped
+        tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
         environment:
-            TZ: "${TZ}" # Timezone to run the container under.
+            TZ: ${TZ}
         networks:
-            - "media" # Internal media network.
+            - media
         ports:
-            - "${LIDARR_PORT:-8686}:8686/tcp" # Lidarr web interface.
+            - ${LIDARR_PORT:-8686}:8686/tcp # Lidarr web interface.
         volumes:
-            - "downloads:/downloads" # Root downloads volume.
-            - "lidarr:/lidarr/etc" # Configuration and data volume.
-            - "media-library:/library" # Root media library volume.
+            - downloads:/downloads # Root downloads volume.
+            - lidarr:/lidarr/etc # Configuration and data volume.
+            - media-library:/library # Root media library volume.
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     lidarr:
         external: true
-        name: "lidarr-volume"
+        name: lidarr-volume

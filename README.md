@@ -2,10 +2,6 @@
 
 Compose setups, configuration files, and scripts taken from my homelab setup.
 
-## Services
-
-WIP
-
 ## Setup
 
 ```bash
@@ -17,10 +13,12 @@ docker volume create bazarr-volume
 docker volume create bookshelf-volume
 docker volume create bookshelf-volume
 docker volume create caddy-volume
+docker volume create checkmate-db-volume
 docker volume create cleanuparr-volume
 docker volume create configarr-volume
 docker volume create deemix-volume
 docker volume create gluetun-volume
+docker volume create homarr-volume
 docker volume create jellyfin-cache-volume
 docker volume create jellyfin-volume
 docker volume create lidarr-volume
@@ -38,6 +36,7 @@ docker volume create thelounge-volume
 docker network create -d bridge external-network
 docker network create -d bridge frontend-network
 docker network create -d bridge gluetun-network
+docker network create -d bridge internal-network
 docker network create -d bridge media-network
 
 # create required host directories

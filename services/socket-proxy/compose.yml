@@ -1,22 +1,25 @@
 services:
     socket-proxy:
-        container_name: "socket-proxy"
-        image: "ghcr.io/11notes/socket-proxy:2"
-        read_only: true # Prevents write-access to the image.
-        restart: "always" # Always keep the socket-proxy running.
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        container_name: socket-proxy
+        image: ghcr.io/11notes/socket-proxy:2
+        read_only: true
+        restart: unless-stopped
         user: 0:${DOCKER_PGID} # Run as the local Docker user.
         environment:
-            SOCKET_PROXY_GID: "${PGID}" # Group ID to run the container under.
-            SOCKET_PROXY_UID: "${PUID}" # User ID to run the container under.
-            TZ: "${TZ}" # Timezone to run the container under.
+            SOCKET_PROXY_GID: ${PGID}
+            SOCKET_PROXY_UID: ${PUID}
+            TZ: ${TZ}
+        networks:
+            - internal
         ports:
-            - "2375:2375/tcp" # Socket proxy networking.
+            - 2375:2375/tcp # Socket proxy networking.
         volumes:
-            - "/run/docker.sock:/run/docker.sock:ro" # Read-only access to the primary Docker socket.
-            - "socket-proxy:/run/proxy" # Socket proxy mount volume.
+            - /run/docker.sock:/run/docker.sock:ro # Read-only access to the primary Docker socket.
+            - socket-proxy:/run/proxy # Socket proxy mount volume.
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     socket-proxy:
         external: true
-        name: "socket-proxy-volume"
+        name: socket-proxy-volume

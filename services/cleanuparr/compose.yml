@@ -1,38 +1,41 @@
 services:
     cleanuparr:
-        container_name: "cleanuparr"
-        image: "ghcr.io/cleanuparr/cleanuparr:2"
-        restart: "unless-stopped"
-        security_opt: ["no-new-privileges:true"] # Prevents privilege escalation.
+        container_name: cleanuparr
+        image: ghcr.io/cleanuparr/cleanuparr:2
+        restart: unless-stopped
+        environment:
+            PGID: ${PGID}
+            PUID: ${PUID}
+            TZ: ${TZ}
+        networks:
+            - media
+        ports:
+            - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
+        volumes:
+            - cleanuparr:/config # Configuration and data volume.
         depends_on:
             bookshelf:
-                condition: "service_healthy" # Require Bookshelf to be healthy before connecting.
+                condition: service_healthy # Require Bookshelf to be healthy before connecting.
                 restart: true
             lidarr:
-                condition: "service_healthy" # Require Lidarr to be healthy before connecting.
+                condition: service_healthy # Require Lidarr to be healthy before connecting.
                 restart: true
             radarr:
-                condition: "service_healthy" # Require Radarr to be healthy before connecting.
+                condition: service_healthy # Require Radarr to be healthy before connecting.
                 restart: true
             sonarr:
-                condition: "service_healthy" # Require Sonarr to be healthy before connecting.
+                condition: service_healthy # Require Sonarr to be healthy before connecting.
                 restart: true
-        environment:
-            TZ: "${TZ}" # Timezone to run the container under.
         healthcheck:
-            interval: "1m"
-            retries: "3"
-            start_period: "15s"
+            interval: 1m
+            retries: 3
+            start_period: 15s
             test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
-            timeout: "3s"
-        networks:
-            - "media" # Internal media network.
-        ports:
-            - "${CLEANUPARR_PORT:-11011}:11011/tcp" # Cleanuparr web interface.
-        volumes:
-            - "cleanuparr:/config" # Configuration and data volume.
+            timeout: 3s
+        security_opt:
+            - no-new-privileges:true
 
 volumes:
     cleanuparr:
         external: true
-        name: "cleanuparr-volume"
+        name: cleanuparr-volume

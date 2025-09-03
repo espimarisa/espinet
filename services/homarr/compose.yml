@@ -1,0 +1,37 @@
+services:
+    homarr:
+        container_name: homarr
+        image: ghcr.io/homarr-labs/homarr:v1.35.0
+        restart: unless-stopped
+        environment:
+            SECRET_ENCRYPTION_KEY: ${HOMARR_ENCRYPTION_KEY} # Encryption key to use for Homarr.
+            TZ: ${TZ}
+        networks:
+            - external
+            - frontend
+            - internal
+            - media
+        ports:
+            - ${HOMARR_PORT:-7575}:7575/tcp # Homarr web interface.
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock # Docker socket mount.
+            - homarr:/homarr/appdata # Configuration and data volume.
+        healthcheck:
+            interval: 1m
+            retries: 3
+            start_period: 15s
+            test: ["CMD", "curl", "-f", "http://localhost:7575"]
+            timeout: 3s
+        labels:
+            caddy: ${PUBLISHED_HOMARR_URL} # Tells Caddy to reverse proxy to the external Homarr URL.
+            caddy.reverse_proxy: homarr:7575 # Tells Caddy to reverse proxy internal traffic on port 7575.
+            caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
+            caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: tls1.3 # Requires clients to support TLS 1.3.
+        security_opt:
+            - no-new-privileges:true
+
+volumes:
+    homarr:
+        external: true
+        name: homarr-volume
