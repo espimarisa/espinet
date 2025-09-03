@@ -3,7 +3,6 @@ services:
         container_name: thelounge
         image: ghcr.io/thelounge/thelounge:4
         restart: unless-stopped
-        user: ${PUID}:${PGID}
         networks:
             - external
             - frontend
