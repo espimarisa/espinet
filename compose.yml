@@ -2,7 +2,6 @@ include:
     - "./services/bazarr/compose.yml" # Subtitle manager.
     - "./services/bookshelf/compose.yml" # Book manager and PVR (fork of Readarr).
     - "./services/caddy/compose.yml" # Reverse proxy and web server.
-    - "./services/checkmate/compose.yml" # Uptime and server status monitoring.
     - "./services/cleanuparr/compose.yml" # 'ARR cleanup tool.
     - "./services/cloudflare-ddns/compose.yml" # Dynamic DNS updates to Cloudflare.
     - "./services/deemix/compose.yml" # Deezer download client.
