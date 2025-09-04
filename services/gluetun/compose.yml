@@ -20,7 +20,17 @@ services:
         networks:
             - gluetun
         ports:
+            - ${BAZARR_PORT:-6767}:6767/tcp # Bazarr web interface.
+            - ${BOOKSHELF_PORT:-8787}:8787/tcp # Bookshelf web interface.
+            - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
+            - ${DEEMIX_PORT:-6595}:6595/tcp # Deemix web interface.
+            - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr API.
+            - ${LIDARR_PORT:-8686}:8686/tcp # Lidarr web interface.
+            - ${PROFILARR_PORT:-6868}:6868/tcp # Profilarr web interface.
+            - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
             - ${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080} # qBittorrent web interface.
+            - ${RADARR_PORT:-7878}:7878/tcp # Radarr web interface.
+            - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.
         volumes:
             - gluetun:/gluetun # Configuration and data volume.
         cap_add:

@@ -9,12 +9,16 @@ services:
         networks:
             - external
             - internal
-            - media
+            - gluetun
         ports:
             - ${HOMARR_PORT:-7575}:7575/tcp # Homarr web interface.
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock # Docker socket mount.
             - homarr:/appdata # Configuration and data volume.
+        depends_on:
+            socket-proxy:
+                condition: service_healthy # Require socket-proxy to be healthy before connecting.
+                restart: true
         labels:
             caddy: ${HOMARR_URL} # Tells Caddy to reverse proxy to the external Homarr URL.
             caddy.reverse_proxy: homarr:7575 # Tells Caddy to reverse proxy internal traffic on port 7575.

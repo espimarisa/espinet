@@ -7,15 +7,15 @@ services:
             PGID: ${PGID}
             PUID: ${PUID}
             TZ: ${TZ}
-        networks:
-            - media
-        ports:
-            - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - cleanuparr:/config # Configuration and data volume.
         depends_on:
             bookshelf:
                 condition: service_healthy # Require Bookshelf to be healthy before connecting.
+                restart: true
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
                 restart: true
             lidarr:
                 condition: service_healthy # Require Lidarr to be healthy before connecting.

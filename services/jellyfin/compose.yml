@@ -14,7 +14,7 @@ services:
             UMASK: ${UMASK}
         networks:
             - external
-            - media
+            - internal
         ports:
             - ${JELLYFIN_PORT:-8096}:8096 # Jellyfin web interface.
         volumes:

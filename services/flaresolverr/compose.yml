@@ -6,10 +6,11 @@ services:
         user: ${PUID}:${PGID}
         environment:
             TZ: ${TZ}
-        networks:
-            - media
-        ports:
-            - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr API.
+        network_mode: service:gluetun # Route all networking through Gluetun.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         healthcheck:
             interval: 1m
             retries: 3

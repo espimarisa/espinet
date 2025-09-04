@@ -7,10 +7,7 @@ services:
         tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
         environment:
             TZ: ${TZ}
-        networks:
-            - media
-        ports:
-            - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - prowlarr:/prowlarr/etc # Configuration and data volume.
         depends_on:
@@ -19,6 +16,9 @@ services:
                 restart: true
             flaresolverr:
                 condition: service_healthy # Require Flaresolverr to be healthy before connecting.
+                restart: true
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
                 restart: true
             lidarr:
                 condition: service_healthy # Require Lidarr to be healthy before connecting.

@@ -36,7 +36,6 @@ docker volume create thelounge-volume
 docker network create -d bridge external-network
 docker network create -d bridge gluetun-network
 docker network create -d bridge internal-network
-docker network create -d bridge media-network
 
 # create required host directories
 mkdir -p /storage/media-library

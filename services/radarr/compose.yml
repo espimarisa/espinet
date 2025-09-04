@@ -7,14 +7,15 @@ services:
         tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
         environment:
             TZ: ${TZ}
-        networks:
-            - media
-        ports:
-            - ${RADARR_PORT:-7878}:7878/tcp # Radarr web interface.
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - downloads:/downloads # Root downloads volume.
             - media-library:/library # Root media library volume.
             - radarr:/radarr/etc # Configuration and data volume.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         security_opt:
             - no-new-privileges:true
 

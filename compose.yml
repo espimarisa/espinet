@@ -39,10 +39,6 @@ networks:
         driver: "bridge"
         external: true
         name: "internal-network"
-    media: # Network used for shared media stack applications.
-        driver: "bridge"
-        external: true
-        name: "media-network"
 
 volumes:
     downloads: # Root path to the downloads directory.

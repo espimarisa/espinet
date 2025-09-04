@@ -5,13 +5,13 @@ services:
         restart: unless-stopped
         environment:
             TZ: ${TZ}
-        networks:
-            - media
-        ports:
-            - ${PROFILARR_PORT:-6868}:6868/tcp # Profilarr web interface.
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - profilarr:/config # Configuration and data volume.
         depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
             radarr:
                 condition: service_healthy # Require Radarr to be healthy before connecting.
                 restart: true

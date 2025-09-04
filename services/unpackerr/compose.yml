@@ -11,9 +11,13 @@ services:
             UN_RADARR_0_URL: http://radarr:7878 # Primary Radarr URL.
             UN_SONARR_0_API_KEY: ${SONARR_API_KEY} # Sonarr API key.
             UN_SONARR_0_URL: http://sonarr:8989 # Primary Sonarr URL.
-        networks:
-            - media
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - downloads:/downloads # Downloads directory.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
+
         security_opt:
             - no-new-privileges:true

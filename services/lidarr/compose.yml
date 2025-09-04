@@ -7,14 +7,15 @@ services:
         tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
         environment:
             TZ: ${TZ}
-        networks:
-            - media
-        ports:
-            - ${LIDARR_PORT:-8686}:8686/tcp # Lidarr web interface.
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - downloads:/downloads # Root downloads volume.
             - lidarr:/lidarr/etc # Configuration and data volume.
             - media-library:/library # Root media library volume.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         security_opt:
             - no-new-privileges:true
 

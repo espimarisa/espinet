@@ -8,14 +8,15 @@ services:
             PUID: ${PUID}
             TZ: ${TZ}
             UMASK: ${UMASK}
-        networks:
-            - media
-        ports:
-            - ${BOOKSHELF_PORT:-8787}:8787/tcp # Bookshelf web interface.
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - bookshelf:/config # Configuration and data volume.
             - downloads:/downloads # Root downloads volume.
             - media-library:/library # Root media library volume.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         healthcheck:
             interval: 1m
             retries: 3

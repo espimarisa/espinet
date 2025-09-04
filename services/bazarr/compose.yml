@@ -8,13 +8,14 @@ services:
             PUID: ${PUID}
             TZ: ${TZ}
             UMASK: ${UMASK}
-        networks:
-            - media
-        ports:
-            - ${BAZARR_PORT:-6767}:6767/tcp # Bazarr web interface.
+        network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - bazarr:/config # Configuration and database volume.
             - media-library:/library # Root media library volume.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         security_opt:
             - no-new-privileges:true
 
