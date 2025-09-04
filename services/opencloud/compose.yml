@@ -36,6 +36,8 @@ services:
             caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
             caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
             caddy.tls.protocols: tls1.3 # Requires clients to support TLS 1.3.
+        extra_hosts:
+            - "${OC_URL}:caddy" # no idea if this works
         security_opt:
             - no-new-privileges:true
 
