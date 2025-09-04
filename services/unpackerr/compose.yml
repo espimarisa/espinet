@@ -8,9 +8,9 @@ services:
             TZ: ${TZ}
             UN_LOG_FILE: /downloads/unpackerr.log # Log file location.
             UN_RADARR_0_API_KEY: ${RADARR_API_KEY} # Radarr API key.
-            UN_RADARR_0_URL: http://radarr:7878 # Primary Radarr URL.
+            UN_RADARR_0_URL: http://localhost:7878 # Primary Radarr URL.
             UN_SONARR_0_API_KEY: ${SONARR_API_KEY} # Sonarr API key.
-            UN_SONARR_0_URL: http://sonarr:8989 # Primary Sonarr URL.
+            UN_SONARR_0_URL: http://localhost:8989 # Primary Sonarr URL.
         network_mode: service:gluetun # Route all networking through Gluetun.
         volumes:
             - downloads:/downloads # Downloads directory.
