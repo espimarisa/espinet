@@ -8,7 +8,6 @@ services:
         environment:
             TZ: ${TZ}
         networks:
-            - gluetun
             - media
         ports:
             - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.

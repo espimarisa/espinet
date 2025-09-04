@@ -9,7 +9,7 @@ services:
             UMASK: ${UMASK}
             USER_ID: ${PUID}
         networks:
-            - frontend
+            - internal
         ports:
             - ${PICARD_PORT:-5800}:5800/tcp # Picard web interface.
         volumes:

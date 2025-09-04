@@ -22,6 +22,7 @@ docker volume create homarr-volume
 docker volume create jellyfin-cache-volume
 docker volume create jellyfin-volume
 docker volume create lidarr-volume
+docker volume create opencloud-volume
 docker volume create picard-volume
 docker volume create profilarr-volume
 docker volume create prowlarr-volume
@@ -29,12 +30,10 @@ docker volume create qbittorrent-volume
 docker volume create radarr-volume
 docker volume create socket-proxy-volume
 docker volume create sonarr-volume
-docker volume create syncthing-volume
 docker volume create thelounge-volume
 
 # create required docker networks
 docker network create -d bridge external-network
-docker network create -d bridge frontend-network
 docker network create -d bridge gluetun-network
 docker network create -d bridge internal-network
 docker network create -d bridge media-network
@@ -42,7 +41,6 @@ docker network create -d bridge media-network
 # create required host directories
 mkdir -p /storage/media-library
 mkdir -p /storage/downloads
-mkdir -p /storage/syncthing
 
 # create media library directory structure
 mkdir -p /storage/media-library/anime
@@ -54,15 +52,11 @@ mkdir -p /storage/media-library/movies
 mkdir -p /storage/media-library/music
 mkdir -p /storage/media-library/tv-shows
 
-# create torrent download structure
+# create download structure
 mkdir -p /storage/downloads/torrents
-
-# create torrent subdirectories for qbittorrent backup/monitoring
 mkdir -p /storage/downloads/torrents/.dot-torrents # complete .torrent file backups
 mkdir -p /storage/downloads/torrents/.incomplete # incomplete downloads
 mkdir -p /storage/downloads/torrents/.monitored # any torrents placed here will be monitored once configured
-
-# create specific download directories
 mkdir -p /storage/downloads/bookshelf
 mkdir -p /storage/downloads/deemix
 mkdir -p /storage/downloads/lidarr

@@ -1,0 +1,51 @@
+services:
+    opencloud:
+        container_name: opencloud
+        image: opencloudeu/opencloud-rolling:3
+        command:
+            ["-c", "opencloud init --insecure true || true; opencloud server"]
+        entrypoint: "/bin/sh" #it
+        hostname: opencloud
+        restart: unless-stopped
+        environment:
+            FRONTEND_ARCHIVER_MAX_SIZE: "10000000000" # Max number of files that can be packed into an archive.
+            IDM_ADMIN_PASSWORD: ${OPENCLOUD_ADMIN_PASSWORD} # Configures the initial admin password.
+            IDM_CREATE_DEMO_USERS: false # Do not create demo users.
+            OC_INSECURE: true # Run in insecure mode; Caddy handles SSL.
+            OC_LOG_COLOR: true # Log in color.
+            OC_LOG_LEVEL: info # Log at the info level.
+            OC_LOG_PRETTY: true # Use pretty logs.
+            OC_URL: https://${OPENCLOUD_URL} # Configures the OpenCloud URL.
+            PROXY_TLS: false # Do not use SSL between the reverse proxy and OpenCloud.
+            SMTP_HOST: ${SMTP_HOST} # External SMTP host URL to connect to.
+            SMTP_INSECURE: ${SMTP_INSECURE} # If enabled, allows insecure connections to the external SMTP server.
+            SMTP_PASSWORD: ${SMTP_PASSWORD} # External SMTP email account password to login with.
+            SMTP_SENDER: ${SMTP_SENDER} # SMTP address used for sending email notifications.
+            SMTP_TRANSPORT_ENCRYPTION: ${SMTP_TRANSPORT_ENCRYPTION} # External SMTP port to connect to.
+        networks:
+            - external
+            - internal
+        ports:
+            - ${OPENCLOUD_PORT:-9200}:9200/tcp # OpenCloud web interface.
+        volumes:
+            - opencloud:/etc/opencloud # OpenCloud configuration volume.
+            - opencloud-data:/var/lib/opencloud # OpenCloud data volume.
+        labels:
+            caddy: ${OPENCLOUD_URL} # Tells Caddy to reverse proxy to the external OpenCloud URL.
+            caddy.reverse_proxy: opencloud:9200 # Tells Caddy to reverse proxy internal traffic on port 9200.
+            caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
+            caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: tls1.3 # Requires clients to support TLS 1.3.
+        security_opt:
+            - no-new-privileges:true
+
+volumes:
+    opencloud:
+        name: opencloud-volume
+        external: true
+    opencloud-data:
+        name: opencloud-data-volume
+        driver_opts:
+            device: ${OPENCLOUD_PATH}
+            o: bind
+            type: none

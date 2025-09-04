@@ -8,8 +8,6 @@ services:
             TZ: ${TZ}
         networks:
             - external
-            - frontend
-            - gluetun
             - internal
             - media
         ports:
@@ -18,7 +16,7 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock # Docker socket mount.
             - homarr:/appdata # Configuration and data volume.
         labels:
-            caddy: ${PUBLISHED_HOMARR_URL} # Tells Caddy to reverse proxy to the external Homarr URL.
+            caddy: ${HOMARR_URL} # Tells Caddy to reverse proxy to the external Homarr URL.
             caddy.reverse_proxy: homarr:7575 # Tells Caddy to reverse proxy internal traffic on port 7575.
             caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
             caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.

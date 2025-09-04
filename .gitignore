@@ -1,9 +1,3 @@
-# Explicitly allowed files.
-!.env.example*
-!secrets.example.yml
-!bun.lock
-!bun.lockb
-
 # Cache and temporary files.
 ._*
 .cache/
@@ -58,3 +52,8 @@ Thumbs.db*
 *.p12
 *.pem
 *.pfx
+
+# Explicitly allowed files.
+!.env.example
+!bun.lock
+!bun.lockb

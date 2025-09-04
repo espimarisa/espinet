@@ -6,27 +6,17 @@ services:
         devices:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
-            # WIREGUARD_ENDPOINT_PORT: ${WIREGUARD_ENDPOINT_PORT} # Optional target VPN server port number to use.
             BLOCK_MALICIOUS: off # Disable malicious content blocking; cuts memory usage significantly.
-            DOT_PROVIDERS: quad9 # Use Quad9 as a DOT provider.
             FIREWALL_OUTBOUND_SUBNETS: ${FIREWALL_OUTBOUND_SUBNETS} # List of subnets able to access the container network.
-            HEALTH_VPN_DURATION_ADDITION: 10s # Additional duration to set for the VPN healthcheck.
-            HEALTH_VPN_DURATION_INITIAL: 30s # Initial duration to wait for the VPN to be ready before restarting it.
             PGID: ${PGID}
             PORT_FORWARD_ONLY: ${PORT_FORWARD_ONLY} # If true, only connect to servers with port forwarding enabled.
             PUID: ${PUID}
-            SERVER_CITIES: ${SERVER_CITIES} # List of cities provided by the VPN service provider to connect to.
             SERVER_COUNTRIES: ${SERVER_COUNTRIES} # List of countries provided by the VPN service provider to connect to.
             UPDATER_PERIOD: 24h # Updates the server list every 24 hours.
-            VERSION_INFORMATION: off # Disables version information in logs.
-            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
             VPN_PORT_FORWARDING: ${VPN_PORT_FORWARDING} # If set to on, enables port forwarding.
             VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER} # Sets the VPN service provider to use.
             VPN_TYPE: wireguard # Use Wireguard as the VPN protocol.
-            WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES} # IP network addresses provided by the VPN service provider to connect to.
-            WIREGUARD_ENDPOINT_IP: ${WIREGUARD_ENDPOINT_IP} # Optional target VPN server IP address to use.
             WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY} # Base58 private Wireguard key provided by the VPN service provider.
-            WIREGUARD_PUBLIC_KEY: ${WIREGUARD_PUBLIC_KEY} # Base58 public Wireguard key provided by the VPN service provider.
         networks:
             - gluetun
         ports:

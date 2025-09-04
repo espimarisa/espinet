@@ -5,7 +5,7 @@ services:
         restart: unless-stopped
         networks:
             - external
-            - frontend
+            - internal
         ports:
             - ${THELOUNGE_PORT:-9000}:9000/tcp # TheLounge web interface.
         volumes:
@@ -18,7 +18,7 @@ services:
             test: ["CMD", "wget", "--spider", "http://localhost:9000"]
             timeout: 3s
         labels:
-            caddy: ${PUBLISHED_THELOUNGE_URL} # Tells Caddy to reverse proxy to the external The Lounge URL.
+            caddy: ${THELOUNGE_URL} # Tells Caddy to reverse proxy to the external The Lounge URL.
             caddy.reverse_proxy: thelounge:9000 # Tells Caddy to reverse proxy internal traffic on port 8096.
             caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
             caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.

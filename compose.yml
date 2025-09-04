@@ -11,6 +11,7 @@ include:
     - "./services/homarr/compose.yml" # Homepage and analytics.
     - "./services/lidarr/compose.yml" # Music manager and PVR.
     - "./services/mam-ip-helper/compose.yml" # Automatically update linked MyAnonaMouse IP.
+    - "./services/opencloud/compose.yml" # Web cloud.
     - "./services/picard/compose.yml" # Music tagger; web version.
     - "./services/profilarr/compose.yml" # 'ARR profile manager.
     - "./services/prowlarr/compose.yml" # 'ARR indexer manager.
@@ -18,7 +19,6 @@ include:
     - "./services/radarr/compose.yml" # Movie manager and PVR.
     - "./services/socket-proxy/compose.yml" # Proxy wrapper around the Docker socket for security.
     - "./services/sonarr/compose.yml" # Anime/TV series manager and PVR.
-    - "./services/syncthing/compose.yml" # Cross-device file synchronization.
     - "./services/thelounge/compose.yml" # IRC client.
     - "./services/unpackerr/compose.yml" # Automatic download extraction.
 

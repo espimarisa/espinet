@@ -9,7 +9,7 @@ services:
         environment:
             CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
             EMOJI: false # Disable emoji inside of log files.
-            IP4_DOMAINS: ${CLOUDFLARE_DOMAINS} # List of domains to add/update A records for.
+            DOMAINS: ${DOMAINS} # List of domains to add/update A records for.
             PROXIED: true # Enable proxying service traffic through Cloudflare.
             TZ: ${TZ}
             UPDATE_CRON: "@every 24h" # Checks for an updated IP address every 24 hours.
