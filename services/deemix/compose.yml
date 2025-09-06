@@ -1,38 +1,48 @@
 services:
     deemix:
-        container_name: deemix
-        image: ghcr.io/bambanah/deemix:v4.3.5
-        restart: unless-stopped
+        container_name: "deemix"
+        image: "ghcr.io/bambanah/deemix:latest"
+        hostname: "deemix"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         environment:
             DEEMIX_SINGLE_USER: true # Use one global user.
-            PGID: ${PGID}
-            PUID: ${PUID}
-            TZ: ${TZ}
-            UMASK_SET: ${UMASK}
-        network_mode: service:gluetun # Route all networking through Gluetun.
-        volumes:
-            - deemix:/config # Configuration and data volume.
-            - deemix-downloads:/downloads # Root Deemix downloads volume.
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
+            PGID: "${PGID}" # Group ID to run the container as.
+            PUID: "${PUID}" # User ID to run the container as.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            UMASK_SET: "${UMASK}" # Default umask permissions to apply to newly created files.
         healthcheck:
-            interval: 1m
-            retries: 3
-            start_period: 15s
+            interval: "1m"
+            retries: "3"
+            start_period: "30s"
             test: ["CMD", "curl", "-f", "http://localhost:6595/"]
-            timeout: 3s
-        security_opt:
-            - no-new-privileges:true
+            timeout: "3s"
+        networks:
+            - "frontend" # Local frontend network.
+            - "media" # Media stack network.
+        ports:
+            - "${DEEMIX_PORT:-6595}:6595/tcp" # Local web interface.
+        volumes:
+            - "deemix:/config" # Configuration and data volume.
+            - "deemix-downloads:/downloads" # Root Deemix downloads volume.
+
+networks:
+    frontend:
+        driver: "bridge"
+        external: "true"
+        name: "frontend-network"
+    media:
+        driver: "bridge"
+        external: "true"
+        name: "media-network"
 
 volumes:
     deemix:
-        external: true
-        name: deemix-volume
+        external: "true"
+        name: "deemix-volume"
     deemix-downloads:
-        name: deemix-downloads-volume
+        name: "deemix-downloads-volume"
         driver_opts:
-            device: ${DOWNLOADS_PATH}/deemix
-            o: bind
-            type: none
+            device: "${DOWNLOADS_PATH}/deemix"
+            o: "bind"
+            type: "none"

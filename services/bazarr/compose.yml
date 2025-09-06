@@ -1,25 +1,31 @@
 services:
     bazarr:
-        container_name: bazarr
-        image: lscr.io/linuxserver/bazarr:1.5.2
-        restart: unless-stopped
+        container_name: "bazarr"
+        image: "lscr.io/linuxserver/bazarr:latest"
+        hostname: "bazarr"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         environment:
-            PGID: ${PGID}
-            PUID: ${PUID}
-            TZ: ${TZ}
-            UMASK: ${UMASK}
-        network_mode: service:gluetun # Route all networking through Gluetun.
+            PGID: "${PGID}" # Group ID to run the container as.
+            PUID: "${PUID}" # User ID to run the container as.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
+        networks:
+            - "frontend" # Local frontend network.
+            - "media" # Media stack network.
+        ports:
+            - "${BAZARR_PORT:-6767}:6767/tcp" # Local web interface.
         volumes:
-            - bazarr:/config # Configuration and database volume.
-            - media-library:/library # Root media library volume.
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
-        security_opt:
-            - no-new-privileges:true
+            - "bazarr:/config" # Configuration and database volume.
+            - "media-library:/library" # Root downloads volume.
 
 volumes:
     bazarr:
-        external: true
-        name: bazarr-volume
+        external: "true"
+        name: "bazarr-volume"
+    media-library:
+        name: "media-library-volume"
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}" # Root media library path.
+            o: "bind"
+            type: "none"

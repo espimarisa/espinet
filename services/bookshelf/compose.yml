@@ -1,32 +1,48 @@
 services:
     bookshelf:
-        container_name: bookshelf
-        image: ghcr.io/pennydreadful/bookshelf:hardcover
-        restart: unless-stopped
+        container_name: "bookshelf"
+        image: "ghcr.io/pennydreadful/bookshelf:hardcover"
+        hostname: "bookshelf"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         environment:
-            PGID: ${PGID}
-            PUID: ${PUID}
-            TZ: ${TZ}
-            UMASK: ${UMASK}
-        network_mode: service:gluetun # Route all networking through Gluetun.
+            PGID: "${PGID}" # Group ID to run the container as.
+            PUID: "${PUID}" # User ID to run the container as.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
+        networks:
+            - "frontend" # Local frontend network.
+            - "media" # Media stack network.
+        ports:
+            - "${BOOKSHELF_PORT:-8787}:8787/tcp" # Local web interface.
         volumes:
-            - bookshelf:/config # Configuration and data volume.
-            - downloads:/downloads # Root downloads volume.
-            - media-library:/library # Root media library volume.
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
-        healthcheck:
-            interval: 1m
-            retries: 3
-            start_period: 15s
-            test: ["CMD", "curl", "-f", "http://localhost:8787/health"]
-            timeout: 3s
-        security_opt:
-            - no-new-privileges:true
+            - "downloads:/downloads" # Root downloads directory volume.
+            - "media-library:/library" # Root media library volume.
+            - "bookshelf:/config" # Configuration and data volume.
+
+networks:
+    frontend:
+        driver: "bridge"
+        external: "true"
+        name: "frontend-network"
+    media:
+        driver: "bridge"
+        external: "true"
+        name: "media-network"
 
 volumes:
+    downloads:
+        name: "downloads-volume"
+        driver_opts:
+            device: "${DOWNLOADS_PATH}" # Root downloads directory path.
+            o: "bind"
+            type: "none"
+    media-library:
+        name: "media-library-volume"
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}" # Root media library path.
+            o: "bind"
+            type: "none"
     bookshelf:
-        external: true
-        name: bookshelf-volume
+        external: "true"
+        name: "bookshelf-volume"

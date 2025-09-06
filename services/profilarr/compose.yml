@@ -1,27 +1,30 @@
 services:
     profilarr:
-        container_name: profilarr
-        image: santiagosayshey/profilarr:v1.1.3
-        restart: unless-stopped
+        container_name: "profilarr"
+        image: "santiagosayshey/profilarr:latest"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         environment:
-            TZ: ${TZ}
-        network_mode: service:gluetun # Route all networking through Gluetun.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+        networks:
+            - "frontend" # Local frontend network.
+            - "media" # Media stack network.
+        ports:
+            - "${PROFILARR_PORT:-6868}:6868/tcp" # Local web interface.
         volumes:
-            - profilarr:/config # Configuration and data volume.
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
-            radarr:
-                condition: service_healthy # Require Radarr to be healthy before connecting.
-                restart: true
-            sonarr:
-                condition: service_healthy # Require Sonarr to be healthy before connecting.
-                restart: true
-        security_opt:
-            - no-new-privileges:true
+            - "profilarr:/config" # Configuration and data volume.
 
 volumes:
     profilarr:
-        external: true
-        name: profilarr-volume
+        external: "true"
+        name: "profilarr-volume"
+
+networks:
+    frontend:
+        driver: "bridge"
+        external: "true"
+        name: "frontend-network"
+    media:
+        driver: "bridge"
+        external: "true"
+        name: "media-network"

@@ -1,25 +1,48 @@
 services:
     lidarr:
-        container_name: lidarr
-        image: ghcr.io/11notes/lidarr:2
-        read_only: true
-        restart: unless-stopped
-        tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
+        container_name: "lidarr"
+        image: "ghcr.io/hotio/lidarr:pr-plugins"
+        hostname: "lidarr"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         environment:
-            TZ: ${TZ}
-        network_mode: service:gluetun # Route all networking through Gluetun.
+            PGID: "${PGID}" # Group ID to run the container as.
+            PUID: "${PUID}" # User ID to run the container as.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
+        networks:
+            - "frontend" # Local frontend network.
+            - "media" # Media stack network.
+        ports:
+            - "${LIDARR_PORT:-8989}:8989/tcp" # Local web interface.
         volumes:
-            - downloads:/downloads # Root downloads volume.
-            - lidarr:/lidarr/etc # Configuration and data volume.
-            - media-library:/library # Root media library volume.
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
-        security_opt:
-            - no-new-privileges:true
+            - "downloads:/downloads" # Root downloads directory volume.
+            - "media-library:/library" # Root media library volume.
+            - "lidarr:/config" # Configuration and data volume.
+
+networks:
+    frontend:
+        driver: "bridge"
+        external: "true"
+        name: "frontend-network"
+    media:
+        driver: "bridge"
+        external: "true"
+        name: "media-network"
 
 volumes:
+    downloads:
+        name: "downloads-volume"
+        driver_opts:
+            device: "${DOWNLOADS_PATH}" # Root downloads directory path.
+            o: "bind"
+            type: "none"
+    media-library:
+        name: "media-library-volume"
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}" # Root media library path.
+            o: "bind"
+            type: "none"
     lidarr:
-        external: true
-        name: lidarr-volume
+        external: "true"
+        name: "lidarr-volume"

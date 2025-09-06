@@ -1,38 +1,23 @@
 services:
     prowlarr:
-        container_name: prowlarr
-        image: ghcr.io/11notes/prowlarr:2
-        read_only: true
-        restart: unless-stopped
-        tmpfs: /tmp:uid=1000,gid=1000 # Required for read-only images.
-        environment:
-            TZ: ${TZ}
-        network_mode: service:gluetun # Route all networking through Gluetun.
-        volumes:
-            - prowlarr:/prowlarr/etc # Configuration and data volume.
+        container_name: "prowlarr"
+        image: "lscr.io/linuxserver/prowlarr:latest"
+        network_mode: "service:gluetun" # Route all networking through Gluetun.
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         depends_on:
-            bookshelf:
-                condition: service_healthy # Require Bookshelf to be healthy before connecting.
-                restart: true
-            flaresolverr:
-                condition: service_healthy # Require Flaresolverr to be healthy before connecting.
-                restart: true
             gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
-            lidarr:
-                condition: service_healthy # Require Lidarr to be healthy before connecting.
-                restart: true
-            radarr:
-                condition: service_healthy # Require Radarr to be healthy before connecting.
-                restart: true
-            sonarr:
-                condition: service_healthy # Require Sonarr to be healthy before connecting.
-                restart: true
-        security_opt:
-            - no-new-privileges:true
+                condition: "service_healthy" # Require Gluetun to be healthy before connecting.
+                restart: "true"
+        environment:
+            PGID: "${PGID}" # Group ID to run the container as.
+            PUID: "${PUID}" # User ID to run the container as.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
+        volumes:
+            - "prowlarr:/config" # Configuration and data volume.
 
 volumes:
     prowlarr:
-        external: true
-        name: prowlarr-volume
+        external: "true"
+        name: "prowlarr-volume"

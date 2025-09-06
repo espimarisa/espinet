@@ -1,25 +1,49 @@
 services:
     socket-proxy:
-        container_name: socket-proxy
-        image: ghcr.io/11notes/socket-proxy:2
-        read_only: true
+        container_name: "socket-proxy"
+        image: "lscr.io/linuxserver/socket-proxy:latest"
+        hostname: "socket-proxy"
+        read_only: "true"
         restart: unless-stopped
-        user: 0:${DOCKER_PGID} # Run as the local Docker user.
+        security_opt: ["no-new-privileges:true"]
         environment:
-            SOCKET_PROXY_GID: ${PGID}
-            SOCKET_PROXY_UID: ${PUID}
-            TZ: ${TZ}
+            ALLOW_START: "1" # Allow starting containers.
+            ALLOW_STOP: "1" # Allow stopping containers.
+            ALLOW_RESTARTS: "1" # Allow restarting containers.
+            AUTH: "0" # Disable auth endpoint.
+            BUILD: "0" # Disable build endpoint.
+            COMMIT: "0" # Disable commit endpoint.
+            CONFIGS: "0" # Disable configs endpoint.
+            CONTAINERS: "0" # Disable containers endpoint.
+            DISABLE_IPV6: "1" # Disable IPV6 binding.
+            DISTRIBUTION: "0" # Disable distribution endpoint.
+            EVENTS: "1" # Allow event logging.
+            EXEC: "0" # Disable exec endpoint.
+            IMAGES: "0" # Disable images endpoint.
+            INFO: "0" # Disable info endpoint.
+            LOG_LEVEL: info # Use info logging level.
+            NETWORKS: "0" # Disable networks endpoint.
+            NODES: "0" # Disable nodes endpoint.
+            PING: "1" # Enable ping endpoint.
+            PLUGINS: "0" # Disable plugins endpoint.
+            POST: "0" # Disable POST requests.
+            SECRETS: "0" # Disable secrets endpoint.
+            SERVICES: "0" # Disable services endpoint.
+            SESSION: "0" # Disable session endpoint.
+            SWARM: "0" # Disable swarm endpoint.
+            SYSTEM: "0" # Disable system endpoint.
+            TASKS: "0" # Disable tasks endpoint.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            VERSION: "1" # Enable version endpoint.
+            VOLUMES: "0" # Disable volume endpoint.
         networks:
-            - internal
-        ports:
-            - 2375:2375/tcp # Socket proxy networking.
+            - "internal" # Internal-only traffic network.
         volumes:
-            - /run/docker.sock:/run/docker.sock:ro # Read-only access to the primary Docker socket.
-            - socket-proxy:/run/proxy # Socket proxy mount volume.
-        security_opt:
-            - no-new-privileges:true
+            - /var/run/docker.sock:/var/run/docker.sock:ro # Read-only Docker socket mount.
+        tmpfs: /run # Required for read_only image.
 
-volumes:
-    socket-proxy:
-        external: true
-        name: socket-proxy-volume
+networks:
+    internal:
+        driver: "bridge"
+        external: "true"
+        name: "internal-network"

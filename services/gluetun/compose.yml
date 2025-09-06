@@ -1,45 +1,41 @@
 services:
     gluetun:
-        container_name: gluetun
-        image: ghcr.io/qdm12/gluetun:v3
-        restart: unless-stopped
+        container_name: "gluetun"
+        image: "ghcr.io/qdm12/gluetun:latest"
+        cap_add: ["NET_ADMIN"]
+        hostname: "gluetun"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         devices:
-            - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
+            - "/dev/net/tun:/dev/net/tun" # TUN/TAP device passthrough.
         environment:
-            BLOCK_MALICIOUS: off # Disable malicious content blocking; cuts memory usage significantly.
-            FIREWALL_OUTBOUND_SUBNETS: ${FIREWALL_OUTBOUND_SUBNETS} # List of subnets able to access the container network.
-            PGID: ${PGID}
-            PORT_FORWARD_ONLY: ${PORT_FORWARD_ONLY} # If true, only connect to servers with port forwarding enabled.
-            PUID: ${PUID}
-            SERVER_COUNTRIES: ${SERVER_COUNTRIES} # List of countries provided by the VPN service provider to connect to.
-            UPDATER_PERIOD: 24h # Updates the server list every 24 hours.
-            VPN_PORT_FORWARDING: ${VPN_PORT_FORWARDING} # If set to on, enables port forwarding.
-            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
-            VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER} # Sets the VPN service provider to use.
-            VPN_TYPE: wireguard # Use Wireguard as the VPN protocol.
-            WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY} # Base58 private Wireguard key provided by the VPN service provider.
+            BLOCK_MALICIOUS: "off" # Disable malicious content blocking; cuts memory usage significantly.
+            FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of subnets able to access the container network.
+            PGID: "${PGID}" # Group ID to run the container as.
+            PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY}" # If true, only connect to servers with port forwarding enabled.
+            PUID: "${PUID}"
+            SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # List of countries provided by the VPN service provider to connect to.
+            UPDATER_PERIOD: "24h" # Updates the server list every 24 hours.
+            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'"" # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
+            VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING}" # If set to on, enables port forwarding.
+            VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # Sets the VPN service provider to use.
+            VPN_TYPE: "wireguard" # Use Wireguard as the VPN protocol.
+            WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # Base58 private Wireguard key provided by the VPN service provider.
         networks:
-            - gluetun
+            - gluetun # Gluetun VPN network.
         ports:
-            - ${BAZARR_PORT:-6767}:6767/tcp # Bazarr web interface.
-            - ${BOOKSHELF_PORT:-8787}:8787/tcp # Bookshelf web interface.
-            - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
-            - ${DEEMIX_PORT:-6595}:6595/tcp # Deemix web interface.
-            - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr API.
-            - ${LIDARR_PORT:-8686}:8686/tcp # Lidarr web interface.
-            - ${PROFILARR_PORT:-6868}:6868/tcp # Profilarr web interface.
-            - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
-            - ${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080} # qBittorrent web interface.
-            - ${RADARR_PORT:-7878}:7878/tcp # Radarr web interface.
-            - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.
+            - "${PROWLARR_PORT:-9696}:9696/tcp" # Prowlarr web interface.
+            - "${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080}/tcp" # qBittorrent web interface.
         volumes:
-            - gluetun:/gluetun # Configuration and data volume.
-        cap_add:
-            - NET_ADMIN
-        security_opt:
-            - no-new-privileges:true
+            - "gluetun:/gluetun" # Configuration and data volume.
+
+networks:
+    gluetun:
+        driver: "bridge"
+        external: "true"
+        name: "gluetun-network"
 
 volumes:
     gluetun:
-        name: gluetun-volume
-        external: true
+        name: "gluetun-volume"
+        external: "true"

@@ -1,25 +1,32 @@
 services:
     qbittorrent:
-        container_name: qbittorrent
-        image: ghcr.io/11notes/qbittorrent:5
-        command: --profile=/opt --confirm-legal-notice # Shuts the annoying legal notice up.
-        network_mode: service:gluetun # Route all networking through Gluetun.
-        read_only: true
-        restart: unless-stopped
-        environment:
-            TZ: ${TZ}
-        volumes:
-            - downloads:/downloads # Root downloads volume.
-            - qbittorrent:/qbittorrent/etc # qBittorrent configuration volume.
-            - qbittorrent:/qbittorrent/var # qBittorrent database volume.
+        container_name: "qbittorrent"
+        image: "lscr.io/linuxserver/qbittorrent:latest"
+        network_mode: "service:gluetun" # Route all networking through Gluetun.
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         depends_on:
             gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
-        security_opt:
-            - no-new-privileges:true
+                condition: "service_healthy" # Require Gluetun to be healthy before connecting.
+                restart: "true"
+        environment:
+            DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent.
+            PGID: "${PGID}" # Group ID to run the container as.
+            PUID: "${PUID}" # User ID to run the container as.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
+            WEBUI_PORT: "${QBITTORRENT_PORT:-8080}" # Configures the web interface port.
+        volumes:
+            - "downloads:/downloads" # Root downloads volume.
+            - "qbittorrent:/config" # qBittorrent configuration volume.
 
 volumes:
+    downloads:
+        name: "downloads-volume"
+        driver_opts:
+            device: "${DOWNLOADS_PATH}" # Root downloads directory path.
+            o: "bind"
+            type: "none"
     qbittorrent:
-        name: qbittorrent-volume
-        external: true
+        name: "qbittorrent-volume"
+        external: "true"

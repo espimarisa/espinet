@@ -1,45 +1,57 @@
 services:
     jellyfin:
-        container_name: jellyfin
-        image: lscr.io/linuxserver/jellyfin:10.10.7
-        restart: unless-stopped
+        container_name: "jellyfin"
+        image: "lscr.io/linuxserver/jellyfin:latest"
+        hostname: "jellyfin"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         devices:
-            - /dev/dri/renderD128:/dev/dri/renderD128 # Video device passthrough, /dev/dri/renderD128 is usually GPU0.
+            - "/dev/dri:/dev/dri" # Video device passthrough, /dev/dri/renderD128 is usually GPU0.
         environment:
             DOCKER_MODS: "linuxserver/mods:jellyfin-opencl-intel|ghcr.io/intro-skipper/intro-skipper-docker-mod:latest" # Intel OpenCL + Intro Skipper.
-            JELLYFIN_PublishedServerUrl: https://${JELLYFIN_URL} # Configures autodiscovery.
-            PGID: ${PGID}
-            PUID: ${PUID}
-            TZ: ${TZ}
-            UMASK: ${UMASK}
-        networks:
-            - external
-            - internal
-        ports:
-            - ${JELLYFIN_PORT:-8096}:8096 # Jellyfin web interface.
-        volumes:
-            - media-library:/library:ro # Root media library volume, read-only.
-            - jellyfin-cache:/config/cache # Jellyfin cache volume.
-            - jellyfin:/config # Jellyfin configuration and database volume.
+            JELLYFIN_PublishedServerUrl: "https://${JELLYFIN_URL}" # Configures autodiscovery.
+            PGID: "${PGID}" # Group ID to run the container as.
+            PUID: "${PUID}" # User ID to run the container as.
+            TZ: "${TZ}" # Timezone to configure the container to use.
+            UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
         healthcheck:
-            interval: 1m
-            retries: 3
-            start_period: 30s
+            interval: "1m"
+            retries: "3"
+            start_period: "1m"
             test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
-            timeout: 3s
+            timeout: "3s"
         labels:
-            caddy: ${JELLYFIN_URL} # Tells Caddy to reverse proxy to the external Jellyfin URL.
-            caddy.reverse_proxy: jellyfin:8096 # Tells Caddy to reverse proxy internal traffic on port 8096.
-            caddy.tls.ca: https://acme.zerossl.com/v2/DV90 # Use ZeroSSL as the CA issuer.
-            caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
-            caddy.tls.protocols: tls1.3 # Requires clients to support TLS 1.3.
-        security_opt:
-            - no-new-privileges:true
+            caddy: "${JELLYFIN_URL}" # Tells Caddy to reverse proxy to the external Jellyfin URL.
+            caddy.reverse_proxy: "jellyfin:8096" # Tells Caddy to reverse proxy internal traffic on port 8096.
+            caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
+            caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
+        networks:
+            - "external" # External caddy network.
+            - "media" # Media stack network.
+        ports:
+            - "${JELLYFIN_PORT:-8096}:8096" # Local web interface.
+        volumes:
+            - "media-library:/library:ro" # Root media library volume, read-only.
+            - "jellyfin:/config" # Configuration and database volume.
+
+networks:
+    external:
+        driver: "bridge"
+        external: "true"
+        name: "external-network"
+    media:
+        driver: "bridge"
+        external: "true"
+        name: "media-network"
 
 volumes:
     jellyfin:
-        external: true
-        name: jellyfin-volume
-    jellyfin-cache:
-        external: true
-        name: jellyfin-cache-volume
+        external: "true"
+        name: "jellyfin-volume"
+    media-library:
+        name: "media-library-volume"
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}" # Root media library path.
+            o: "bind"
+            type: "none"

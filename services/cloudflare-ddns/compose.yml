@@ -1,19 +1,17 @@
 services:
     cloudflare-ddns:
-        container_name: cloudflare-ddns
-        image: favonia/cloudflare-ddns:1
-        network_mode: host
-        read_only: true
-        restart: unless-stopped
-        user: ${PUID}:${PGID}
+        container_name: "cloudflare-ddns"
+        image: "favonia/cloudflare-ddns:1"
+        cap_drop: ["ALL"]
+        network_mode: "host"
+        read_only: "true"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
+        user: "${PUID}:${PGID}"
         environment:
             CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN} # A scoped Cloudflare account token with DNS Zone edit permissions.
-            EMOJI: false # Disable emoji inside of log files.
-            DOMAINS: ${DOMAINS} # List of domains to add/update A records for.
-            PROXIED: false # Disable proxying service traffic through Cloudflare.
-            TZ: ${TZ}
+            DOMAINS: "${DOMAINS}" # List of domains to add/update A records for.
+            EMOJI: "false" # Disable emoji inside of log files.
+            PROXIED: "false" # Disable proxying service traffic through Cloudflare.
+            TZ: "${TZ}"
             UPDATE_CRON: "@every 24h" # Checks for an updated IP address every 24 hours.
-        cap_drop:
-            - ALL
-        security_opt:
-            - no-new-privileges:true

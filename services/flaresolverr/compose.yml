@@ -1,21 +1,26 @@
 services:
     flaresolverr:
         container_name: flaresolverr
-        image: ghcr.io/flaresolverr/flaresolverr:v3.4.0
-        restart: unless-stopped
-        user: ${PUID}:${PGID}
-        environment:
-            TZ: ${TZ}
-        network_mode: service:gluetun # Route all networking through Gluetun.
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
+        image: "ghcr.io/flaresolverr/flaresolverr:latest"
+        restart: "unless-stopped"
+        user: "${PUID}:${PGID}"
+        hostname: "flaresolverr"
+        security_opt: ["no-new-privileges:true"]
         healthcheck:
-            interval: 1m
-            retries: 3
-            start_period: 15s
+            interval: "1m"
+            retries: "3"
+            start_period: "30s"
             test: ["CMD", "curl", "-f", "http://localhost:8191/health"]
-            timeout: 3s
-        security_opt:
-            - no-new-privileges:true
+            timeout: "3s"
+        environment:
+            TZ: "${TZ}" # Timezone to configure the container to use.
+        networks:
+            - "media" # Media stack network.
+        ports:
+            - "${FLARESOLVERR_PORT:-8191}:8191/tcp" # Local API.
+
+networks:
+    media:
+        driver: "bridge"
+        external: "true"
+        name: "media-network"

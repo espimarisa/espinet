@@ -1,33 +1,43 @@
 services:
     caddy:
-        container_name: caddy
-        image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.02
-        restart: unless-stopped
-        environment:
-            CADDY_INGRESS_NETWORKS: external # Only proxy traffic from the external network.
-            CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN} # Scoped Cloudflare account token with DNS Zone edit permissions.
-            DOCKER_HOST: tcp://socket-proxy:2375 # Connect to the Docker socket proxy.
-            TZ: ${TZ}
-        networks:
-            - internal
-            - external
-        ports:
-            - 80:80/tcp # HTTP traffic.
-            - 443:443/tcp # HTTPS traffic.
-            - 443:443/udp # HTTPS/3 traffic.
-        volumes:
-            - caddy:/data # Configuration and data volume.
+        container_name: "caddy"
+        image: "ghcr.io/homeall/caddy-reverse-proxy-cloudflare:latest"
+        hostname: "caddy"
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
         depends_on:
             socket-proxy:
-                condition: service_healthy # Require socket-proxy to be healthy before starting.
-                restart: true
+                condition: "service_started" # Require socket-proxy to be running before starting.
+                restart: "true"
+        environment:
+            CADDY_INGRESS_NETWORKS: "external" # Only proxy traffic from the external network.
+            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Scoped Cloudflare account token with DNS Zone edit permissions.
+            DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
+            TZ: "${TZ}" # Timezone to configure the container to use.
         labels:
-            caddy.acme_dns: cloudflare ${CLOUDFLARE_API_TOKEN} # Use Cloudflare for TLS DNS challenges.
-            caddy.email: ${ACME_EMAIL} # Email to use for public ACME challenges.
-        security_opt:
-            - no-new-privileges:true
+            caddy.acme_dns: "cloudflare ${CLOUDFLARE_API_TOKEN}" # Use Cloudflare for TLS DNS challenges.
+            caddy.email: "${ACME_EMAIL}" # Email to use for ACME challenges.
+        networks:
+            - "external" # External Caddy network.
+            - "internal" # Internal traffic network.
+        ports:
+            - "443:443/tcp" # HTTPS traffic.
+            - "443:443/udp" # HTTPS/3 traffic.
+            - "80:80/tcp" # HTTP traffic.
+        volumes:
+            - "caddy:/data" # Configuration and data volume.
+
+networks:
+    external:
+        driver: "bridge"
+        external: "true"
+        name: "external-network"
+    internal:
+        driver: "bridge"
+        external: "true"
+        name: "internal-network"
 
 volumes:
     caddy:
-        external: true
-        name: caddy-volume
+        external: "true"
+        name: "caddy-volume"
