@@ -30,7 +30,7 @@ services:
             SECRETS: "0" # Disable secrets endpoint.
             SERVICES: "1" # Allow services endpoint.
             SESSION: "0" # Disable session endpoint.
-            SWARM: "0" # Disable swarm endpoint.
+            SWARM: "1" # Enable swarm endpoint.
             SYSTEM: "0" # Disable system endpoint.
             TASKS: "0" # Disable tasks endpoint.
             TZ: "${TZ}" # Timezone to configure the container to use.
