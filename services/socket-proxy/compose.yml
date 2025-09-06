@@ -14,7 +14,7 @@ services:
             BUILD: "0" # Disable build endpoint.
             COMMIT: "0" # Disable commit endpoint.
             CONFIGS: "0" # Disable configs endpoint.
-            CONTAINERS: "0" # Disable containers endpoint.
+            CONTAINERS: "1" # Allow containers endpoint.
             DISABLE_IPV6: "1" # Disable IPV6 binding.
             DISTRIBUTION: "0" # Disable distribution endpoint.
             EVENTS: "1" # Allow event logging.
@@ -22,13 +22,13 @@ services:
             IMAGES: "0" # Disable images endpoint.
             INFO: "0" # Disable info endpoint.
             LOG_LEVEL: info # Use info logging level.
-            NETWORKS: "0" # Disable networks endpoint.
+            NETWORKS: "1" # Allow networks endpoint.
             NODES: "0" # Disable nodes endpoint.
             PING: "1" # Enable ping endpoint.
             PLUGINS: "0" # Disable plugins endpoint.
             POST: "0" # Disable POST requests.
             SECRETS: "0" # Disable secrets endpoint.
-            SERVICES: "0" # Disable services endpoint.
+            SERVICES: "1" # Allow services endpoint.
             SESSION: "0" # Disable session endpoint.
             SWARM: "0" # Disable swarm endpoint.
             SYSTEM: "0" # Disable system endpoint.
