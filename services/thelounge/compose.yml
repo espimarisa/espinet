@@ -36,5 +36,8 @@ networks:
 
 volumes:
     thelounge:
-        external: "true"
         name: "thelounge-volume"
+        driver_opts:
+            device: "${THELOUNGE_PATH}" # Root The Lounge data path.
+            o: "bind"
+            type: "none"

@@ -21,7 +21,6 @@ docker volume create prowlarr-volume
 docker volume create qbittorrent-volume
 docker volume create radarr-volume
 docker volume create sonarr-volume
-docker volume create thelounge-volume
 
 # create required docker networks
 docker network create -d bridge external-network
@@ -33,6 +32,7 @@ docker network create -d bridge media-network
 # create persistent config directories
 mkdir -p /storage/homarr
 mkdir -p /storage/opencloud
+mkdir -p /storage/thelounge
 
 # create media library directory structure
 mkdir -p /storage/media-library
