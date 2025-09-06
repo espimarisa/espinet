@@ -2,7 +2,6 @@ services:
     homarr:
         container_name: "homarr"
         image: "ghcr.io/homarr-labs/homarr:latest"
-        hostname: "homarr"
         restart: "unless-stopped"
         security_opt: ["no-new-privileges:true"]
         depends_on:
