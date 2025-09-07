@@ -18,9 +18,3 @@ services:
             timeout: "3s"
         environment:
             TZ: "${TZ}" # Timezone to configure the container to use.
-
-networks:
-    media:
-        driver: "bridge"
-        external: "true"
-        name: "media-network"
