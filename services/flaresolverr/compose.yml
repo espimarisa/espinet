@@ -5,7 +5,6 @@ services:
         network_mode: "service:gluetun" # Route all networking through Gluetun.
         restart: "unless-stopped"
         user: "${PUID}:${PGID}"
-        hostname: "flaresolverr"
         security_opt: ["no-new-privileges:true"]
         depends_on:
             gluetun:
