@@ -7,6 +7,10 @@ services:
         user: "${PUID}:${PGID}"
         hostname: "flaresolverr"
         security_opt: ["no-new-privileges:true"]
+        depends_on:
+            gluetun:
+                condition: "service_healthy" # Require Gluetun to be healthy before connecting.
+                restart: "true"
         healthcheck:
             interval: "1m"
             retries: "3"
@@ -15,8 +19,6 @@ services:
             timeout: "3s"
         environment:
             TZ: "${TZ}" # Timezone to configure the container to use.
-        ports:
-            - "${FLARESOLVERR_PORT:-8191}:8191/tcp" # Local API.
 
 networks:
     media:

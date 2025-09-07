@@ -27,6 +27,7 @@ services:
         networks:
             - gluetun # Gluetun VPN network.
         ports:
+            - "${FLARESOLVERR_PORT:-8191}:8191/tcp" # Flaresolverr API.
             - "${PROWLARR_PORT:-9696}:9696/tcp" # Prowlarr web interface.
             - "${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080}/tcp" # qBittorrent web interface.
         volumes:
