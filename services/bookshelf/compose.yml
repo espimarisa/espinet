@@ -18,6 +18,7 @@ services:
             timeout: "3s"
         networks:
             - "frontend" # Local frontend network.
+            - "gluetun" # Gluetun VPN network.
             - "media" # Media stack network.
         ports:
             - "${BOOKSHELF_PORT:-8787}:8787/tcp" # Local web interface.
@@ -31,6 +32,10 @@ networks:
         driver: "bridge"
         external: "true"
         name: "frontend-network"
+    gluetun:
+        driver: "bridge"
+        external: "true"
+        name: "gluetun-network"
     media:
         driver: "bridge"
         external: "true"
