@@ -9,14 +9,17 @@ services:
         devices:
             - "/dev/net/tun:/dev/net/tun" # TUN/TAP device passthrough.
         environment:
-            BLOCK_MALICIOUS: "off" # Disable malicious content blocking; cuts memory usage significantly.
+            BLOCK_MALICIOUS: "off" # https://github.com/TechHutTV/homelab/tree/main/media#reduce-gluetun-ram-usage
+            DNS_ADDRESS: "9.9.9.9" # Use Quad9.
+            DOT_PROVIDERS: "quad9" # Use Quad9.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of subnets able to access the container network.
+            HEALTH_VPN_DURATION_INITIAL: "120s" # Give gluetun a few more minutes to connect.
             PGID: "${PGID}" # Group ID to run the container as.
             PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY}" # If true, only connect to servers with port forwarding enabled.
             PUID: "${PUID}"
             SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # List of countries provided by the VPN service provider to connect to.
             UPDATER_PERIOD: "24h" # Updates the server list every 24 hours.
-            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'"" # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
+            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'sleep 15; wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'"" # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
             VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING}" # If set to on, enables port forwarding.
             VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # Sets the VPN service provider to use.
             VPN_TYPE: "wireguard" # Use Wireguard as the VPN protocol.

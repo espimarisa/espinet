@@ -36,6 +36,12 @@ services:
             TZ: "${TZ}" # Timezone to configure the container to use.
             VERSION: "1" # Enable version endpoint.
             VOLUMES: "0" # Disable volume endpoint.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "15s"
+            test: ["CMD", "wget", "--spider", "http://127.0.0.1:2375/_ping"]
+            timeout: "3s"
         networks:
             - "internal" # Internal-only traffic network.
         volumes:

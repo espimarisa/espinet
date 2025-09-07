@@ -17,8 +17,8 @@ services:
         healthcheck:
             interval: "1m"
             retries: "3"
-            start_period: "1m"
-            test: ["CMD", "curl", "-f", "http://localhost:8096/health"]
+            start_period: "30s"
+            test: ["CMD", "curl", "-f", "http://127.0.0.1:8096/health"]
             timeout: "3s"
         labels:
             caddy: "${JELLYFIN_URL}" # Tells Caddy to reverse proxy to the external Jellyfin URL.

@@ -33,6 +33,10 @@ docker network create -d bridge media-network
 mkdir -p /storage/homarr
 mkdir -p /storage/opencloud
 mkdir -p /storage/thelounge
+mkdir -p /storage/snapp
+
+# create empty db
+touch /storage/snapp/db.sqlite
 
 # create media library directory structure
 mkdir -p /storage/media-library

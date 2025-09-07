@@ -24,6 +24,7 @@ services:
         networks:
             - "external" # External caddy network.
             - "frontend" # Local frontend network.
+            - "gluetun" # Gluetun VPN network.
             - "internal" # Internal-only network.
         ports:
             - "${HOMARR_PORT:-7575}:7575/tcp" # Local web interface.
@@ -39,10 +40,14 @@ networks:
         driver: "bridge"
         external: "true"
         name: "frontend-network"
-    internal:
+    gluetun:
         driver: "bridge"
         external: "true"
-        name: "internal-network"
+        name: "gluetun-network"
+    media:
+        driver: "bridge"
+        external: "true"
+        name: "media-network"
 
 volumes:
     homarr-appdata:

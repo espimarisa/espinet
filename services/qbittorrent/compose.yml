@@ -16,6 +16,12 @@ services:
             TZ: "${TZ}" # Timezone to configure the container to use.
             UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
             WEBUI_PORT: "${QBITTORRENT_PORT:-8080}" # Configures the web interface port.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "1m"
+            test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/"]
+            timeout: "3s"
         volumes:
             - "downloads:/downloads" # Root downloads volume.
             - "qbittorrent:/config" # qBittorrent configuration volume.

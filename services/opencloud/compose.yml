@@ -17,15 +17,20 @@ services:
             OC_LOG_PRETTY: "true" # Use pretty logs.
             OC_URL: "https://${OPENCLOUD_URL}" # Configures the OpenCloud URL.
             PROXY_TLS: "false" # Do not use SSL between the reverse proxy and OpenCloud.
-            NOTIFICATIONS_SMTP_AUTHENTICATION: "${SMTP_AUTHENTICATION}" #  SMTP email authentication type.
-            NOTIFICATIONS_SMTP_ENCRYPTION: "${SMTP_TRANSPORT_ENCRYPTION}" # External SMTP port to connect to.
-            NOTIFICATIONS_SMTP_HOST: "${SMTP_HOST}" # External SMTP host URL to connect to.
-            NOTIFICATIONS_SMTP_INSECURE: "${SMTP_INSECURE}" # If enabled, allows insecure connections to the external SMTP server.
-            NOTIFICATIONS_SMTP_PASSWORD: "${SMTP_PASSWORD}" # External SMTP email account password to login with.
-            NOTIFICATIONS_SMTP_PORT: "${SMTP_PORT}" # External SMTP port to connect to.
-            NOTIFICATIONS_SMTP_SENDER: "${SMTP_SENDER}" # SMTP address used for sending email notifications.
-            NOTIFICATIONS_SMTP_USERNAME: "${SMTP_USERNAME}" # External SMTP email account username to login with.
+            SMTP_TRANSPORT_ENCRYPTION: "${SMTP_TRANSPORT_ENCRYPTION}" # External SMTP port to connect to.
+            SMTP_HOST: "${SMTP_HOST}" # External SMTP host URL to connect to.
+            SMTP_INSECURE: "${SMTP_INSECURE}" # If enabled, allows insecure connections to the external SMTP server.
+            SMTP_PASSWORD: "${SMTP_PASSWORD}" # External SMTP email account password to login with.
+            SMTP_PORT: "${SMTP_PORT}" # External SMTP port to connect to.
+            SMTP_SENDER: "${SMTP_SENDER}" # SMTP address used for sending email notifications.
+            SMTP_USERNAME: "${SMTP_USERNAME}" # External SMTP email account username to login with.
             START_ADDITIONAL_SERVICES: "notifications" # Additional services to start.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "15s"
+            test: ["CMD", "wget", "--spider", "http://127.0.0.1:9200"]
+            timeout: "3s"
         labels:
             caddy: "${OPENCLOUD_URL}" # Tells Caddy to reverse proxy to the external OpenCloud URL.
             caddy.reverse_proxy: "opencloud:9200" # Tells Caddy to reverse proxy internal traffic on port 9200.

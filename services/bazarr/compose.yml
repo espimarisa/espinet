@@ -10,6 +10,12 @@ services:
             PUID: "${PUID}" # User ID to run the container as.
             TZ: "${TZ}" # Timezone to configure the container to use.
             UMASK: "${UMASK}" # Default umask permissions to apply to newly created files.
+        healthcheck:
+            interval: "1m"
+            retries: "3"
+            start_period: "15s"
+            test: ["CMD", "curl", "-f", "http://127.0.0.1:6767/"]
+            timeout: "3s"
         networks:
             - "frontend" # Local frontend network.
             - "media" # Media stack network.

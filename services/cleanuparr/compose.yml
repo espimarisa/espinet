@@ -9,14 +9,9 @@ services:
             PGID: "${PGID}" # Group ID to run the container as.
             PUID: "${PUID}" # User ID to run the container as.
             TZ: "${TZ}" # Timezone to configure the container to use.
-        healthcheck:
-            interval: "1m"
-            retries: "3"
-            start_period: "30s"
-            test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
-            timeout: "3s"
         networks:
             - "frontend" # Local frontend network.
+            - "gluetun" # Gluetun VPN network.
             - "media" # Media stack network.
         ports:
             - "${CLEANUPARR_PORT:-11011}:11011/tcp" # Local web interface.
@@ -28,11 +23,14 @@ networks:
         driver: "bridge"
         external: "true"
         name: "frontend-network"
+    gluetun:
+        driver: "bridge"
+        external: "true"
+        name: "gluetun-network"
     media:
         driver: "bridge"
         external: "true"
         name: "media-network"
-
 volumes:
     cleanuparr:
         external: "true"
