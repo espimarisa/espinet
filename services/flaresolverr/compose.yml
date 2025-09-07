@@ -2,6 +2,7 @@ services:
     flaresolverr:
         container_name: flaresolverr
         image: "ghcr.io/flaresolverr/flaresolverr:latest"
+        network_mode: "service:gluetun" # Route all networking through Gluetun.
         restart: "unless-stopped"
         user: "${PUID}:${PGID}"
         hostname: "flaresolverr"
@@ -14,8 +15,6 @@ services:
             timeout: "3s"
         environment:
             TZ: "${TZ}" # Timezone to configure the container to use.
-        networks:
-            - "media" # Media stack network.
         ports:
             - "${FLARESOLVERR_PORT:-8191}:8191/tcp" # Local API.
 
