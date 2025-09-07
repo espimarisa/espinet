@@ -14,7 +14,7 @@ services:
             interval: "1m"
             retries: "3"
             start_period: "15s"
-            test: ["CMD", "curl", "-f", "http://127.0.0.1:9000/ping"]
+            test: ["CMD", "curl", "-f", "http://127.0.0.1:9000"]
             timeout: "3s"
         labels:
             caddy: "${THELOUNGE_URL}" # Tells Caddy to reverse proxy to the external The Lounge URL.
