@@ -23,7 +23,7 @@ services:
             INFO: "0" # Disable info endpoint.
             LOG_LEVEL: info # Use info logging level.
             NETWORKS: "1" # Allow networks endpoint.
-            NODES: "0" # Disable nodes endpoint.
+            NODES: "1" # Enable nodes endpoint.
             PING: "1" # Enable ping endpoint.
             PLUGINS: "0" # Disable plugins endpoint.
             POST: "0" # Disable POST requests.
