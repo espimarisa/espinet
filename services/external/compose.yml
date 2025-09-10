@@ -187,7 +187,7 @@ services:
             interval: 1m
             retries: 3
             start_period: 1m
-            test: "curl -f http://127.0.0.1:3000/health || exit 1"
+            test: "wget --spider http://127.0.0.1:9200 || exit 1"
             timeout: 3s
         labels:
             caddy: "${OPENCLOUD_URL}" # Tells Caddy to reverse proxy to the external OpenCloud URL.
