@@ -23,8 +23,29 @@ services:
             test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/"]
             timeout: "3s"
         volumes:
+            - "gluetun:/tmp/gluetun" # Gluetun data.
             - "downloads:/downloads" # Root downloads volume.
             - "qbittorrent:/config" # qBittorrent configuration volume.
+
+    qbittorrent-port-manager:
+        container_name: qbittorrent-port-manager
+        image: jopiermeier/gluetun-qbittorrent-port-manager:latest
+        network_mode: "service:gluetun" # Route all networking through Gluetun.
+        restart: "unless-stopped"
+        security_opt: ["no-new-privileges:true"]
+        read_only: true
+        depends_on:
+            gluetun:
+                condition: "service_healthy" # Require Gluetun to be healthy before connecting.
+                restart: "true"
+            qbittorrent:
+                condition: "service_started" # Require qBittorrent to be started before connecting.
+                restart: "true"
+        environment:
+            QBITTORRENT_USER: "${QBITTORRENT_USER}"
+            QBITTORRENT_PASS: "${QBITTORRENT_PASS}"
+        volumes:
+            - "gluetun:/tmp/gluetun" # Gluetun data.
 
 volumes:
     downloads:
