@@ -12,7 +12,7 @@ services:
         restart: unless-stopped
         depends_on:
             socket-proxy:
-                condition: service_started # Require socket-proxy to be running before starting.
+                condition: service_healthy # Require socket-proxy to be healthy before starting.
                 restart: true
         environment:
             CADDY_INGRESS_NETWORKS: "external" # Only handle traffic from the external network.
@@ -93,9 +93,12 @@ services:
             SECRETS: "0" # Disable secrets endpoint.
             SERVICES: "1" # Enable services endpoint.
             SESSION: "0" # Disable session endpoint.
-            SWARM: "0" # Disable swarm endpoint.
+            SWARM: "1" # Enable swarm endpoint.
+            SYSTEM: "0" # Disable system endpoint.
+            TASKS: "0" # Disable tasks endpoint.
             TZ: "${TZ}" # Local timezone to use.
             VERSION: "1" # Enable version endpoint.
+            VOLUMES: "0" # Disable volume endpoint.
         healthcheck:
             interval: 1m
             retries: 3
@@ -135,7 +138,7 @@ services:
             timeout: 3s
         labels:
             caddy: "${JELLYFIN_URL}" # Tells Caddy to reverse proxy to the external Jellyfin URL.
-            caddy.reverse_proxy: "{{upstreams 8096}}" # Tells Caddy to reverse proxy internal traffic on port 8096.
+            caddy.reverse_proxy: "jellyfin:8096" # Tells Caddy to reverse proxy internal traffic on port 8096.
             caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
             caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
             caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
@@ -188,7 +191,7 @@ services:
             timeout: 3s
         labels:
             caddy: "${OPENCLOUD_URL}" # Tells Caddy to reverse proxy to the external OpenCloud URL.
-            caddy.reverse_proxy: "{{upstreams 9200}}" # Tells Caddy to reverse proxy internal traffic on port 9200.
+            caddy.reverse_proxy: "opencloud:9200" # Tells Caddy to reverse proxy internal traffic on port 9200.
             caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
             caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
             caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
@@ -238,7 +241,7 @@ services:
             timeout: 3s
         labels:
             caddy: "${SNAPP_URL}" # Tells Caddy to reverse proxy to the external The Lounge URL.
-            caddy.reverse_proxy: "{{upstreams 3000}}" # Tells Caddy to reverse proxy internal traffic on port 3000.
+            caddy.reverse_proxy: "snapp:3000" # Tells Caddy to reverse proxy internal traffic on port 3000.
             caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
             caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
             caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
@@ -274,7 +277,7 @@ services:
             timeout: 3s
         labels:
             caddy: "${THELOUNGE_URL}" # Tells Caddy to reverse proxy to the external The Lounge URL.
-            caddy.reverse_proxy: "{{upstreams 9000}}" # Tells Caddy to reverse proxy internal traffic on port 9000.
+            caddy.reverse_proxy: "thelounge:9000" # Tells Caddy to reverse proxy internal traffic on port 9000.
             caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
             caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
             caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
@@ -293,7 +296,6 @@ networks:
         name: external-network # $ docker network create external-network
     socket-proxy:
         external: true
-        internal: true
         name: socket-proxy-network # $ docker network create socket-proxy-network
 
 volumes:
