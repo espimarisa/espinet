@@ -15,7 +15,7 @@ services:
                 condition: service_started # Require socket-proxy to be running before starting.
                 restart: true
         environment:
-            CADDY_INGRESS_NETWORKS: "caddy" # Only handle traffic from the caddy network.
+            CADDY_INGRESS_NETWORKS: "external" # Only handle traffic from the external network.
             CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Scoped Cloudflare account token with DNS Zone edit permissions.
             DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the Caddy socket proxy.
             TZ: "${TZ}" # Local timezone to use.
