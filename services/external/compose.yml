@@ -86,16 +86,16 @@ services:
             INFO: "0" # Disable info endpoint.
             LOG_LEVEL: info # Use info logging level.
             NETWORKS: "1" # Allow networks endpoint.
-            NODES: "0" # Disable nodes endpoint.
+            NODES: "1" # Enable nodes endpoint.
             PING: "1" # Enable ping endpoint.
             PLUGINS: "0" # Disable plugins endpoint.
             POST: "0" # Disable POST requests.
             SECRETS: "0" # Disable secrets endpoint.
-            SERVICES: "0" # Disable services endpoint.
+            SERVICES: "1" # Enable services endpoint.
             SESSION: "0" # Disable session endpoint.
             SWARM: "0" # Disable swarm endpoint.
             TZ: "${TZ}" # Local timezone to use.
-            VERSION: "0" # Disable version endpoint.
+            VERSION: "1" # Enable version endpoint.
         healthcheck:
             interval: 1m
             retries: 3
