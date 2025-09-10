@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Creates the required networks.
-docker network create caddy-network
+docker network create external-network
 docker network create socket-proxy-network
 
 # Creates the required volumes.
