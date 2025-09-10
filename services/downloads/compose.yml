@@ -120,14 +120,13 @@ services:
                 condition: service_healthy # Require qBittorrent to be healthy before connecting.
                 restart: true
         environment:
-            PORT_FILE_PATH: "/gluetun/forwarded_port" # Use /gluetun/forwarded_port.
             QBITTORRENT_PASS: "${QBITTORRENT_PASS}" # Configured qBittorrent web interface password.
             QBITTORRENT_USER: "${QBITTORRENT_USER:-admin}" # Configured qBittorrent web interface username.
             TZ: "${TZ}" # Local timezone to use.
         security_opt:
             - no-new-privileges:true
         volumes:
-            - gluetun:/gluetun # Gluetun configuration volume.
+            - gluetun:/tmp/gluetun # Gluetun configuration volume.
 
     ###############################################################################################
     # Deemix: Deezer music download client.                                                       #
