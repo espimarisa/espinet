@@ -1,24 +1,3 @@
 include:
-    - "./services/bazarr/compose.yml" # Subtitle manager.
-    - "./services/bookshelf/compose.yml" # Book manager and PVR (fork of Readarr).
-    - "./services/caddy/compose.yml" # Reverse proxy and web server.
-    - "./services/cleanuparr/compose.yml" # 'ARR cleanup tool.
-    - "./services/cloudflare-ddns/compose.yml" # Dynamic DNS updates to Cloudflare.
-    - "./services/deemix/compose.yml" # Deezer download client.
-    - "./services/flaresolverr/compose.yml" # Bypass Cloudflare and DDoS-Guard.
-    - "./services/gluetun/compose.yml" # VPN client.
-    - "./services/homarr/compose.yml" # Homepage and analytics.
-    - "./services/jellyfin/compose.yml" # Media server.
-    - "./services/lidarr/compose.yml" # Music manager and PVR.
-    - "./services/mam-ip-helper/compose.yml" # Automatically update linked MyAnonaMouse IP.
-    - "./services/opencloud/compose.yml" # Web cloud.
-    - "./services/picard/compose.yml" # Music tagger; web version.
-    - "./services/profilarr/compose.yml" # 'ARR profile manager.
-    - "./services/prowlarr/compose.yml" # 'ARR indexer manager.
-    - "./services/qbittorrent/compose.yml" # BitTorrent client.
-    - "./services/radarr/compose.yml" # Movie manager and PVR.
-    - "./services/snapp/compose.yml" # Link shortener.
-    - "./services/socket-proxy/compose.yml" # Proxy wrapper around the Docker socket for security.
-    - "./services/sonarr/compose.yml" # Anime/TV series manager and PVR.
-    - "./services/thelounge/compose.yml" # IRC client.
-    - "./services/unpackerr/compose.yml" # Automatic download extraction.
+    - "./services/downloads/compose.yml" # Downloads stack.
+    - "./services/external/compose.yml" # External stack.
