@@ -33,7 +33,7 @@ services:
             SHADOWSOCKS: "off" # Disable the built-in Shadowsocks server.
             TZ: "${TZ}" # Local timezone to use.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
-            VPN_PORT_FORWARDING_STATUS_FILE: "/tmp/gluetun/forwarded_port" # Write the current forwarded port.
+            VPN_PORT_FORWARDING_STATUS_FILE: "/gluetun/forwarded_port" # Write the current forwarded port.
             VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING}" # If on, enables P2P port forwarding.
             VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
@@ -63,7 +63,7 @@ services:
         security_opt:
             - no-new-privileges:true
         volumes:
-            - gluetun:/tmp/gluetun # Temporary Gluetun log and output directory.
+            - gluetun:/gluetun # Temporary Gluetun log and output directory.
 
     ###############################################################################################
     # qBittorrent: BitTorrent client.                                                             #
@@ -96,7 +96,7 @@ services:
             - no-new-privileges:true # Prevents privilege escalation.
         volumes:
             - downloads:/downloads # Root path to store downloaded files into.
-            - gluetun:/tmp/gluetun # Gluetun configuration volume.
+            - gluetun:/gluetun # Gluetun configuration volume.
             - qbittorrent:/config # qBittorrent configuration and database.
 
     ###############################################################################################
@@ -120,12 +120,14 @@ services:
                 condition: service_healthy # Require qBittorrent to be healthy before connecting.
                 restart: true
         environment:
+            PORT_FILE_PATH: "/gluetun/forwarded_port" # Use /gluetun/forwarded_port.
             QBITTORRENT_PASS: "${QBITTORRENT_PASS}" # Configured qBittorrent web interface password.
             QBITTORRENT_USER: "${QBITTORRENT_USER:-admin}" # Configured qBittorrent web interface username.
+            TZ: "${TZ}" # Local timezone to use.
         security_opt:
             - no-new-privileges:true
         volumes:
-            - gluetun:/tmp/gluetun # Gluetun configuration volume.
+            - gluetun:/gluetun # Gluetun configuration volume.
 
     ###############################################################################################
     # Deemix: Deezer music download client.                                                       #
