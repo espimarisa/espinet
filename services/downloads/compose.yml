@@ -74,7 +74,6 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent to /vuetorrent.
             PGID: "${PGID}" # Local group to run as.
