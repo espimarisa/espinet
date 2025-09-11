@@ -15,33 +15,21 @@ services:
         devices:
             - /dev/net/tun:/dev/net/tun # Wireguard support.
         environment:
-            BLOCK_ADS: "off" # https://github.com/qdm12/gluetun/issues/765
-            BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
-            BLOCK_SURVEILLANCE: "off" # https://github.com/qdm12/gluetun/issues/765
-            DOT: "off" # Disable DOT.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
-            HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
-            HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
-            HTTPPROXY: "off" # Disable the built-in HTTP proxy.
+            HEALTH_VPN_DURATION_INITIAL: "30s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
             PGID: "${PGID}" # Local group to run as.
             PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY:-off}" # If on, only connect to P2P servers.
             PUID: "${PUID}" # Local user to run as.
             SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # VPN server countries to connect to.
-            SHADOWSOCKS: "off" # Disable the built-in Shadowsocks server.
             TZ: "${TZ}" # Local timezone to use.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
             VPN_PORT_FORWARDING_STATUS_FILE: "/gluetun/forwarded_port" # Write the current forwarded port.
             VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING:-off}" # If on, enables P2P port forwarding.
             VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
-            WIREGUARD_PERSISTENT_KEEPALIVE: "25s" # Keep Wireguard alive a little longer.
+            WIREGUARD_PERSISTENT_KEEPALIVE: "30s" # Keep Wireguard alive a little longer.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
-        healthcheck:
-            interval: 1m
-            retries: 3
-            start_period: 30s
-            test: "ping -c 1 www.quad9.net || exit 1"
-            timeout: 3s
+            WIREGUARD_MTU: "1200" # Use a lower MTU.
         networks:
             - gluetun # Internal Gluetun network.
         ports:
