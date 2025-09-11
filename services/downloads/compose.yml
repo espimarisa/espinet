@@ -18,7 +18,7 @@ services:
             BLOCK_ADS: "off" # https://github.com/qdm12/gluetun/issues/765
             BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
             BLOCK_SURVEILLANCE: "off" # https://github.com/qdm12/gluetun/issues/765
-            DOT_PROVIDERS: "quad9" # Use Quad9 for DOT; Cloudflare introduces weird issues.
+            DOT: "off" # Disable DOT.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
@@ -34,8 +34,8 @@ services:
             VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING:-off}" # If on, enables P2P port forwarding.
             VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
-            WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
             WIREGUARD_PERSISTENT_KEEPALIVE: "25s" # Keep Wireguard alive a little longer.
+            WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
         healthcheck:
             interval: 1m
             retries: 3
