@@ -49,7 +49,7 @@ services:
         cap_drop:
             - ALL
         environment:
-            CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN} # Scoped Cloudflare account token with DNS Zone edit permissions.
+            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Scoped Cloudflare account token with DNS Zone edit permissions.
             DOMAINS: "${DOMAINS}" # List of domains to update DNS records for.
             EMOJI: "false" # Disable emoji inside of log files.
             PROXIED: "false" # Disable proxying service traffic through Cloudflare.
@@ -225,13 +225,12 @@ services:
             ENABLE_SIGNUP: "false" # Do not allow public signups.
             ENABLED_MFA: "true" # Require MFA for all users.
             ORIGIN: "https://${SNAPP_URL}" # Configure the origin URL to be the published external URL.
-            PORT: ${SNAPP_PORT:-3000} # Configures the port to use.
             PUBLIC_URL: "https://${SNAPP_URL}" # Configures the public URL to be the published external URL.
-            SMTP_FROM: ${SMTP_SENDER} # External email server sender.
-            SMTP_HOST: ${SMTP_HOST} # External email server host.
-            SMTP_PASS: ${SMTP_PASSWORD} # External email server password.
-            SMTP_PORT: ${SMTP_PORT} # External email server port.
-            SMTP_USER: ${SMTP_USERNAME} # External email server username.
+            SMTP_FROM: "${SMTP_SENDER}" # External email server sender.
+            SMTP_HOST: "${SMTP_HOST}" # External email server host.
+            SMTP_PASS: "${SMTP_PASSWORD}" # External email server password.
+            SMTP_PORT: "${SMTP_PORT}" # External email server port.
+            SMTP_USER: "${SMTP_USERNAME}" # External email server username.
             TOKEN_SECRET: "${SNAPP_SECRET}" # Configures the secret to use.
         healthcheck:
             interval: 1m
