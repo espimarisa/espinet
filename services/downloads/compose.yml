@@ -6,7 +6,7 @@ services:
 
     gluetun:
         container_name: gluetun
-        image: ghcr.io/qdm12/gluetun:v3.39.1 # Held back due to weird ProtonVPN quirks?
+        image: ghcr.io/qdm12/gluetun:v3.39.1
         env_file: ./.env
         hostname: gluetun
         restart: unless-stopped
@@ -15,12 +15,19 @@ services:
         devices:
             - /dev/net/tun:/dev/net/tun # Wireguard support.
         environment:
+            BLOCK_ADS: "off" # https://github.com/qdm12/gluetun/issues/765
+            BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
+            BLOCK_SURVEILLANCE: "off" # https://github.com/qdm12/gluetun/issues/765
+            DOT_PROVIDERS: "quad9" # Use Quad9 for DOT; Cloudflare introduces weird issues.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
-            HEALTH_VPN_DURATION_INITIAL: "1m" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
+            HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
+            HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
+            HTTPPROXY: "off" # Disable the built-in HTTP proxy.
             PGID: "${PGID}" # Local group to run as.
             PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY:-off}" # If on, only connect to P2P servers.
             PUID: "${PUID}" # Local user to run as.
             SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # VPN server countries to connect to.
+            SHADOWSOCKS: "off" # Disable the built-in Shadowsocks server.
             TZ: "${TZ}" # Local timezone to use.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
             VPN_PORT_FORWARDING_STATUS_FILE: "/gluetun/forwarded_port" # Write the current forwarded port.
@@ -29,7 +36,6 @@ services:
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
             WIREGUARD_PERSISTENT_KEEPALIVE: "25s" # Keep Wireguard alive a little longer.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
-            WIREGUARD_MTU: "1200" # Use a lower MTU.
         networks:
             - gluetun # Internal Gluetun network.
         ports:
