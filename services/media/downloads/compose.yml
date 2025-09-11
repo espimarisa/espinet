@@ -1,0 +1,209 @@
+---
+name: media-downloads
+
+# Repeated volumes.
+x-downloads-volume: &volume-downloads downloads:/downloads # Root path to the downloads volume.
+
+# Default environment variables.
+x-defaults-env: &defaults-env
+    PGID: "${PGID}" # Local group to run as.
+    PUID: "${PUID}" # Local user to run as.
+    TZ: "${TZ}" # Local timezone to use.
+    UMASK: "${UMASK}" # Umask to apply to newly created files.
+
+# Default healthcheck options.
+x-defaults-healthcheck: &defaults-healthcheck
+    interval: 30s
+    retries: 3
+    start_period: 30s
+    timeout: 3s
+
+# Default container options.
+x-defaults: &defaults
+    restart: unless-stopped
+    env_file: ../.env
+    environment: *defaults-env
+    security_opt:
+        - no-new-privileges:true # Prevents privilege escalation.
+
+services:
+    #############################################
+    # Gluetun: VPN client.                      #
+    #############################################
+
+    gluetun:
+        <<: *defaults
+        image: ghcr.io/qdm12/gluetun:v3
+        container_name: gluetun
+        cap_add:
+            - NET_ADMIN # Required for Wireguard configuration.
+        devices:
+            - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
+        environment:
+            <<: *defaults-env
+            BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
+            DOT_PROVIDERS: "quad9" # Use Quad9 for DOT; Cloudflare introduces weird issues.
+            FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
+            HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
+            HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
+            PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY}" # If on, only connect to P2P servers.
+            SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # VPN server countries to connect to.
+            UPDATER_PERIOD: "24h" # Update server data every 24 hours.
+            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
+            VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING}" # If on, enables P2P port forwarding.
+            VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
+            VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
+            WIREGUARD_MTU: "1380" # Use a lower MTU for stability/performance.
+            WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
+        networks:
+            - gluetun # Gluetun VPN network.
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "ping www.quad9.net || exit 1"
+        ports:
+            - ${DEEMIX_PORT:-6595}:6595/tcp # Deemix port.
+            - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr server.
+            - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
+            - ${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080}/tcp # qBittorrent web interface.
+        volumes:
+            - gluetun:/gluetun # Gluetun configuration.
+
+    #############################################
+    # qBittorrent: BitTorrent client.           #
+    #############################################
+
+    qbittorrent:
+        <<: *defaults
+        image: lscr.io/linuxserver/qbittorrent:latest
+        container_name: qbittorrent
+        network_mode: service:gluetun # Route all traffic through Gluetun.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
+        environment:
+            <<: *defaults-env
+            DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent to /vuetorrent.
+            WEBUI_PORT: "${QBITTORRENT_PORT:-8080}" # Sets the web interface port.
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:${QBITTORRENT_PORT:-8080} || exit 1"
+        volumes:
+            - *volume-downloads # Root path to store downloaded files into.
+            - qbittorrent:/config # qBittorrent configuration and database.
+
+    #############################################
+    # Deemix: Deezer music downloader.          #
+    #############################################
+
+    deemix:
+        <<: *defaults
+        image: ghcr.io/bambanah/deemix:latest
+        container_name: deemix
+        network_mode: service:gluetun # Route all networking through Gluetun.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
+        environment:
+            <<: *defaults-env
+            DEEMIX_SINGLE_USER: "true" # Use one global user.
+            UMASK_SET: "${UMASK}" # Umask to apply to newly created files.
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:6595 || exit 1"
+        volumes:
+            - *volume-downloads # Root path to store downloaded files into.
+            - deemix:/config # Deemix configuration volume.
+
+    #############################################
+    # Prowlarr: Indexer and tracker manager.    #
+    #############################################
+
+    prowlarr:
+        <<: *defaults
+        image: lscr.io/linuxserver/prowlarr:latest
+        container_name: prowlarr
+        network_mode: service:gluetun # Route all networking through Gluetun.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
+        environment:
+            <<: *defaults-env
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:9696/ping || exit 1"
+        volumes:
+            - prowlarr:/config # Prowlarr configuration volume.
+
+    #############################################
+    # Flaresolverr: Bypass Cloudflare captchas. #
+    #############################################
+
+    flaresolverr:
+        <<: *defaults
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        container_name: flaresolverr
+        network_mode: service:gluetun # Route all networking through Gluetun.
+        user: ${PUID}:${PGID}
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
+        environment:
+            <<: *defaults-env
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:8191/health || exit 1"
+
+    #############################################
+    # mam-ip-helper: MyAnonaMouse IP updater.   #
+    #############################################
+
+    mam-ip-helper:
+        <<: *defaults
+        image: tyzen9/myanonamouse-ip-helper:latest
+        container_name: mam-ip-helper
+        network_mode: "service:gluetun" # Route all networking through Gluetun.
+        read_only: true
+        user: ${PUID}:${PGID}
+        cap_drop:
+            - ALL # Remove all permissions.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
+        environment:
+            MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
+
+networks:
+    gluetun:
+        external: true
+        name: gluetun-network # $ docker network create gluetun-network
+
+volumes:
+    deemix:
+        external: true
+        name: deemix-volume # $ docker volume create deemix-volume
+    gluetun:
+        external: true
+        name: gluetun-volume # $ docker volume create gluetun-volume
+    prowlarr:
+        external: true
+        name: prowlarr-volume # $ docker volume create prowlarr-volume
+    qbittorrent:
+        external: true
+        name: qbittorrent-volume # $ docker volume create qbittorrent-volume
+    downloads:
+        name: downloads-volume
+        driver_opts:
+            device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
+            o: bind
+            type: none
+    media-library:
+        name: media-library-volume
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
+            o: bind
+            type: none

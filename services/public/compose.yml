@@ -1,0 +1,128 @@
+---
+name: public
+
+x-defaults: &defaults
+    restart: unless-stopped
+    env_file: ./.env
+    security_opt:
+        - no-new-privileges:true # Prevents privilege escalation.
+
+services:
+    #############################################
+    # Caddy: Reverse proxy and web server.      #
+    #############################################
+
+    caddy:
+        <<: *defaults
+        image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:latest
+        container_name: caddy
+        hostname: caddy
+        depends_on:
+            socket-proxy:
+                condition: service_healthy # Require socket-proxy to be healthy before starting.
+                restart: true
+        environment:
+            CADDY_INGRESS_NETWORKS: "external" # Only handle traffic from the external network.
+            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Scoped Cloudflare account token with DNS Zone edit permissions.
+            DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
+            TZ: "${TZ}" # Local timezone to use.
+        labels:
+            caddy.acme_dns: "cloudflare ${CLOUDFLARE_API_TOKEN}" # Use Cloudflare for TLS DNS challenges.
+            caddy.email: "${ACME_EMAIL}" # Email to use for ACME challenges.
+        networks:
+            - external # External network; reverse proxied.
+            - socket-proxy # Internal docker socket-proxy network.
+        ports:
+            - 443:443/tcp # HTTPS traffic.
+            - 443:443/udp # HTTPS3 traffic.
+            - 80:80/tcp # HTTP traffic.
+        volumes:
+            - caddy:/data # Caddy configuration and certificates.
+
+    #############################################
+    # Cloudflare-DDNS: Auto DNS record updates. #
+    #############################################
+
+    cloudflare-ddns:
+        <<: *defaults
+        image: favonia/cloudflare-ddns:1
+        container_name: cloudflare-ddns
+        network_mode: host
+        read_only: true
+        user: ${PUID}:${PGID}
+        cap_drop:
+            - ALL
+        environment:
+            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Scoped Cloudflare account token with DNS Zone edit permissions.
+            IP4_DOMAINS: "${CLOUDFLARE_DOMAINS}" # List of domains to update DNS records for.
+            EMOJI: "false" # Disable emoji inside of log files.
+            IP6_PROVIDER: "none" # Disable IPV6.
+            PROXIED: "false" # Disable proxying service traffic through Cloudflare.
+            TZ: "${TZ}" # Local timezone to use.
+            UPDATE_CRON: "@every 1h" # Checks for an updated IP address every hour.
+
+    #############################################
+    # Socket Proxy: Docker socket proxy.        #
+    #############################################
+
+    socket-proxy:
+        <<: *defaults
+        image: lscr.io/linuxserver/socket-proxy:latest
+        container_name: socket-proxy
+        hostname: socket-proxy
+        read_only: true
+        tmpfs: /run # Required for read_only image.
+        environment:
+            ALLOW_RESTARTS: "1" # Allow restarting containers.
+            ALLOW_START: "1" # Allow starting containers.
+            ALLOW_STOP: "1" # Allow stopping containers.
+            AUTH: "0" # Disable auth endpoint.
+            BUILD: "0" # Disable build endpoint.
+            COMMIT: "0" # Disable commit endpoint.
+            CONFIGS: "0" # Disable configs endpoint.
+            CONTAINERS: "1" # Allow containers endpoint.
+            DISABLE_IPV6: "1" # Disable IPV6 binding.
+            DISTRIBUTION: "0" # Disable distribution endpoint.
+            EVENTS: "1" # Allow event logging.
+            EXEC: "0" # Disable exec endpoint.
+            IMAGES: "0" # Disable images endpoint.
+            INFO: "0" # Disable info endpoint.
+            LOG_LEVEL: info # Use info logging level.
+            NETWORKS: "1" # Allow networks endpoint.
+            NODES: "0" # Disable nodes endpoint.
+            PING: "1" # Enable ping endpoint.
+            PLUGINS: "0" # Disable plugins endpoint.
+            POST: "0" # Disable POST requests.
+            SECRETS: "0" # Disable secrets endpoint.
+            SERVICES: "1" # Enable services endpoint.
+            SESSION: "0" # Disable session endpoint.
+            SWARM: "0" # Disable swarm endpoint.
+            SYSTEM: "0" # Disable system endpoint.
+            TASKS: "0" # Disable tasks endpoint.
+            TZ: "${TZ}" # Local timezone to use.
+            VERSION: "0" # Disable version endpoint.
+            VOLUMES: "0" # Disable volume endpoint.
+        healthcheck:
+            interval: 1m
+            retries: 3
+            start_period: 15s
+            test: "wget --spider http://127.0.0.1:2375/_ping || exit 1"
+            timeout: 3s
+        networks:
+            - socket-proxy # Internal-only socket-proxy network.
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
+
+networks:
+    external:
+        external: true
+        name: external-network # $ docker network create external-network
+    socket-proxy:
+        external: true
+        internal: true
+        name: socket-proxy-network # $ docker network create socket-proxy-network
+
+volumes:
+    caddy:
+        external: true
+        name: caddy-volume # $ docker volume create caddy-volume

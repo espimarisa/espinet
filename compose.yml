@@ -1,3 +1,4 @@
 include:
-    - ./services/downloads/compose.yml # Downloads stack.
-    - ./services/external/compose.yml # External stack.
+    - ./services/cloud/compose.yml # Cloud stack.
+    - ./services/media/compose.yml # Media stack.
+    - ./services/public/compose.yml # Public stack.

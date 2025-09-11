@@ -1,0 +1,193 @@
+---
+name: media-management
+
+# Repeated volumes.
+x-downloads-volume: &volume-downloads downloads:/downloads # Root path to the downloads volume.
+x-media-library-volume: &volume-media-library media-library:/library # Root path to the downloads volume.
+
+# Default environment variables.
+x-defaults-env: &defaults-env
+    PGID: "${PGID}" # Local group to run as.
+    PUID: "${PUID}" # Local user to run as.
+    TZ: "${TZ}" # Local timezone to use.
+    UMASK: "${UMASK}" # Umask to apply to newly created files.
+
+# Default healthcheck options.
+x-defaults-healthcheck: &defaults-healthcheck
+    interval: 1m
+    retries: 3
+    start_period: 30s
+    timeout: 3s
+
+# Default container options.
+x-defaults: &defaults
+    restart: unless-stopped
+    env_file: ../.env
+    environment: *defaults-env
+    networks:
+        - media # Internal media network.
+    security_opt:
+        - no-new-privileges:true # Prevents privilege escalation.
+
+services:
+    #############################################
+    # Lidarr: Music manager and organizer.      #
+    #############################################
+
+    lidarr:
+        <<: *defaults
+        image: ghcr.io/hotio/lidarr:pr-plugins
+        container_name: lidarr
+        hostname: lidarr
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:8686/ping || exit 1"
+        ports:
+            - ${LIDARR_PORT:-8686}:8686/tcp # Lidarr web interface.
+        volumes:
+            - *volume-downloads
+            - *volume-media-library
+            - lidarr:/config # Lidarr configuration and database.
+
+    #############################################
+    # Radarr: Movie manager and PVR.            #
+    #############################################
+
+    radarr:
+        <<: *defaults
+        image: lscr.io/linuxserver/radarr:latest
+        container_name: radarr
+        hostname: radarr
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:7878/ping || exit 1"
+        ports:
+            - ${RADARR_PORT:-7878}:7878/tcp # Readarr web interface.
+        volumes:
+            - *volume-downloads
+            - *volume-media-library
+            - radarr:/config # Radarr configuration and database.
+
+    #############################################
+    # Readarr: Book manager and PVR.            #
+    #############################################
+
+    readarr:
+        <<: *defaults
+        image: ghcr.io/pennydreadful/bookshelf:hardcover
+        container_name: readarr
+        hostname: readarr
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:8787/ping || exit 1"
+        ports:
+            - ${READARR_PORT:-8787}:8787/tcp # Readarr web interface.
+        volumes:
+            - *volume-downloads
+            - *volume-media-library
+            - readarr:/config # Readarr configuration and database.
+
+    #############################################
+    # Sonarr: TV/Anime manager and PVR.         #
+    #############################################
+
+    sonarr:
+        <<: *defaults
+        image: lscr.io/linuxserver/sonarr:latest
+        container_name: sonarr
+        hostname: sonarr
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:8989/ping || exit 1"
+        ports:
+            - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.
+        volumes:
+            - *volume-downloads
+            - *volume-media-library
+            - sonarr:/config # Sonarr configuration and database.
+
+    #############################################
+    # Profilarr: Profile manager for 'ARR apps. #
+    #############################################
+
+    profilarr:
+        <<: *defaults
+        image: santiagosayshey/profilarr:latest
+        container_name: profilarr
+        hostname: profilarr
+        ports:
+            - ${PROFILARR_PORT:-6868}:6868/tcp # Profilarr web interface.
+        volumes:
+            - profilarr:/config # Profilarr configuration and database.
+
+    #############################################
+    # Cleanuparr: Automatically clean ARR apps. #
+    #############################################
+
+    cleanuparr:
+        <<: *defaults
+        image: ghcr.io/cleanuparr/cleanuparr:latest
+        container_name: cleanuparr
+        hostname: cleanuparr
+        ports:
+            - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
+        volumes:
+            - cleanuparr:/config # Cleanuparr configuration and database.
+
+    #############################################
+    # Unpackerr: Automatic download extraction. #
+    #############################################
+
+    unpackerr:
+        <<: *defaults
+        image: ghcr.io/unpackerr/unpackerr:latest
+        container_name: unpackerr
+        networks:
+            - media # Internal media network.
+        restart: unless-stopped
+        environment:
+            <<: *defaults-env
+            UN_LOG_FILE: "/downloads/unpackerr.log" # Log file location.
+            UN_RADARR_0_API_KEY: "${RADARR_API_KEY}" # Radarr API key.
+            UN_RADARR_0_URL: "http://localhost:7878" # Primary Radarr URL.
+            UN_SONARR_0_API_KEY: "${SONARR_API_KEY}" # Sonarr API key.
+            UN_SONARR_0_URL: "http://localhost:8989" # Primary Sonarr URL.
+        volumes:
+            - *volume-downloads # Root path to store downloaded files into.
+
+networks:
+    media:
+        external: true
+        name: media-network # $ docker network create media-network
+
+volumes:
+    lidarr:
+        external: true
+        name: lidarr-volume # $ docker volume create lidarr-volume
+    radarr:
+        external: true
+        name: radarr-volume # $ docker volume create radarr-volume
+    readarr:
+        external: true
+        name: readarr-volume # $ docker volume create readarr-volume
+    sonarr:
+        external: true
+        name: sonarr-volume # $ docker volume create sonarr-volume
+    profilarr:
+        external: true
+        name: profilarr-volume # $ docker volume create profilarr-volume
+    cleanuparr:
+        external: true
+        name: cleanuparr-volume # $ docker volume create cleanuparr-volume
+    downloads:
+        name: downloads-volume
+        driver_opts:
+            device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
+            o: bind
+            type: none
+    media-library:
+        name: media-library-volume
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
+            o: bind
+            type: none
