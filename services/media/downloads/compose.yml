@@ -33,7 +33,7 @@ services:
 
     gluetun:
         <<: *defaults
-        image: ghcr.io/qdm12/gluetun:v3
+        image: ghcr.io/qdm12/gluetun:v3.39.1 # gluetun sucks
         container_name: gluetun
         cap_add:
             - NET_ADMIN # Required for Wireguard configuration.
@@ -42,9 +42,7 @@ services:
         environment:
             <<: *defaults-env
             BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
-            DOT_PROVIDERS: "quad9" # Use Quad9 for DOT; Cloudflare introduces weird issues.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
-            HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
             PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY}" # If on, only connect to P2P servers.
             SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # VPN server countries to connect to.
