@@ -6,7 +6,7 @@ services:
 
     gluetun:
         container_name: gluetun
-        image: ghcr.io/qdm12/gluetun:latest
+        image: ghcr.io/qdm12/gluetun:v3.39.1 # Held back due to weird issues.
         env_file: ./.env
         hostname: gluetun
         restart: unless-stopped
