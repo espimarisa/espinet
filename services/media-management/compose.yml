@@ -43,12 +43,8 @@ services:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
             <<: *defaults-env
-            BLOCK_ADS: "off" # https://github.com/qdm12/gluetun/issues/765
-            BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
-            BLOCK_SURVEILLANCE: "off" # https://github.com/qdm12/gluetun/issues/765
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports to use for server-side VPN forwarding; provided by VPN service provider.
-            HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
             SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
