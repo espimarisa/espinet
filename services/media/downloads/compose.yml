@@ -33,7 +33,7 @@ services:
 
     gluetun:
         <<: *defaults
-        image: ghcr.io/qdm12/gluetun:v3.39.1 # Held back due to DNS quirks.
+        image: ghcr.io/qdm12/gluetun:v3 # Held back due to DNS quirks.
         container_name: gluetun
         hostname: gluetun
         cap_add:
@@ -83,7 +83,7 @@ services:
 
     qbittorrent:
         <<: *defaults
-        image: lscr.io/linuxserver/qbittorrent:libtorrentv1
+        image: lscr.io/linuxserver/qbittorrent:latest
         container_name: qbittorrent
         network_mode: service:gluetun # Route all traffic through Gluetun.
         depends_on:
