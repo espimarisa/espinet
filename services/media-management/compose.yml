@@ -70,6 +70,7 @@ services:
             - ${PROFILARR_PORT:-6868}:6868/tcp # Profilarr web interface.
             - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
             - ${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080}/tcp # qBittorrent web interface.
+            - ${RADARR_PORT:-7878}:7878/tcp # Readarr web interface.
             - ${READARR_PORT:-8787}:8787/tcp # Readarr web interface.
             - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.
         security_opt:
@@ -152,8 +153,6 @@ services:
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:7878/ping || exit 1"
-        ports:
-            - ${RADARR_PORT:-7878}:7878/tcp # Readarr web interface.
         volumes:
             - *volume-downloads
             - *volume-media-library
