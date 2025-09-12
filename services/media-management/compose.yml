@@ -96,7 +96,7 @@ services:
             WEBUI_PORT: "${QBITTORRENT_PORT:-8080}" # Sets the web interface port.
         healthcheck:
             <<: *defaults-healthcheck
-            test: "ping 9.9.9.9 -nqc 1 -W 4 > /dev/null 2>&1 || exit 1"
+            test: "curl -f http://127.0.0.1:${QBITTORRENT_PORT:-8080} || exit 1"
         volumes:
             - *volume-downloads # Root path to store downloaded files into.
             - qbittorrent:/config # qBittorrent configuration and database.
@@ -133,7 +133,6 @@ services:
         <<: *defaults
         image: ghcr.io/hotio/lidarr:pr-plugins
         container_name: lidarr
-        hostname: lidarr
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8686/ping || exit 1"
@@ -150,7 +149,6 @@ services:
         <<: *defaults
         image: lscr.io/linuxserver/radarr:latest
         container_name: radarr
-        hostname: radarr
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:7878/ping || exit 1"
@@ -169,7 +167,6 @@ services:
         <<: *defaults
         image: ghcr.io/pennydreadful/bookshelf:hardcover
         container_name: readarr
-        hostname: readarr
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8787/ping || exit 1"
@@ -186,7 +183,6 @@ services:
         <<: *defaults
         image: lscr.io/linuxserver/sonarr:latest
         container_name: sonarr
-        hostname: sonarr
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8989/ping || exit 1"
@@ -244,7 +240,6 @@ services:
         <<: *defaults
         image: santiagosayshey/profilarr:latest
         container_name: profilarr
-        hostname: profilarr
         volumes:
             - profilarr:/config # Profilarr configuration and database.
 
@@ -256,7 +251,6 @@ services:
         <<: *defaults
         image: ghcr.io/cleanuparr/cleanuparr:latest
         container_name: cleanuparr
-        hostname: cleanuparr
         volumes:
             - cleanuparr:/config # Cleanuparr configuration and database.
 
@@ -268,7 +262,6 @@ services:
         <<: *defaults
         image: ghcr.io/unpackerr/unpackerr:latest
         container_name: unpackerr
-        hostname: unpackerr
         restart: unless-stopped
         environment:
             <<: *defaults-env
