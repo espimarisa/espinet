@@ -165,9 +165,6 @@ networks:
         name: media-network # $ docker network create media-network
 
 volumes:
-    gluetun:
-        external: true
-        name: gluetun-network # $ docker network create gluetun-network
     lidarr:
         external: true
         name: lidarr-volume # $ docker volume create lidarr-volume
