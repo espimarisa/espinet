@@ -52,8 +52,6 @@ services:
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
             WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Addresses to use for Wireguard.
             WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Port to use for Wireguard.
-            WIREGUARD_MTU: "1380" # Use a lower MTU for stability/performance.
-            WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL: "25s" # Keep Wireguard alive a little longer.
             WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # Preshared key from the VPN provider's configuration file.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
         networks:
