@@ -24,8 +24,6 @@ x-defaults: &defaults
     restart: unless-stopped
     env_file: ../.env
     environment: *defaults-env
-    extra_hosts:
-        - "host.docker.internal:host-gateway"
     networks:
         - media # Internal media network.
     security_opt:
@@ -160,6 +158,9 @@ services:
             - *volume-downloads # Root path to store downloaded files into.
 
 networks:
+    gluetun:
+        external: true
+        name: gluetun-network # $ docker network create gluetun-network
     media:
         external: true
         name: media-network # $ docker network create media-network
