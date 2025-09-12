@@ -33,7 +33,7 @@ services:
 
     gluetun:
         <<: *defaults
-        image: ghcr.io/qdm12/gluetun:latest
+        image: ghcr.io/qdm12/gluetun:v3.39.1 # Held back due to DNS quirks.
         container_name: gluetun
         hostname: gluetun
         cap_add:

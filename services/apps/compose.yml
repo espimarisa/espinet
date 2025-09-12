@@ -104,7 +104,7 @@ services:
             ADMIN_RATELIMIT_MAX_BURST: "3" # Configures admin ratelimit.
             ADMIN_RATELIMIT_SECONDS: "300" # Configures admin ratelimit cooldown.
             ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}" # Admin encryption token.
-            DOMAIN: "${VAULTWARDEN_URL}" # Configures the domain to use.
+            DOMAIN: "https://${VAULTWARDEN_URL}" # Configures the domain to use.
             EMAIL_CHANGE_ALLOWED: "true" # Enables email changing.
             EMERGENCY_ACCESS_ALLOWED: "true" # Enables emergency access.
             LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimits.
