@@ -27,7 +27,6 @@ services:
             caddy: "${JELLYFIN_URL}" # Tells Caddy to reverse proxy to the external Jellyfin URL.
             caddy.reverse_proxy: "jellyfin:8096" # Tells Caddy to reverse proxy internal traffic on port 8096.
             caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
-            caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS.
             caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
         healthcheck:
             interval: 1m
