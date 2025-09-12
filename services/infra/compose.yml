@@ -27,7 +27,7 @@ services:
             DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
             TZ: "${TZ}" # Local timezone to use.
         labels:
-            caddy.acme_dns: "cloudflare ${CLOUDFLARE_API_TOKEN}" # Use Cloudflare for TLS DNS challenges.
+            caddy.acme_dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for TLS DNS challenges.
             caddy.email: "${ACME_EMAIL}" # Email to use for ACME challenges.
         networks:
             - external # External network; reverse proxied.
