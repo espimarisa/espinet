@@ -1,12 +1,15 @@
 ---
-name: cloud
+name: apps
+
+include:
+    - ./cloud/compose.yml # Cloud stack.
 
 # Default container options.
 x-defaults: &defaults
     restart: unless-stopped
     env_file: ./.env
     networks:
-        - cloud # Internal media network.
+        - apps # Internal apps network.
         - external # External network; reverse proxied.
     security_opt:
         - no-new-privileges:true # Prevents privilege escalation.
@@ -14,7 +17,6 @@ x-defaults: &defaults
 # Default labels options.
 x-defaults-labels: &defaults-labels
     caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
-    # caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
     caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
 
 # Default healthcheck options.
@@ -25,49 +27,6 @@ x-defaults-healthcheck: &defaults-healthcheck
     timeout: 3s
 
 services:
-    #############################################
-    # OpenCloud: Self-hosted cloud storage.     #
-    #############################################
-
-    opencloud:
-        <<: *defaults
-        image: opencloudeu/opencloud-rolling:latest
-        container_name: opencloud
-        entrypoint: /bin/sh
-        hostname: opencloud
-        command:
-            ["-c", "opencloud init --insecure true || true; opencloud server"]
-        environment:
-            FRONTEND_ARCHIVER_MAX_SIZE: "10000000000" # Max number of files that can be packed into an archive.
-            IDM_ADMIN_PASSWORD: "${OPENCLOUD_ADMIN_PASSWORD}" # Configures the initial admin password.
-            IDM_CREATE_DEMO_USERS: "false" # Do not create demo users.
-            OC_INSECURE: "false" # Do not run in insecure mode.
-            OC_LOG_COLOR: "true" # Log in color.
-            OC_LOG_LEVEL: "info" # Log at the info level.
-            OC_LOG_PRETTY: "true" # Use pretty logs.
-            OC_URL: "https://${OPENCLOUD_URL}" # Configures the OpenCloud URL.
-            PROXY_TLS: "false" # Do not use SSL between the reverse proxy and OpenCloud.
-            SMTP_TRANSPORT_ENCRYPTION: "${SMTP_TRANSPORT_ENCRYPTION}" # External SMTP port to connect to.
-            SMTP_HOST: "${SMTP_HOST}" # External SMTP host URL to connect to.
-            SMTP_INSECURE: "${SMTP_INSECURE}" # If enabled, allows insecure connections to the external SMTP server.
-            SMTP_PASSWORD: "${SMTP_PASSWORD}" # External SMTP email account password to login with.
-            SMTP_PORT: "${SMTP_PORT}" # External SMTP port to connect to.
-            SMTP_SENDER: "${SMTP_SENDER}" # SMTP address used for sending email notifications.
-            SMTP_USERNAME: "${SMTP_USERNAME}" # External SMTP email account username to login with.
-            START_ADDITIONAL_SERVICES: "notifications" # Additional services to start.
-        healthcheck:
-            <<: *defaults-healthcheck
-            test: "wget --spider http://127.0.0.1:9200 || exit 1"
-        labels:
-            <<: *defaults-labels
-            caddy: "${OPENCLOUD_URL}" # Tells Caddy to reverse proxy to the external OpenCloud URL.
-            caddy.reverse_proxy: "opencloud:9200" # Tells Caddy to reverse proxy internal traffic on port 9200.
-        ports:
-            - ${OPENCLOUD_PORT:-9200}:9200/tcp # OpenCloud web interface.
-        volumes:
-            - opencloud-data:/var/lib/opencloud # OpenCloud data volume.
-            - opencloud:/etc/opencloud # OpenCloud configuration volume.
-
     #############################################
     # Snapp: Self-hosted URL shortener.         #
     #############################################
@@ -132,26 +91,63 @@ services:
         volumes:
             - thelounge:/config # The Lounge configuration and database volume.
 
+    #############################################
+    # Vaultwarden: Bitwarden-compatible server. #
+    #############################################
+
+    vaultwarden:
+        <<: *defaults
+        image: vaultwarden/server:latest
+        container_name: vaultwarden
+        hostname: vaultwarden
+        environment:
+            ADMIN_RATELIMIT_MAX_BURST: "3" # Configures admin ratelimit.
+            ADMIN_RATELIMIT_SECONDS: "300" # Configures admin ratelimit cooldown.
+            ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}" # Admin encryption token.
+            DOMAIN: "${VAULTWARDEN_URL}" # Configures the domain to use.
+            EMAIL_CHANGE_ALLOWED: "true" # Enables email changing.
+            EMERGENCY_ACCESS_ALLOWED: "true" # Enables emergency access.
+            LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimits.
+            LOGIN_RATELIMIT_SECONDS: "60" # Configures ratelimit cooldown.
+            SENDS_ALLOWED: "true" # Enables Bitwarden sends.
+            SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS}" # Configures if signups should be enabled.
+            SMTP_FROM: "${SMTP_SENDER}" # External email server sender.
+            SMTP_HOST: "${SMTP_HOST}" # External email server host.
+            SMTP_PASSWORD: "${SMTP_PASSWORD}" # External email server password.
+            SMTP_PORT: "${SMTP_PORT}" # External email server port.
+            SMTP_SECURITY: ${SMTP_TRANSPORT_ENCRYPTION} # External email server encryption method.
+            SMTP_TIMEOUT: "${SMTP_TIMEOUT}" # 15s timeout.
+            SMTP_USERNAME: "${SMTP_USERNAME}" # External email server username.
+            WEB_VAULT_ENABLED: "true" # Enables the web vault.
+            WEBSOCKET_ENABLED: "true" # Enable WS support.
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:80/alive || exit 1"
+        labels:
+            <<: *defaults-labels
+            caddy: "${VAULTWARDEN_URL}" # Tells Caddy to reverse proxy to the external The Lounge URL.
+            caddy.reverse_proxy: "vaultwarden:80" # Tells Caddy to reverse proxy internal traffic on port 80.
+        ports:
+            - ${VAULTWARDEN_PORT:-11001}:80/tcp # Vaultwarden server and web interface.
+        volumes:
+            - vaultwarden:/data # Vaultwarden user data.
+
 networks:
-    cloud:
+    apps:
         external: true
-        name: cloud-network # $ docker network create cloud-network
+        name: apps-network # $ docker network create apps-network
     external:
         external: true
         name: external-network # $ docker network create external-network
 
 volumes:
-    opencloud:
-        name: opencloud-volume # $ docker volume create opencloud-volume
-        external: true
-    opencloud-data:
-        driver_opts:
-            device: "${OPENCLOUD_PATH}" # Root path to store OpenCloud user data.
-            o: bind
-            type: none
-        name: opencloud-data-volume
     thelounge:
         driver_opts:
             device: "${THELOUNGE_PATH}" # Root path to store The Lounge data.
+            o: bind
+            type: none
+    vaultwarden:
+        driver_opts:
+            device: "${VAULTWARDEN_PATH}" # Root path to store Vaultwarden data.
             o: bind
             type: none

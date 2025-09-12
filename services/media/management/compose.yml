@@ -142,6 +142,7 @@ services:
         <<: *defaults
         image: ghcr.io/unpackerr/unpackerr:latest
         container_name: unpackerr
+        hostname: unpackerr
         networks:
             - media # Internal media network.
         restart: unless-stopped

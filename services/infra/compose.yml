@@ -1,5 +1,5 @@
 ---
-name: public
+name: infra
 
 x-defaults: &defaults
     restart: unless-stopped
@@ -31,7 +31,7 @@ services:
             caddy.email: "${ACME_EMAIL}" # Email to use for ACME challenges.
         networks:
             - external # External network; reverse proxied.
-            - socket-proxy # Internal docker socket-proxy network.
+            - infra # Internal docker infra network.
         ports:
             - 443:443/tcp # HTTPS traffic.
             - 443:443/udp # HTTPS3 traffic.
@@ -109,18 +109,18 @@ services:
             test: "wget --spider http://127.0.0.1:2375/_ping || exit 1"
             timeout: 3s
         networks:
-            - socket-proxy # Internal-only socket-proxy network.
+            - infra # Internal-only infra network.
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
 
 networks:
+    infra:
+        external: true
+        internal: true
+        name: infra-network # $ docker network create infra-network
     external:
         external: true
         name: external-network # $ docker network create external-network
-    socket-proxy:
-        external: true
-        internal: true
-        name: socket-proxy-network # $ docker network create socket-proxy-network
 
 volumes:
     caddy:

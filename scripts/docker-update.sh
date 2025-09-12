@@ -7,5 +7,5 @@ docker compose stop
 # Fetches latest commit and images.
 echo "Pulling latest changes..."
 git pull
-docker compose pull -f
+docker compose pull
 echo "Finished updating."
