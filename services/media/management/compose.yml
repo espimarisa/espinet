@@ -131,7 +131,6 @@ services:
         hostname: cleanuparr
         networks:
             - media # Internal media network.
-            - gluetun # Gluetun network.
         ports:
             - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
         volumes:
