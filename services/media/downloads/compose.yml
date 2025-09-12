@@ -54,6 +54,7 @@ services:
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
         networks:
             - gluetun # Gluetun VPN network.
+            - media # Internal media network.
         ports:
             - ${DEEMIX_PORT:-6595}:6595/tcp # Deemix port.
             - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr server.
@@ -175,6 +176,9 @@ networks:
     gluetun:
         external: true
         name: gluetun-network # $ docker network create gluetun-network
+    media:
+        external: true
+        name: media-network # $ docker network create media-network
 
 volumes:
     deemix:
