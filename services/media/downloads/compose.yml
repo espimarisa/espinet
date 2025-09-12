@@ -89,6 +89,7 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         environment:
             <<: *defaults-env
             DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent to /vuetorrent.
@@ -112,6 +113,7 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         environment:
             <<: *defaults-env
             DEEMIX_SINGLE_USER: "true" # Use one global user.
@@ -135,6 +137,7 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         environment:
             <<: *defaults-env
         healthcheck:
@@ -156,6 +159,7 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         environment:
             <<: *defaults-env
         healthcheck:
@@ -178,6 +182,7 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
         environment:
             MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
 

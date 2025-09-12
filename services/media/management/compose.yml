@@ -24,6 +24,8 @@ x-defaults: &defaults
     restart: unless-stopped
     env_file: ../.env
     environment: *defaults-env
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
     networks:
         - media # Internal media network.
     security_opt:
@@ -129,6 +131,9 @@ services:
         image: ghcr.io/cleanuparr/cleanuparr:latest
         container_name: cleanuparr
         hostname: cleanuparr
+        networks:
+            - media # Internal media network.
+            - gluetun # Gluetun network.
         ports:
             - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
         volumes:
@@ -143,8 +148,6 @@ services:
         image: ghcr.io/unpackerr/unpackerr:latest
         container_name: unpackerr
         hostname: unpackerr
-        networks:
-            - media # Internal media network.
         restart: unless-stopped
         environment:
             <<: *defaults-env
@@ -162,6 +165,9 @@ networks:
         name: media-network # $ docker network create media-network
 
 volumes:
+    gluetun:
+        external: true
+        name: gluetun-network # $ docker network create gluetun-network
     lidarr:
         external: true
         name: lidarr-volume # $ docker volume create lidarr-volume
