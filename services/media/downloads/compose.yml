@@ -87,14 +87,13 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             <<: *defaults-env
             DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent to /vuetorrent.
             WEBUI_PORT: "${QBITTORRENT_PORT:-8080}" # Sets the web interface port.
         healthcheck:
             <<: *defaults-healthcheck
-            test: "curl -f http://127.0.0.1:${QBITTORRENT_PORT:-8080} || exit 1"
+            test: "ping 9.9.9.9 -nqc 1 -W 4 > /dev/null 2>&1 || exit 1"
         volumes:
             - *volume-downloads # Root path to store downloaded files into.
             - qbittorrent:/config # qBittorrent configuration and database.
@@ -111,7 +110,6 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             <<: *defaults-env
             DEEMIX_SINGLE_USER: "true" # Use one global user.
@@ -135,7 +133,6 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             <<: *defaults-env
         healthcheck:
@@ -157,7 +154,6 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             <<: *defaults-env
         healthcheck:
@@ -180,7 +176,6 @@ services:
         depends_on:
             gluetun:
                 condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
 
