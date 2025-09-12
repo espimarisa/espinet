@@ -6,8 +6,7 @@ x-defaults: &defaults
     restart: unless-stopped
     env_file: ../.env
     networks:
-        - apps # Internal media network.
-        - external # External network; reverse proxied.
+        - external # External apps network; reverse proxied.
     security_opt:
         - no-new-privileges:true # Prevents privilege escalation.
 

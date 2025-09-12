@@ -1,4 +1,4 @@
 include:
-    - ./services/apps/compose.yml # Apps stack.
-    - ./services/infra/compose.yml # Infra stack.
-    - ./services/media/compose.yml # Media stack.
+    - ./services/external-apps/compose.yml # External apps stack.
+    - ./services/infrastructure/compose.yml # Infrastructure  stack.
+    - ./services/media-management/compose.yml # Media management stack.

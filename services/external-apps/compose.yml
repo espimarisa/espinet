@@ -1,5 +1,5 @@
 ---
-name: apps
+name: external-apps
 
 include:
     - ./cloud/compose.yml # Cloud stack.
@@ -9,8 +9,7 @@ x-defaults: &defaults
     restart: unless-stopped
     env_file: ./.env
     networks:
-        - apps # Internal apps network.
-        - external # External network; reverse proxied.
+        - external # External apps network; reverse proxied.
     security_opt:
         - no-new-privileges:true # Prevents privilege escalation.
 
@@ -27,6 +26,44 @@ x-defaults-healthcheck: &defaults-healthcheck
     timeout: 3s
 
 services:
+    #############################################
+    # Jellyfin: Media server.                   #
+    #############################################
+
+    jellyfin:
+        image: lscr.io/linuxserver/jellyfin:latest
+        container_name: jellyfin
+        hostname: jellyfin
+        restart: unless-stopped
+        devices:
+            - /dev/dri/renderD128:/dev/dri/renderD128 # Video device support; renderD128 is GPU0.
+        environment:
+            DOCKER_MODS: "linuxserver/mods:jellyfin-opencl-intel:latest" # Enables the latest OpenCL drivers.
+            JELLYFIN_PublishedServerUrl: "https://${JELLYFIN_URL}" # Configures autodiscovery to use the external URL.
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
+            TZ: "${TZ}" # Local timezone to use.
+        labels:
+            caddy: "${JELLYFIN_URL}" # Tells Caddy to reverse proxy to the external Jellyfin URL.
+            caddy.reverse_proxy: "jellyfin:8096" # Tells Caddy to reverse proxy internal traffic on port 8096.
+            caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
+            caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
+        healthcheck:
+            interval: 1m
+            retries: 3
+            start_period: 1m
+            test: "curl -f http://127.0.0.1:8096/health || exit 1"
+            timeout: 3s
+        networks:
+            - external # External apps network; reverse proxied.
+        ports:
+            - ${JELLYFIN_PORT:-8096}:8096/tcp # Jellyfin web interface.
+        security_opt:
+            - no-new-privileges:true # Prevents privilege escalation.
+        volumes:
+            - jellyfin:/config # Jellyfin configuration and database.
+            - jellyfin-media-library:/library:ro # Root path to the media library, read-only.
+
     #############################################
     # Snapp: Self-hosted URL shortener.         #
     #############################################
@@ -133,14 +170,20 @@ services:
             - vaultwarden:/data # Vaultwarden user data.
 
 networks:
-    apps:
-        external: true
-        name: apps-network # $ docker network create apps-network
     external:
         external: true
         name: external-network # $ docker network create external-network
 
 volumes:
+    jellyfin:
+        external: true
+        name: jellyfin-volume # $ docker volume create jellyfin
+    jellyfin-media-library:
+        name: jellyfin-media-library-volume
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
+            o: bind
+            type: none
     thelounge:
         driver_opts:
             device: "${THELOUNGE_PATH}" # Root path to store The Lounge data.

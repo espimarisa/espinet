@@ -2,10 +2,9 @@
 
 # Creates networks.
 docker network create apps-network
-docker network create gluetun-network
-docker network create infra-network
-docker network create media-network
 docker network create external-network
+docker network create gluetun-network
+docker network create infrastructure-network
 
 # Creates volumes.
 docker volume create cleanuparr-volume
