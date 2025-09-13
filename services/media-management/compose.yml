@@ -49,10 +49,15 @@ services:
             DOT: "off" # DNS OVER TLS IS FUCKING DOGSHIT
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports to use for server-side VPN forwarding; provided by VPN service provider.
-            HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
-            SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.
+            HTTPPROXY: "off" # Disable the built-in HTTP proxy.
+            PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY}" # If on, only connect to P2P servers.
+            SERVER_CITIES: "${SERVER_CITIES}" # VPN server cities to connect to.
+            SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # VPN server countries to connect to.
+            SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.            SHADOWSOCKS: "off" # Disable the built-in Shadowsocks server.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
+            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
+            VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING}" # If on, enables P2P port forwarding.
             VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
             WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Addresses to use for Wireguard.
@@ -61,6 +66,7 @@ services:
             WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL: "25s" # Keep Wireguard alive a little longer.
             WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # Preshared key from the VPN provider's configuration file.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
+            WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from the VPN provider's configuration file.
         networks:
             - gluetun # Gluetun VPN network.
         ports:
