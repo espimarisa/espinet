@@ -43,15 +43,22 @@ services:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
             <<: *defaults-env
+            BLOCK_ADS: "off" # https://github.com/qdm12/gluetun/issues/765
+            BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
+            BLOCK_SURVEILLANCE: "off" # https://github.com/qdm12/gluetun/issues/765
+            DOT_PROVIDERS: "quad9" # Use Quad9 for DOT; Cloudflare introduces weird issues.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports to use for server-side VPN forwarding; provided by VPN service provider.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
+            HTTPPROXY: "off" # Disable the built-in HTTP proxy.
             SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
             VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
             WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Addresses to use for Wireguard.
             WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Port to use for Wireguard.
+            WIREGUARD_MTU: "1380" # Use a lower MTU for stability/performance.
+            WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL: "25s" # Keep Wireguard alive a little longer.
             WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # Preshared key from the VPN provider's configuration file.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
         networks:
