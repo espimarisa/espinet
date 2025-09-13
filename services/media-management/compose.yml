@@ -49,6 +49,7 @@ services:
             DOT_PROVIDERS: "quad9" # Use Quad9 for DOT; Cloudflare introduces weird issues.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports to use for server-side VPN forwarding; provided by VPN service provider.
+            HEALTH_TARGET_ADDRESS: "quad9.net:443" # Ping Quad9 for healthchecks, Cloudflare is iffy.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
             HTTPPROXY: "off" # Disable the built-in HTTP proxy.
             SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.
