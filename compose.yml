@@ -63,12 +63,6 @@ volumes:
     sonarr:
         external: true
         name: sonarr-volume # Sonarr configuration and database.
-    scrutiny:
-        external: true
-        name: scrutiny-volume # Scrutiny configuration.
-    scrutiny-influxdb:
-        external: true
-        name: scrutiny-influxdb-volume # Scrutiny database.
     uptime-kuma:
         external: true
         name: uptime-kuma-volume # Uptime Kuma configuration and database.

@@ -19,8 +19,6 @@ docker volume create prowlarr-volume
 docker volume create qbittorrent-volume
 docker volume create radarr-volume
 docker volume create readarr-volume
-docker volume create scrutiny-influxdb-volume
-docker volume create scrutiny-volume
 docker volume create sonarr-volume
 docker volume create uptime-kuma-volume
 docker volume create vaultwarden-volume
