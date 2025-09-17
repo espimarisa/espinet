@@ -33,6 +33,7 @@ services:
             PUID: "${PUID}" # User ID to run as.
         networks:
             - caddy # External Caddy network; reverse proxied.
+            - infra # Internal infra network.
         ports:
             - ${UPTIME_KUMA_PORT:-3001}:3001/tcp # Uptime Kuma web interface.
         volumes:
