@@ -1,9 +1,5 @@
 ---
-name: media-management
-
-# Repeated volumes.
-x-downloads-volume: &volume-downloads downloads:/downloads # Root path to the downloads volume.
-x-media-library-volume: &volume-media-library media-library:/library # Root path to the downloads volume.
+name: media
 
 # Default environment variables.
 x-defaults-env: &defaults-env
@@ -22,19 +18,51 @@ x-defaults-healthcheck: &defaults-healthcheck
 # Default container options.
 x-defaults: &defaults
     restart: unless-stopped
-    env_file: ./.env
-    network_mode: service:gluetun
     environment: *defaults-env
     security_opt:
         - no-new-privileges:true # Prevents privilege escalation.
 
 services:
     #############################################
+    # Jellyfin: Media server.                   #
+    #############################################
+
+    jellyfin:
+        <<: *defaults
+        image: lscr.io/linuxserver/jellyfin:latest
+        container_name: jellyfin
+        hostname: jellyfin
+        restart: unless-stopped
+        devices:
+            - /dev/dri/renderD128:/dev/dri/renderD128 # Video device support; renderD128 is GPU0.
+        environment:
+            <<: *defaults-env
+            DOCKER_MODS: "linuxserver/mods:jellyfin-opencl-intel:latest" # Enables the latest OpenCL drivers.
+            JELLYFIN_PublishedServerUrl: "https://${JELLYFIN_URL}" # Configures autodiscovery to use the external URL.
+        labels:
+            caddy: "${JELLYFIN_URL}" # Tells Caddy to reverse proxy to the external Jellyfin URL.
+            caddy.reverse_proxy: "jellyfin:8096" # Tells Caddy to reverse proxy internal traffic on port 8096.
+            caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
+            caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
+        healthcheck:
+            <<: *defaults-healthcheck
+            test: "curl -f http://127.0.0.1:8096/health || exit 1"
+        networks:
+            - caddy # External Caddy network; reverse proxied.
+        ports:
+            - ${JELLYFIN_PORT:-8096}:8096/tcp # Jellyfin web interface.
+        volumes:
+            - media-library:/library:ro # Root path to the media library.
+            - jellyfin-cache:/config/cache # Jellyfin cache.
+            - jellyfin:/config # Jellyfin configuration and database.
+
+    #############################################
     # Gluetun: VPN client.                      #
     #############################################
 
     gluetun:
-        image: ghcr.io/qdm12/gluetun:latest
+        image: ghcr.io/qdm12/gluetun:v3.39.1
         container_name: gluetun
         hostname: gluetun
         cap_add:
@@ -43,18 +71,15 @@ services:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
             <<: *defaults-env
-            BLOCK_ADS: "off" # https://github.com/qdm12/gluetun/issues/765
             BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
-            BLOCK_SURVEILLANCE: "off" # https://github.com/qdm12/gluetun/issues/765
-            DOT: "off" # DNS OVER TLS IS FUCKING DOGSHIT
+            DOT: "off" # Disable DoT due to Gluetun issues.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports to use for server-side VPN forwarding; provided by VPN service provider.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
-            HTTPPROXY: "off" # Disable the built-in HTTP proxy.
             PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY}" # If on, only connect to P2P servers.
             SERVER_CITIES: "${SERVER_CITIES}" # VPN server cities to connect to.
             SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # VPN server countries to connect to.
-            SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.            SHADOWSOCKS: "off" # Disable the built-in Shadowsocks server.
+            SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
             VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
             VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING}" # If on, enables P2P port forwarding.
@@ -62,7 +87,7 @@ services:
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
             WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Addresses to use for Wireguard.
             WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Port to use for Wireguard.
-            WIREGUARD_MTU: "1380" # Use a lower MTU for stability/performance.
+            WIREGUARD_MTU: "1280" # Use a lower MTU for stability/performance.
             WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL: "25s" # Keep Wireguard alive a little longer.
             WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # Preshared key from the VPN provider's configuration file.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
@@ -70,16 +95,8 @@ services:
         networks:
             - gluetun # Gluetun VPN network.
         ports:
-            - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
-            - ${DEEMIX_PORT:-6595}:6595/tcp # Deemix port.
-            - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr server.
-            - ${LIDARR_PORT:-8686}:8686/tcp # Lidarr web interface.
-            - ${PROFILARR_PORT:-6868}:6868/tcp # Profilarr web interface.
             - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
             - ${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080}/tcp # qBittorrent web interface.
-            - ${RADARR_PORT:-7878}:7878/tcp # Readarr web interface.
-            - ${READARR_PORT:-8787}:8787/tcp # Readarr web interface.
-            - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.
         security_opt:
             - no-new-privileges:true # Prevents privilege escalation.
         volumes:
@@ -106,7 +123,7 @@ services:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:${QBITTORRENT_PORT:-8080} || exit 1"
         volumes:
-            - *volume-downloads # Root path to store downloaded files into.
+            - downloads:/downloads # Root path to store downloaded files into.
             - qbittorrent:/config # qBittorrent configuration and database.
 
     #############################################
@@ -117,11 +134,6 @@ services:
         <<: *defaults
         image: ghcr.io/bambanah/deemix:latest
         container_name: deemix
-        network_mode: service:gluetun # Route all networking through Gluetun.
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             <<: *defaults-env
             DEEMIX_SINGLE_USER: "true" # Use one global user.
@@ -129,8 +141,12 @@ services:
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:6595 || exit 1"
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
+        ports:
+            - ${DEEMIX_PORT:-6595}:6595/tcp # Deemix web interface.
         volumes:
-            - *volume-downloads # Root path to store downloaded files into.
+            - downloads:/downloads # Root path to store downloaded files into.
             - deemix:/config # Deemix configuration volume.
 
     #############################################
@@ -144,10 +160,14 @@ services:
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8686/ping || exit 1"
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
+        ports:
+            - ${LIDARR_PORT:-6595}:8686/tcp # Lidarr web interface.
         volumes:
-            - *volume-downloads
-            - *volume-media-library
+            - downloads:/downloads # Root path to store downloaded files into.
             - lidarr:/config # Lidarr configuration and database.
+            - media-library:/library # Root path to the media library.
 
     #############################################
     # Radarr: Movie manager and PVR.            #
@@ -160,9 +180,13 @@ services:
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:7878/ping || exit 1"
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
+        ports:
+            - ${RADARR_PORT:-7878}:7878/tcp # Radarr web interface.
         volumes:
-            - *volume-downloads
-            - *volume-media-library
+            - downloads:/downloads # Root path to store downloaded files into.
+            - media-library:/library # Root path to the media library.
             - radarr:/config # Radarr configuration and database.
 
     #############################################
@@ -176,9 +200,13 @@ services:
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8787/ping || exit 1"
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
+        ports:
+            - ${READARR_PORT:-8787}:8787/tcp # Readarr web interface.
         volumes:
-            - *volume-downloads
-            - *volume-media-library
+            - downloads:/downloads # Root path to store downloaded files into.
+            - media-library:/library # Root path to the media library.
             - readarr:/config # Readarr configuration and database.
 
     #############################################
@@ -192,9 +220,13 @@ services:
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8989/ping || exit 1"
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
+        ports:
+            - ${SONARR_PORT:-8989}:8989/tcp # Sonarr web interface.
         volumes:
-            - *volume-downloads
-            - *volume-media-library
+            - downloads:/downloads # Root path to store downloaded files into.
+            - media-library:/library # Root path to the media library.
             - sonarr:/config # Sonarr configuration and database.
 
     #############################################
@@ -226,17 +258,16 @@ services:
         <<: *defaults
         image: ghcr.io/flaresolverr/flaresolverr:latest
         container_name: flaresolverr
-        network_mode: service:gluetun # Route all networking through Gluetun.
         user: ${PUID}:${PGID}
-        depends_on:
-            gluetun:
-                condition: service_healthy # Require Gluetun to be healthy before connecting.
-                restart: true
         environment:
             <<: *defaults-env
         healthcheck:
             <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8191/health || exit 1"
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
+        ports:
+            - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr server.
 
     #############################################
     # Profilarr: Profile manager for 'ARR apps. #
@@ -246,8 +277,12 @@ services:
         <<: *defaults
         image: santiagosayshey/profilarr:latest
         container_name: profilarr
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
         volumes:
             - profilarr:/config # Profilarr configuration and database.
+        ports:
+            - ${PROFILARR_PORT:-6868}:6868/tcp # Profilarr web interface.
 
     #############################################
     # Cleanuparr: Automatically clean ARR apps. #
@@ -255,10 +290,14 @@ services:
 
     cleanuparr:
         <<: *defaults
-        image: ghcr.io/cleanuparr/cleanuparr:latest
+        image: ghcr.io/cleanuparr/cleanuparr:2
         container_name: cleanuparr
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
         volumes:
             - cleanuparr:/config # Cleanuparr configuration and database.
+        ports:
+            - ${CLEANUPARR_PORT:-11011}:11011/tcp # Cleanuparr web interface.
 
     #############################################
     # Unpackerr: Automatic download extraction. #
@@ -266,18 +305,20 @@ services:
 
     unpackerr:
         <<: *defaults
-        image: ghcr.io/unpackerr/unpackerr:latest
+        image: ghcr.io/unpackerr/unpackerr:0
         container_name: unpackerr
         restart: unless-stopped
+        networks:
+            - gluetun # Gluetun VPN network; internal-only.
         environment:
             <<: *defaults-env
             UN_LOG_FILE: "/downloads/unpackerr.log" # Log file location.
             UN_RADARR_0_API_KEY: "${RADARR_API_KEY}" # Radarr API key.
-            UN_RADARR_0_URL: "http://localhost:7878" # Primary Radarr URL.
+            UN_RADARR_0_URL: "http://radarr:7878" # Primary Radarr URL.
             UN_SONARR_0_API_KEY: "${SONARR_API_KEY}" # Sonarr API key.
-            UN_SONARR_0_URL: "http://localhost:8989" # Primary Sonarr URL.
+            UN_SONARR_0_URL: "http://sonarr:8989" # Primary Sonarr URL.
         volumes:
-            - *volume-downloads # Root path to store downloaded files into.
+            - downloads:/downloads # Root path to store downloaded files into.
 
     #############################################
     # mam-ip-helper: MyAnonaMouse IP updater.   #
@@ -298,52 +339,3 @@ services:
                 restart: true
         environment:
             MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
-
-networks:
-    gluetun:
-        external: true
-        name: gluetun-network # $ docker network create gluetun-network
-
-volumes:
-    deemix:
-        external: true
-        name: deemix-volume # $ docker volume create deemix-volume
-    gluetun:
-        external: true
-        name: gluetun-volume # $ docker volume create gluetun-volume
-    lidarr:
-        external: true
-        name: lidarr-volume # $ docker volume create lidarr-volume
-    radarr:
-        external: true
-        name: radarr-volume # $ docker volume create radarr-volume
-    readarr:
-        external: true
-        name: readarr-volume # $ docker volume create readarr-volume
-    sonarr:
-        external: true
-        name: sonarr-volume # $ docker volume create sonarr-volume
-    profilarr:
-        external: true
-        name: profilarr-volume # $ docker volume create profilarr-volume
-    cleanuparr:
-        external: true
-        name: cleanuparr-volume # $ docker volume create cleanuparr-volume
-    prowlarr:
-        external: true
-        name: prowlarr-volume # $ docker volume create prowlarr-volume
-    qbittorrent:
-        external: true
-        name: qbittorrent-volume # $ docker volume create qbittorrent-volume
-    downloads:
-        name: downloads-volume
-        driver_opts:
-            device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
-            o: bind
-            type: none
-    media-library:
-        name: media-library-volume
-        driver_opts:
-            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
-            o: bind
-            type: none

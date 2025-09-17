@@ -1,9 +1,8 @@
 ---
-name: infrastructure
+name: infra
 
 x-defaults: &defaults
     restart: unless-stopped
-    env_file: ./.env
     security_opt:
         - no-new-privileges:true # Prevents privilege escalation.
 
@@ -30,8 +29,8 @@ services:
             caddy.acme_dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for TLS DNS challenges.
             caddy.email: "${ACME_EMAIL}" # Email to use for ACME challenges.
         networks:
-            - external # External apps network; reverse proxied.
-            - infrastructure # Internal infrastructure network.
+            - caddy # External Caddy network; reverse proxied.
+            - infra # Internal infra network.
         ports:
             - 443:443/tcp # HTTPS traffic.
             - 443:443/udp # HTTPS3 traffic.
@@ -109,20 +108,6 @@ services:
             test: "wget --spider http://127.0.0.1:2375/_ping || exit 1"
             timeout: 3s
         networks:
-            - infrastructure # Internal infrastructure network.
+            - infra # Internal infra network.
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
-
-networks:
-    infrastructure:
-        external: true
-        internal: true
-        name: infrastructure-network # $ docker network create infrastructure-network
-    external:
-        external: true
-        name: external-network # $ docker network create external-network
-
-volumes:
-    caddy:
-        external: true
-        name: caddy-volume # $ docker volume create caddy-volume

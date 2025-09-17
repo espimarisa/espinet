@@ -4,15 +4,15 @@ name: cloud
 # Default container options.
 x-defaults: &defaults
     restart: unless-stopped
-    env_file: ../.env
     networks:
-        - external # External apps network; reverse proxied.
+        - caddy # External Caddy network; reverse proxied.
     security_opt:
         - no-new-privileges:true # Prevents privilege escalation.
 
 # Default labels options.
 x-defaults-labels: &defaults-labels
     caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
+    caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
     caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
 
 # Default healthcheck options.
@@ -29,13 +29,14 @@ services:
 
     opencloud:
         <<: *defaults
-        image: opencloudeu/opencloud-rolling:latest
+        image: opencloudeu/opencloud-rolling:3
         container_name: opencloud
         entrypoint: /bin/sh
         hostname: opencloud
         command:
             ["-c", "opencloud init --insecure true || true; opencloud server"]
         environment:
+            OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD: "false" # Allow public shares without passwords.
             FRONTEND_ARCHIVER_MAX_SIZE: "10000000000" # Max number of files that can be packed into an archive.
             IDM_ADMIN_PASSWORD: "${OPENCLOUD_ADMIN_PASSWORD}" # Configures the initial admin password.
             IDM_CREATE_DEMO_USERS: "false" # Do not create demo users.
@@ -65,22 +66,3 @@ services:
         volumes:
             - opencloud-data:/var/lib/opencloud # OpenCloud data volume.
             - opencloud:/etc/opencloud # OpenCloud configuration volume.
-
-networks:
-    apps:
-        external: true
-        name: apps-network # $ docker network create apps-network
-    external:
-        external: true
-        name: external-network # $ docker network create external-network
-
-volumes:
-    opencloud:
-        name: opencloud-volume # $ docker volume create opencloud-volume
-        external: true
-    opencloud-data:
-        driver_opts:
-            device: "${OPENCLOUD_PATH}" # Root path to store OpenCloud user data.
-            o: bind
-            type: none
-        name: opencloud-data-volume

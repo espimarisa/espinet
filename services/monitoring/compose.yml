@@ -1,0 +1,110 @@
+---
+name: monitoring
+
+# Default container options.
+x-defaults: &defaults
+    restart: unless-stopped
+    security_opt:
+        - no-new-privileges:true # Prevents privilege escalation.
+
+services:
+    #############################################
+    # Uptime Kuma: Service uptime monitoring.   #
+    #############################################
+
+    uptime-kuma:
+        <<: *defaults
+        container_name: uptime-kuma
+        image: ghcr.io/louislam/uptime-kuma:beta-rootless
+        hostname: uptime-kuma
+        depends_on:
+            socket-proxy:
+                condition: service_healthy # Wait for the Docker socket proxy to be healthy.
+                restart: true
+        labels:
+            caddy: "${UPTIME_KUMA_URL}" # Tells Caddy to reverse proxy to the external Uptime Kuma URL.
+            caddy.reverse_proxy: "uptime-kuma:3001" # Tells Caddy to reverse proxy internal traffic on port 3001.
+            caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL as the CA issuer.
+            caddy.tls.dns: cloudflare $CLOUDFLARE_API_TOKEN # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: "tls1.3" # Requires clients to support TLS 1.3.
+        environment:
+            DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
+            PGID: "${PGID}" # Group ID to run as.
+            PUID: "${PUID}" # User ID to run as.
+        networks:
+            - caddy # External Caddy network; reverse proxied.
+        ports:
+            - ${UPTIME_KUMA_PORT:-3001}:3001/tcp # Uptime Kuma web interface.
+        volumes:
+            - uptime-kuma:/app/data # Uptime Kuma configuration and database.
+
+    #############################################
+    # Glances: Host system monitoring.          #
+    #############################################
+
+    glances:
+        <<: *defaults
+        container_name: glances
+        image: nicolargo/glances:latest
+        network_mode: host
+        pid: host
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+
+    #############################################
+    # Scrutiny: SMART monitoring.               #
+    #############################################
+
+    scrutiny:
+        <<: *defaults
+        container_name: scrutiny
+        image: ghcr.io/analogj/scrutiny:master-omnibus
+        hostname: scrutiny
+        cap_add:
+            - SYS_RAWIO # Required for SMART data.
+        devices:
+            - /dev/nvme0n1 # Root disk
+            - /dev/nvme1n1 # Cache disk
+            - /dev/sda # HDD1
+            - /dev/sdb # HDD2
+            - /dev/sdc # HDD3
+            - /dev/sdd # HDD4
+        environment:
+            SCRUTINY_WEB_INFLUXDB_INIT_PASSWORD: ${SCRUTINY_WEB_INFLUXDB_INIT_PASSWORD} # Initial Scrutiny web interface password.
+            SCRUTINY_WEB_INFLUXDB_INIT_USERNAME: "${SCRUTINY_WEB_INFLUXDB_INIT_USERNAME}" # Initial Scrutiny web interface username.
+            SCRUTINY_WEB_INFLUXDB_TOKEN: "${SCRUTINY_WEB_INFLUXDB_TOKEN}" # Token to use to secure the web interface.
+        networks:
+            - infra # Internal infra network.
+        ports:
+            - ${SCRUTINY_PORT:-8081}:8080/tcp # Scrutiny web interface.
+            - ${SCRUTINY_DB_PORT:-8086}:8086/tcp # Scrutiny database.
+        volumes:
+            - /run/udev:/run/udev:ro # udev access
+            - scrutiny-influxdb:/opt/scrutiny/influxdb # Scrutiny database.
+            - scrutiny:/opt/scrutiny/config # Scrutiny configuration.
+
+    #############################################
+    # Dozzle: Docker compose log monitoring.    #
+    #############################################
+
+    dozzle:
+        <<: *defaults
+        container_name: dozzle
+        image: ghcr.io/amir20/dozzle:latest
+        hostname: dozzle
+        environment:
+            DOZZLE_ENABLE_ACTIONS: "true" # Enables container actions.
+            DOZZLE_ENABLE_SHELL: "true" # Allows access to container shells.
+        healthcheck:
+            interval: 3s
+            retries: 3
+            start_period: 30s
+            test: ["CMD", "/dozzle", "healthcheck"]
+            timeout: 30s
+        networks:
+            - infra # Internal infra network.
+        ports:
+            - ${DOZZLE_PORT:-8082}:8080/tcp # Dozzle web interface.
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock # Real Docker socket access, ooooh scary!
+            - dozzle:/data # Dozzle configuration and database.
