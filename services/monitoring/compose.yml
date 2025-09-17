@@ -68,3 +68,4 @@ services:
             - ${DOZZLE_PORT:-8082}:8080/tcp # Dozzle web interface.
         volumes:
             - dozzle:/data # Dozzle configuration and database.
+            - /var/run/docker.sock:/var/run/docker.sock # Host Docker socket mount. SCARY!!!
