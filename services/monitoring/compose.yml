@@ -49,8 +49,13 @@ services:
         image: ghcr.io/amir20/dozzle:latest
         hostname: dozzle
         environment:
+            DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
             DOZZLE_ENABLE_ACTIONS: "true" # Enables container actions.
             DOZZLE_ENABLE_SHELL: "true" # Allows access to container shells.
+        depends_on:
+            socket-proxy:
+                condition: service_healthy # Require socket-proxy to be healthy before starting.
+                restart: true
         healthcheck:
             interval: 3s
             retries: 3
@@ -62,5 +67,4 @@ services:
         ports:
             - ${DOZZLE_PORT:-8082}:8080/tcp # Dozzle web interface.
         volumes:
-            - /var/run/docker.sock:/var/run/docker.sock # Real Docker socket access, ooooh scary!
             - dozzle:/data # Dozzle configuration and database.

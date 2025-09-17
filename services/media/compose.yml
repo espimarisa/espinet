@@ -71,17 +71,20 @@ services:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
             <<: *defaults-env
+            BLOCK_ADS: "off" # https://github.com/qdm12/gluetun/issues/765
             BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
-            DOT: "off" # Disable DoT due to Gluetun issues.
+            BLOCK_SURVEILLANCE: "off" # https://github.com/qdm12/gluetun/issues/765            DOT_PROVIDERS: "quad9" # Use Quad9 for DOT; Cloudflare introduces weird issues.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports to use for server-side VPN forwarding; provided by VPN service provider.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
+            HTTPPROXY: "off" # Disable the built-in HTTP proxy.
             PORT_FORWARD_ONLY: "${PORT_FORWARD_ONLY}" # If on, only connect to P2P servers.
             SERVER_CITIES: "${SERVER_CITIES}" # VPN server cities to connect to.
             SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # VPN server countries to connect to.
             SERVER_REGIONS: "${SERVER_REGIONS}" # VPN server regions to connect to.
+            SHADOWSOCKS: "off" # Disable the built-in Shadowsocks server.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
-            VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{PORTS}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1' # Attempt to update qBittorrent port; local auth bypass needs to be on. Edit port above if need be.
+            VPN_PORT_FORWARDING_STATUS_FILE: "/gluetun/forwarded_port" # Write the forwarded port file.
             VPN_PORT_FORWARDING: "${VPN_PORT_FORWARDING}" # If on, enables P2P port forwarding.
             VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
@@ -92,6 +95,12 @@ services:
             WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # Preshared key from the VPN provider's configuration file.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
             WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from the VPN provider's configuration file.
+        healthcheck:
+            interval: 1m
+            retries: 3
+            start_period: 30s
+            test: "ping -c 1 www.quad9.net || exit 1"
+            timeout: 3s
         networks:
             - gluetun # Gluetun VPN network.
         ports:
@@ -119,12 +128,40 @@ services:
             <<: *defaults-env
             DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent to /vuetorrent.
             WEBUI_PORT: "${QBITTORRENT_PORT:-8080}" # Sets the web interface port.
+        labels:
+            deunhealth.restart.on.unhealthy: "true" # Auto-restart when unhealthy.
         healthcheck:
             <<: *defaults-healthcheck
-            test: "curl -f http://127.0.0.1:${QBITTORRENT_PORT:-8080} || exit 1"
+            test: "ifconfig | grep -q eth0"
         volumes:
             - downloads:/downloads # Root path to store downloaded files into.
             - qbittorrent:/config # qBittorrent configuration and database.
+
+    #############################################
+    # qBittorrent Port Manager: Sync qBit port. #
+    #############################################
+
+    qbittorrent-port-manager:
+        <<: *defaults
+        container_name: qbittorrent-port-manager
+        image: jopiermeier/gluetun-qbittorrent-port-manager:latest
+        network_mode: service:gluetun # Route all networking through Gluetun.
+        read_only: true
+        cap_drop:
+            - ALL # Remove all permissions.
+        depends_on:
+            gluetun:
+                condition: service_healthy # Require Gluetun to be healthy before connecting.
+                restart: true
+            qbittorrent:
+                condition: service_started # Require qBittorrent to be started before connecting.
+                restart: true
+        environment:
+            <<: *defaults-env
+            QBITTORRENT_USER: "${QBITTORRENT_USER}" # qBittorrent web interface username.
+            QBITTORRENT_PASS: "${QBITTORRENT_PASS}" # qBittorrent web interface password.
+        volumes:
+            - gluetun:/tmp/gluetun # Gluetun data.
 
     #############################################
     # Deemix: Deezer music downloader.          #

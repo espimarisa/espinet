@@ -111,3 +111,22 @@ services:
             - infra # Internal infra network.
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
+
+    #############################################
+    # Deunhealth: Restart unhealthy containers. #
+    #############################################
+
+    deunhealth:
+        <<: *defaults
+        container_name: deunhealth
+        image: qmcgaw/deunhealth:latest
+        hostname: deunhealth
+        depends_on:
+            socket-proxy:
+                condition: service_healthy # Require socket-proxy to be healthy before starting.
+                restart: true
+        environment:
+            DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
+            TZ: "${TZ}" # Local timezone to use.
+        networks:
+            - infra # Internal infra network.
