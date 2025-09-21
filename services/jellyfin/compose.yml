@@ -51,7 +51,7 @@ volumes:
         name: jellyfin-volume # $ docker volume create jellyfin
     jellyfin-cache:
         external: true
-        name: jellyfin-cache # $ docker volume create jellyfin-cache
+        name: jellyfin-cache-volume # $ docker volume create jellyfin-cache
     media-library:
         name: media-library-volume
         driver_opts:

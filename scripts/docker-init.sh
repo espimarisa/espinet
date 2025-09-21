@@ -6,6 +6,7 @@ docker network create --ipv6=false gluetun-network
 docker network create --ipv6=false --internal=true socket-proxy-network
 
 # Creates volumes.
+docker volume create caddy-volume
 docker volume create cleanuparr-volume
 docker volume create deemix-volume
 docker volume create dozzle-volume
