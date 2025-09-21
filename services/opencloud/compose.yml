@@ -6,11 +6,12 @@ services:
 
     opencloud:
         image: opencloudeu/opencloud-rolling:3
+        container_name: opencloud
         entrypoint: /bin/sh
         hostname: opencloud
+        restart: unless-stopped
         command:
             ["-c", "opencloud init --insecure true || true; opencloud server"]
-        restart: unless-stopped
         environment:
             FRONTEND_ARCHIVER_MAX_SIZE: "10000000000" # Max size of 10GB for web archives.
             IDM_ADMIN_PASSWORD: "${OPENCLOUD_ADMIN_PASSWORD}" # Configures the initial admin password.
