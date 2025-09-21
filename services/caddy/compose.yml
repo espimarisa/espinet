@@ -1,0 +1,62 @@
+---
+services:
+    ###############################################################################
+    # Caddy: Reverse proxy and web server with automatic HTTPS support.           #
+    ##############################################################################
+
+    caddy:
+        image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.16
+        container_name: caddy
+        hostname: caddy
+        restart: unless-stopped
+        depends_on:
+            socket-proxy:
+                condition: service_healthy
+                restart: true
+        dns: # Bypass local DNS rewrites so we can actually get certs.
+            - "1.1.1.1"
+            - "1.0.0.1"
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
+            CADDY_INGRESS_NETWORKS: "caddy" # Listen for traffic coming from the caddy network.
+            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Cloudflare account token with DNS Zone editing to domains.
+            DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
+        labels:
+            caddy_0: "(internal)" # Internal directive.
+            caddy_0.@external: "not remote_ip private_ranges" # Defines external ranges for the internal directive.
+            caddy_0.@internal: "remote_ip private_ranges" # Defines internal ranges for the internal directive.
+            caddy_0.respond: "@external `Forbidden` 403" # Throw 403 for external ranges in the internal directive.
+            caddy_0.reverse_proxy: "@internal {args[:]}" # Reverse proxy internal traffic.
+            caddy_1: "(external)" # External directive.
+            caddy_1.reverse_proxy: "{args[:]}" # Reverse proxy external traffic.
+            caddy.acme_dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for ACME DNS challenges.
+            caddy.email: "${ACME_EMAIL}" # Email to use for ACME DNS challenges.
+        networks:
+            - caddy
+            - socket-proxy
+        ports:
+            - 80:80/tcp # HTTP traffic.
+            - 443:443/tcp # HTTPS traffic.
+            - 443:443/udp # HTTPS traffic.
+        security_opt:
+            - no-new-privileges:true
+        volumes:
+            - caddy:/data
+
+networks:
+    caddy:
+        driver: bridge
+        enable_ipv6: false
+        external: true
+        name: caddy-network # $ docker network create --ipv6=false caddy-network
+    socket-proxy:
+        driver: bridge
+        enable_ipv6: false
+        external: true # $ docker network create --ipv6=false socket-proxy-network
+        internal: true # Isolates the network from the outside.
+        name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
+
+volumes:
+    caddy:
+        external: true
+        name: caddy-volume # $ docker volume create caddy-volume

@@ -1,0 +1,53 @@
+---
+services:
+    ###############################################################################
+    # Snapp: Self-hosted URL shortener.                                           #
+    ##############################################################################
+
+    snapp:
+        image: uraniadev/snapp:0.9-rc-029
+        container_name: snapp
+        hostname: snapp
+        restart: unless-stopped
+        environment:
+            ADMIN_PASSWORD: "${SNAPP_PASSWORD:-password}" # Configures the default admin password.
+            ADMIN_USERNAME: "${SNAPP_USERNAME:-admin}" # Configures the default admin username.
+            ALLOW_UNSECURE_HTTP: "false" # Disallow shortening http-only links.
+            DATABASE_PROVIDER: "sqlite" # Use SQLite as the database provider.
+            DATABASE_URL: "file:./db.sqlite" # Use the local SQLite database.
+            DISABLE_HOME: "true" # Disables the default landing page.
+            ENABLE_SIGNUP: "false" # Do not allow public signups.
+            ENABLED_MFA: "true" # Require MFA for all users.
+            ORIGIN: "https://${SNAPP_URL}" # Configure the origin URL to be the published external URL.
+            PUBLIC_URL: "https://${SNAPP_URL}" # Configures the public URL to be the published external URL.
+            SMTP_FROM: "${SMTP_SENDER}" # External email server sender.
+            SMTP_HOST: "${SMTP_HOST}" # External email server host.
+            SMTP_PASS: "${SMTP_PASSWORD}" # External email server password.
+            SMTP_PORT: "${SMTP_PORT}" # External email server port.
+            SMTP_USER: "${SMTP_USERNAME}" # External email server username.
+            TOKEN_SECRET: "${SNAPP_SECRET}" # Configures the secret to use.
+        healthcheck:
+            interval: 1m
+            start_period: 30s
+            test: "curl -f http://127.0.0.1:3000/health || exit 1"
+        labels:
+            caddy: "${SNAPP_URL}" # Reverse proxy traffic to the published URL.
+            caddy.import: "external snapp:3000" # Reverse proxy internal traffic.
+            caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL for certificates.
+            caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: "tls1.3" # Require TLS 1.3.
+        networks:
+            - caddy
+        ports:
+            - ${SNAPP_PORT:-3000}:3000/tcp # Web interface.
+        security_opt:
+            - no-new-privileges:true
+        volumes:
+            - "${SNAPP_DATA_PATH}/db.sqlite:/app/dbschema/sqlite/prisma/db.sqlite" # Configuration and data file.
+
+networks:
+    caddy:
+        driver: bridge
+        enable_ipv6: false
+        external: true
+        name: caddy-network # $ docker network create --ipv6=false caddy-network

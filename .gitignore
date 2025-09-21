@@ -1,57 +1,34 @@
-# Cache and temporary files.
 ._*
 .cache/
-*~
-
-# Database files.
-*.db*
-*.sql
-*.sqlite*
-
-# Dependencies.
-node_modules/
-
-# Diff and patch files.
-*.BACKUP.*
-*.BASE.*
-*.diff
-*.LOCAL.*
-*.orig
-*.patch
-*.REMOTE.*
-
-# Logs and reports.
-*.log*
-*.pid
-*.pid.lock
-logs/
-
-# Operating system files.
 .directory
 .DocumentRevisions-V100
 .DS_Store
+.env*
 .snapshots/
 .Spotlight-V100
 .Trashes
 [Dd]esktop.ini
 *.cab
+*.db*
+*.key
 *.lnk
+*.log*
 *.msi
 *.msix
 *.msm
 *.msp
-*.stackdump
-*core
-$RECYCLE.BIN/
-ehthumbs*.db
-Thumbs.db*
-
-# Secrets and environment variables.
-.env*
-*.key
 *.p12
 *.pem
 *.pfx
+*.pid*
+*.sqlite*
+*.stackdump
+*~
+*core
+$RECYCLE.BIN/
+ehthumbs*.db
+node_modules/
+Thumbs.db*
 
 # Explicitly allowed files.
 !.env.example

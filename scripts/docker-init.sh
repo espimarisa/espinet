@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # Creates networks.
-docker network create caddy-network
-docker network create gluetun-network
-docker network create infra-network
+docker network create --ipv6=false caddy-network
+docker network create --ipv6=false gluetun-network
+docker network create --ipv6=false --internal=true socket-proxy-network
 
 # Creates volumes.
 docker volume create cleanuparr-volume
@@ -13,7 +13,6 @@ docker volume create gluetun-volume
 docker volume create jellyfin-cache-volume
 docker volume create jellyfin-volume
 docker volume create lidarr-volume
-docker volume create opencloud-volume
 docker volume create profilarr-volume
 docker volume create prowlarr-volume
 docker volume create qbittorrent-volume

@@ -1,96 +1,22 @@
+---
 include:
-    - ./services/apps/compose.yml # Apps stack.
-    - ./services/cloud/compose.yml # Cloud stack.
-    - ./services/infra/compose.yml # Infrastructure stack.
-    - ./services/media/compose.yml # Media management stack.
-    - ./services/monitoring/compose.yml # Monitoring stack.
-
-networks:
-    caddy:
-        external: true
-        name: caddy-network # External Caddy network; reverse proxied.
-    infra:
-        external: true
-        internal: true
-        name: infra-network # Internal infrastructure network.
-    gluetun:
-        external: true
-        name: gluetun-network # Gluetun network; service:gluetun = VPN'd; networks: [gluetun] = DNS.
-
-volumes:
-    caddy:
-        external: true
-        name: caddy-volume # Caddy configuration and certificates.
-    cleanuparr:
-        external: true
-        name: cleanuparr-volume # Cleanuparr configuration and database.
-    deemix:
-        external: true
-        name: deemix-volume # Deemix configuration and database.
-    dozzle:
-        external: true
-        name: dozzle-volume # Dozzle configuration and database.
-    gluetun:
-        external: true
-        name: gluetun-volume # Gluetun database.
-    jellyfin:
-        external: true
-        name: jellyfin-volume # Jellyfin configuration and database.
-    jellyfin-cache:
-        external: true
-        name: jellyfin-cache-volume # Jellyfin cache volume; seperate for easier backups.
-    lidarr:
-        external: true
-        name: lidarr-volume # Lidarr configuration and database.
-    opencloud:
-        external: true
-        name: opencloud-volume # OpenCloud configuration.
-    profilarr:
-        external: true
-        name: profilarr-volume # Profilarr configuration and database.
-    prowlarr:
-        external: true
-        name: prowlarr-volume # Prowlarr configuration and database.
-    qbittorrent:
-        external: true
-        name: qbittorrent-volume # qBittorrent configuration and database.
-    radarr:
-        external: true
-        name: radarr-volume # Radarr configuration and database.
-    readarr:
-        external: true
-        name: readarr-volume # Readarr configuration and database.
-    sonarr:
-        external: true
-        name: sonarr-volume # Sonarr configuration and database.
-    uptime-kuma:
-        external: true
-        name: uptime-kuma-volume # Uptime Kuma configuration and database.
-    downloads:
-        name: downloads-volume
-        driver_opts:
-            device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
-            o: bind
-            type: none
-    media-library:
-        name: media-library-volume
-        driver_opts:
-            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
-            o: bind
-            type: none
-    opencloud-data:
-        driver_opts:
-            device: "${OPENCLOUD_DATA_PATH}" # Root path to store OpenCloud user data.
-            o: bind
-            type: none
-        name: opencloud-data-volume
-    thelounge:
-        driver_opts:
-            device: "${THELOUNGE_DATA_PATH}" # Root path to store The Lounge data.
-            o: bind
-            type: none
-    vaultwarden:
-        driver_opts:
-            device: "${VAULTWARDEN_DATA_PATH}" # Root path to store Vaultwarden data.
-            o: bind
-            type: none
+    - ./services/deemix/compose.yml
+    - ./services/dozzle/compose.yml
+    - ./services/flaresolverr/compose.yml
+    - ./services/gluetun/compose.yml
+    - ./services/jellyfin/compose.yml
+    - ./services/lidarr/compose.yml
+    - ./services/mam-ip-helper/compose.yml
+    - ./services/opencloud/compose.yml
+    - ./services/profilarr/compose.yml
+    - ./services/prowlarr/compose.yml
+    - ./services/qbittorrent/compose.yml
+    - ./services/radarr/compose.yml
+    - ./services/readarr/compose.yml
+    - ./services/snapp/compose.yml
+    - ./services/socket-proxy/compose.yml
+    - ./services/sonarr/compose.yml
+    - ./services/thelounge/compose.yml
+    - ./services/unpackerr/compose.yml
+    - ./services/uptime-kuma/compose.yml
+    - ./services/vaultwarden/compose.yml
