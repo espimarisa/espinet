@@ -1,31 +1,30 @@
 #!/bin/bash
 
+# Exit immediately if a command exits with a non-zero status.
+set -e
+
 ###############################################################################
-# This script scans for Featurettes folders, sometimes included in BD or DVD  #
-# releases of movies, and will import them when importing movies to Radarr.   #
-# Configure Radarr to run this script post-import, wherever it's mounted at.  #
-# shellcheck disable=SC2154													  #
+# This script scans for a "Featurettes" folder alongside a movie file and    #
+# copies it to the movie's final destination folder in the library.           #
+# Configure Radarr to run this script on import.                              #
+# shellcheck disable=SC2154                                                   #
 ###############################################################################
 
-# Source folder path from Radarr's internal variable.
-source_path="$radarr_moviefile_sourcepath"
+echo "--- Radarr Extras Script Started ---"
+source_folder="$radarr_moviefile_sourcefolder"
+destination_folder="$radarr_movie_path"
+featurettes_source_path="$source_folder/Featurettes"
+featurettes_dest_path="$destination_folder/Featurettes"
 
-# Extracts the movie filename from the import path.
-movie_filename="${radarr_moviefile_path##*/}"
-
-# Constructs the source "Featurettes" folder path.
-featurettes_source_path="$source_path/$movie_filename/Featurettes"
-
-# Construct the destination "Featurettes" folder path.
-featurettes_dest_path="$radarr_moviefile_path/Featurettes"
-
-# Checks to see if the source "Featurettes" folder exists.
 if [ -d "$featurettes_source_path" ]; then
-	# Copy the "Featurettes" folder to the import folder.
-	cp -rf "$featurettes_source_path" "$featurettes_dest_path"
-	echo "Featurettes folder copied to: $featurettes_dest_path"
-	exit 0
+	echo "Found 'Featurettes' folder at: $featurettes_source_path"
+	echo "Copying to: $featurettes_dest_path"
+	cp -rpf "$featurettes_source_path" "$destination_folder"
+
+	echo "Successfully copied 'Featurettes' folder."
 else
-	echo "No Featurettes folder was found, not copying."
-	exit 0
+	echo "No 'Featurettes' folder found in source directory. Nothing to do."
 fi
+
+echo "--- Radarr Extras Script Finished ---"
+exit 0
