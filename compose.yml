@@ -1,5 +1,8 @@
 ---
 include:
+    - ./services/caddy/compose.yml
+    - ./services/cleanuparr/compose.yml
+    - ./services/cloudflare-ddns/compose.yml
     - ./services/deemix/compose.yml
     - ./services/dozzle/compose.yml
     - ./services/flaresolverr/compose.yml
