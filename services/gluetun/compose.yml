@@ -5,7 +5,7 @@ services:
     ##############################################################################
 
     gluetun:
-        image: ghcr.io/qdm12/gluetun:v3
+        image: ghcr.io/qdm12/gluetun:v3.39.1 # Held back due to odd issues.
         container_name: gluetun
         hostname: gluetun
         restart: unless-stopped
@@ -14,6 +14,7 @@ services:
         devices:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
+            DOT: "off" # Disables DOT due to weird issues.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of local subnets allowed to access the gluetun network.
             HEALTH_VPN_DURATION_INITIAL: "60s" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/healthcheck.md
             PGID: "${PGID}" # Local group to run as.
