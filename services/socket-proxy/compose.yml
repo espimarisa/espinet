@@ -21,8 +21,7 @@ services:
             SP_ALLOWHEALTHCHECK: "true" # Enables healthcheck support.
             SP_LISTENIP: "0.0.0.0" # Only listen on 0.0.0.0.
         healthcheck:
-            start_interval: 5s
-            interval: 30s
+            interval: 10s
             test: ["CMD", "./healthcheck"]
             timeout: 5s
         networks:
