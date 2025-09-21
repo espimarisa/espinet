@@ -39,6 +39,7 @@ services:
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from the VPN provider's configuration file.
             WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from the VPN provider's configuration file.
         networks:
+            - caddy
             - gluetun
         ports:
             - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr server.
@@ -50,6 +51,11 @@ services:
             - gluetun:/gluetun
 
 networks:
+    caddy:
+        driver: bridge
+        enable_ipv6: false
+        external: true
+        name: caddy-network # $ docker network create --ipv6=false caddy-network
     gluetun:
         driver: bridge
         enable_ipv6: false

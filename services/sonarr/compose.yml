@@ -24,6 +24,7 @@ services:
             caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
             caddy.tls.protocols: "tls1.3" # Require TLS 1.3.
         networks:
+            - caddy
             - gluetun
         ports:
             - ${SONARR_PORT:-8989}:8989/tcp # Web interface.
@@ -34,6 +35,11 @@ services:
             - media-library:/library
             - sonarr:/config
 networks:
+    caddy:
+        driver: bridge
+        enable_ipv6: false
+        external: true
+        name: caddy-network # $ docker network create --ipv6=false caddy-network
     gluetun:
         driver: bridge
         enable_ipv6: false
