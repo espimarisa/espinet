@@ -18,6 +18,9 @@ services:
             EMERGENCY_ACCESS_ALLOWED: "true" # Enables emergency access.
             LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimits.
             LOGIN_RATELIMIT_SECONDS: "60" # Configures ratelimit cooldown.
+            PUSH_ENABLED: "${VAULTWARDEN_PUSH_ENABLED}" # Configures notification support. Requires PUSH_INSTALLATION_ID and PUSH_INSTALLATION_KEY.
+            PUSH_INSTALLATION_ID: "${VAULTWARDEN_PUSH_INSTALLATION_ID}" # https://bitwarden.com/host/
+            PUSH_INSTALLATION_KEY: "${VAULTWARDEN_PUSH_INSTALLATION_KEY}" # https://bitwarden.com/host/
             SENDS_ALLOWED: "true" # Enables Bitwarden sends.
             SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS}" # Configures if signups should be enabled.
             SMTP_FROM: "${SMTP_SENDER}" # External email server sender.
