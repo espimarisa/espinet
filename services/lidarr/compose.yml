@@ -5,7 +5,7 @@ services:
     ##############################################################################
 
     lidarr:
-        image: ghcr.io/hotio/lidarr:pr-plugins # use testing until Lidarr fixes their shit
+        image: blampe/lidarr:latest # lidarr is bad
         container_name: lidarr
         hostname: lidarr
         restart: unless-stopped
