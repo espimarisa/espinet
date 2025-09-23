@@ -34,6 +34,56 @@ services:
             - downloads:/downloads
             - media-library:/library
             - lidarr:/config
+
+    slskd:
+        image: slskd/slskd:latest
+        container_name: slskd
+        network_mode: service:gluetun # Route all traffic thru Gluetun.
+        restart: unless-stopped
+        user: ${PUID}:${PGID}
+        depends_on:
+            gluetun:
+                condition: service_healthy
+                restart: true
+        environment:
+            SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
+            TZ: "${TZ}" # Configures the timezone to use.
+        labels:
+            caddy: "soulseek.${INTERNAL_DOMAIN}" # Reverse proxy to the internal domain.
+            caddy.import: "internal gluetun:5030" # Reverse proxy internal traffic.
+            caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL for certificates.
+            caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
+            caddy.tls.protocols: "tls1.3" # Require TLS 1.3.
+        security_opt:
+            - no-new-privileges:true
+        volumes:
+            - slskd:/app
+            - downloads:/downloads
+
+    soularr:
+        image: mrusse08/soularr:latest
+        container_name: soularr
+        network_mode: service:gluetun # Route all traffic thru Gluetun.
+        restart: unless-stopped
+        user: ${PUID}:${PGID}
+        depends_on:
+            gluetun:
+                condition: service_healthy
+                restart: true
+            lidarr:
+                condition: service_healthy
+                restart: true
+            slskd:
+                condition: service_healthy
+                restart: true
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
+        security_opt:
+            - no-new-privileges:true
+        volumes:
+            - downloads:/downloads
+            - soularr:/data
+
 networks:
     caddy:
         driver: bridge
@@ -50,6 +100,9 @@ volumes:
     lidarr:
         external: true
         name: lidarr-volume # $ docker volume create lidarr-volume
+    slskd:
+        external: true
+        name: slskd-volume # $ docker volume create slskd-volume
     downloads:
         name: downloads-volume
         driver_opts:
@@ -60,5 +113,11 @@ volumes:
         name: media-library-volume
         driver_opts:
             device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
+            o: bind
+            type: none
+    soularr:
+        name: soularr-volume
+        driver_opts:
+            device: "${SOULARR_DATA_PATH}" # Root path to store Soularr data.
             o: bind
             type: none
