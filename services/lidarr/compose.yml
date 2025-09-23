@@ -47,6 +47,7 @@ services:
                 restart: true
         environment:
             SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
+            SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
             TZ: "${TZ}" # Configures the timezone to use.
         labels:
             caddy: "soulseek.${INTERNAL_DOMAIN}" # Reverse proxy to the internal domain.
@@ -58,7 +59,7 @@ services:
             - no-new-privileges:true
         volumes:
             - slskd:/app
-            - downloads:/downloads
+            - soulseek-downloads:/downloads
 
     soularr:
         image: mrusse08/soularr:latest
@@ -81,8 +82,8 @@ services:
         security_opt:
             - no-new-privileges:true
         volumes:
-            - downloads:/downloads
             - soularr:/data
+            - soulseek-downloads:/downloads
 
 networks:
     caddy:
@@ -119,5 +120,11 @@ volumes:
         name: soularr-volume
         driver_opts:
             device: "${SOULARR_DATA_PATH}" # Root path to store Soularr data.
+            o: bind
+            type: none
+    soulseek-downloads:
+        name: soulseek-downloads-volume
+        driver_opts:
+            device: "${DOWNLOADS_PATH}/soulseek" # Root path to store downloaded soulseek files into.
             o: bind
             type: none
