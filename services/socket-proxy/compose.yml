@@ -1,0 +1,37 @@
+---
+services:
+    ###############################################################################
+    # Socket Proxy: Proxies the Docker Socket for increased security.             #
+    ###############################################################################
+
+    socket-proxy:
+        image: ghcr.io/11notes/socket-proxy:2.1.4
+        container_name: socket-proxy
+        hostname: socket-proxy
+        read_only: true
+        restart: unless-stopped
+        user: 0:${DOCKER_GID}
+        environment:
+            SOCKET_PROXY_UID: "${PUID}" # User ID to run as.
+            SOCKET_PROXY_GID: "${PGID}" # Group ID to run as.
+            TZ: "${TZ}" # Configures the timezone to run under.
+        expose:
+            - 2375/tcp # Socket proxy port.
+        networks:
+            - socket-proxy
+        volumes:
+            - /run/docker.sock:/run/docker.sock:ro # Host Docker socket mount.
+            - socket-proxy:/run/proxy # Socket proxy volume mount.
+        security_opt:
+            - no-new-privileges:true
+
+networks:
+    socket-proxy:
+        external: true # $ docker network create --internal=true socket-proxy-network
+        internal: true # Isolates the network from the outside.
+        name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
+
+volumes:
+    socket-proxy:
+        external: true
+        name: socket-proxy-volume # $ docker volume create socket-proxy-volume

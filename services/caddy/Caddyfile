@@ -1,0 +1,159 @@
+{
+	##################################
+	# Global options.				 #
+	##################################
+
+	acme_ca https://acme.zerossl.com/v2/DV90
+	acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
+	email {$ACME_EMAIL}
+
+	dynamic_dns {
+		# Use Cloudflare for Dynamic DNS.
+		provider cloudflare {$CLOUDFLARE_API_TOKEN}
+		check_interval 1h
+		versions ipv4
+
+		# Domain and subdomains to automatically update DNS records for.
+		domains {
+			{$DOMAIN} go jellyfin opencloud vault
+		}
+	}
+
+	servers {
+		# Pass origin IP to Docker containers; allow private ranges + Tailscale access.
+		trusted_proxies static private_ranges 100.64.0.0/10
+	}
+}
+
+##################################
+# Reusable directives.		     #
+##################################
+
+
+# Default settings for all directives.
+(default_settings) {
+	encode zstd gzip
+
+	# Enable logging.
+	log {
+		format json
+		output stdout
+	}
+
+	# Global headers to apply.
+	header {
+		-Server
+		Permissions-Policy "interest-cohort=()" # Fuck Google.
+		Referrer-Policy "strict-origin-when-cross-origin" # Strict referrer policy.
+		Strict-Transport-Security "max-age=31536000;" # Enable HSTS.
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+	}
+}
+
+# Internal only directive.
+(internal_only) {
+	@not_internal not remote_ip private_ranges 100.64.0.0/10
+	abort @not_internal
+	import default_settings
+}
+
+##################################
+# Public external routes.	     #
+##################################
+
+# Chhoto.
+{$CHHOTO_SUBDOMAIN}.{$DOMAIN} {
+	import default_settings
+	reverse_proxy chhoto:4567
+}
+
+# Jellyfin.
+{$JELLYFIN_SUBDOMAIN}.{$DOMAIN} {
+	import default_settings
+	reverse_proxy jellyfin:8096
+}
+
+# OpenCloud.
+{$OPENCLOUD_SUBDOMAIN}.{$DOMAIN} {
+	import default_settings
+	reverse_proxy opencloud:9200
+}
+
+# Vaultwarden.
+{$VAULTWARDEN_SUBDOMAIN}.{$DOMAIN} {
+	import default_settings
+
+	# Only allow access to /admin from private_ranges.
+	@block_admin {
+		path /admin*
+		not remote_ip private_ranges 100.64.0.0/10
+	}
+
+	abort @block_admin
+	reverse_proxy vaultwarden:80
+}
+
+##################################
+# Internal routes.				 #
+##################################
+
+# Cleanuparr.
+cleanuparr.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy profilarr:11011
+}
+
+# Dozzle.
+dozzle.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy dozzle:8082
+}
+
+# Lidarr.
+lidarr.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy lidarr:8686
+}
+
+# Profilarr.
+profilarr.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy profilarr:6868
+}
+
+# Prowlarr.
+prowlarr.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy gluetun:9696
+}
+
+# qBittorrent.
+qbittorrent.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy gluetun:8080
+}
+
+# Radarr.
+radarr.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy radarr:7878
+}
+
+# Readarr.
+readarr.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy readarr:8787
+}
+
+# slskd.
+slskd.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy slskd:5030
+}
+
+# Sonarr.
+sonarr.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy sonarr:8989
+}

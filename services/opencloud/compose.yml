@@ -1,0 +1,69 @@
+---
+services:
+    ###############################################################################
+    # OpenCloud: Self-hosted cloud storage.                                       #
+    ###############################################################################
+
+    opencloud:
+        image: opencloudeu/opencloud-rolling:3
+        container_name: opencloud
+        entrypoint: /bin/sh
+        hostname: opencloud
+        restart: unless-stopped
+        user: ${PUID}:${PGID}
+        command:
+            ["-c", "opencloud init --insecure true || true; opencloud server"]
+        environment:
+            FRONTEND_ARCHIVER_MAX_SIZE: "10000000000" # Max size of 10GB for web archives.
+            IDM_ADMIN_PASSWORD: "${OPENCLOUD_ADMIN_PASSWORD}" # Configures the initial admin password.
+            IDM_CREATE_DEMO_USERS: "false" # Do not create demo users.
+            NOTIFICATIONS_SMTP_ENCRYPTION: "${SMTP_TRANSPORT_ENCRYPTION}" # Type of encryption to use or something idk.
+            NOTIFICATIONS_SMTP_HOST: "${SMTP_HOST}" # External SMTP host URL to connect to.
+            NOTIFICATIONS_SMTP_INSECURE: "${SMTP_INSECURE}" # If enabled, allows insecure connections to the external SMTP server.
+            NOTIFICATIONS_SMTP_PASSWORD: "${SMTP_PASSWORD}" # External SMTP email account password to login with.
+            NOTIFICATIONS_SMTP_PORT: "${SMTP_PORT}" # External SMTP port to connect to.
+            NOTIFICATIONS_SMTP_SENDER: "OpenCloud <${SMTP_SENDER}>" # External SMTP address used for sending email notifications.
+            NOTIFICATIONS_SMTP_USERNAME: "${SMTP_USERNAME}" # External SMTP email account username to login with.
+            OC_ADD_RUN_SERVICES: "notifications" # Additional services to start.
+            OC_INSECURE: "false" # Do not run in insecure mode.
+            OC_LOG_COLOR: "true" # Log in color.
+            OC_LOG_LEVEL: "warn" # Log at the warn level.
+            OC_LOG_PRETTY: "true" # Use pretty logs.
+            OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD: "false" # Allow public shares without passwords.
+            OC_SHARING_PUBLIC_WRITEABLE_SHARE_MUST_HAVE_PASSWORD: "true" # Writable public shares must have passwords.
+            OC_URL: "https://${OPENCLOUD_SUBDOMAIN}.${DOMAIN}" # Configures the OpenCloud URL.
+            PROXY_TLS: "false" # Do not use SSL between the reverse proxy and OpenCloud.
+            TZ: "${TZ}" # Configures the timezone to use.
+        expose:
+            - 9200/tcp # Web interface.
+        networks:
+            - caddy
+        volumes:
+            - opencloud-data:/var/lib/opencloud
+            - opencloud:/etc/opencloud
+        cap_drop:
+            - ALL
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        healthcheck:
+            test: "wget --spider https://${OPENCLOUD_SUBDOMAIN}.${DOMAIN} || exit 1"
+        security_opt:
+            - no-new-privileges:true
+
+networks:
+    caddy:
+        external: true
+        name: caddy-network # $ docker network create caddy-network
+
+volumes:
+    opencloud:
+        external: true
+        name: opencloud-volume # $ docker volume create opencloud-volume
+    opencloud-data:
+        name: opencloud-data-volume
+        driver_opts:
+            device: "${OPENCLOUD_DATA_PATH}" # Root path to store OpenCloud user data.
+            o: bind
+            type: none

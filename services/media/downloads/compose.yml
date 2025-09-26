@@ -1,178 +1,145 @@
 ---
-name: media-downloads
-
-# Default Caddy options.
-x-defaults-caddy: &defaults-caddy
-    caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL for certificates.
-    caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
-    caddy.tls.protocols: "tls1.3" # Require TLS 1.3.
-
-# Default environment variables.
-x-defaults-env: &defaults-env
-    PGID: "${PGID}" # Local group to run as.
-    PUID: "${PUID}" # Local user to run as.
-    TZ: "${TZ}" # Configures the timezone to use.
-    UMASK: "${UMASK}" # Default umask to apply to newly created files.
-
-# Default healthcheck options.
-x-defaults-healthcheck: &defaults-healthcheck
-    interval: 1m
-    retries: 3
-    timeout: 3s
-
-# Default options.
-x-defaults: &defaults
-    restart: unless-stopped
-    environment: *defaults-env
-    security_opt:
-        - no-new-privileges:true
-
 services:
     ###############################################################################
-    # Gluetun: VPN client, currently configured for ProtonVPN.                    #
+    # Gluetun: VPN client. I use AirVPN.                                          #
     ###############################################################################
 
     gluetun:
-        <<: *defaults
-        image: ghcr.io/qdm12/gluetun:v3.39.1 # Held back due to weird issues.
+        image: ghcr.io/qdm12/gluetun:v3
         container_name: gluetun
         hostname: gluetun
-        cap_add:
-            - NET_ADMIN # Required for Wireguard configuration.
+        restart: unless-stopped
         devices:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
-            <<: *defaults-env
             BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
-            DOT: "off" # Disable DOT due to weird issues.
-            FIREWALL_OUTBOUND_SUBNETS: "192.168.1.0/24,172.17.0.0/16" # Allow the Docker network to access the Gluetun network.
-            HEALTH_VPN_DURATION_INITIAL: "30s" # Increase the default healthcheck duration.
-            PORT_FORWARD_ONLY: "on" # Only connect to ProtonVPN P2P servers.
+            FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # Allow the Docker network to access the Gluetun network.
+            FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports allowed to be forwarded by the VPN provider.
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             SERVER_CITIES: "${SERVER_CITIES}" # Server cities to connect to.
             SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # Server countries to connect to.
+            SERVER_HOSTNAMES: "${SERVER_HOSTNAMES}" # Server hostnames to connect to.
+            SERVER_NAMES: "${SERVER_NAMES}" # Server names to connect to.
+            SERVER_REGIONS: "${SERVER_REGIONS}" # Server regions to connect to.
+            TZ: "${TZ}" # Configures the timezone to use.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
-            VPN_PORT_FORWARDING_STATUS_FILE: "/gluetun/forwarded_port" # Write the forwarded port file.
-            VPN_PORT_FORWARDING: "on" # Use port forwarding.
-            VPN_SERVICE_PROVIDER: "protonvpn" # Use ProtonVPN.
+            VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers.
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
             WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Addresses from wg0.conf.
-            WIREGUARD_MTU: "1380" # Lower MTU for slightly better throughput.
+            WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Endpoint port from wg0.conf.
+            WIREGUARD_MTU: "1380" # https://github.com/qdm12/gluetun-wiki/issues/140
+            WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # PresharedKey from wg0.conf.
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from wg0.conf.
             WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from wg0.conf.
+        expose:
+            - 5030/tcp # slskd http server.
+            - 50300/tcp # Soulseek traffic.
+            - 8080/tcp # qBittorrent web interface.
+            - 8191/tcp # Flaresolverr server.
+            - 9696/tcp # Prowlarr web interface.
         networks:
             - caddy
             - gluetun
-        ports:
-            - ${FLARESOLVERR_PORT:-8191}:8191/tcp # Flaresolverr server.
-            - ${PROWLARR_PORT:-9696}:9696/tcp # Prowlarr web interface.
-            - ${QBITTORRENT_PORT:-8080}:${QBITTORRENT_PORT:-8080}/tcp # qBittorrent web interface.
-            - ${SLSKD_PORT:-5030}:5030/tcp # slskd http server.
-            - ${SOULSEEK_PORT:-50300}:50300/tcp # Soulseek traffic.
         volumes:
             - gluetun:/gluetun
+        cap_add:
+            - NET_ADMIN # Required for Wireguard configuration.
+        security_opt:
+            - no-new-privileges:true
 
     ###############################################################################
-    # qBittorrent/qbittorrent-port-manager: BitTorrent client; qbit port updater. #
+    # qBittorrent: BitTorrent client.                                             #
     ###############################################################################
 
     qbittorrent:
-        <<: *defaults
-        image: lscr.io/linuxserver/qbittorrent:latest
+        image: ghcr.io/11notes/qbittorrent:5.1.2
         container_name: qbittorrent
         network_mode: service:gluetun # Route all traffic through Gluetun.
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
+        read_only: true
+        restart: unless-stopped
         environment:
-            <<: *defaults-env
-            DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent to /vuetorrent.
-            WEBUI_PORT: "${QBITTORRENT_PORT:-8080}" # Sets the web interface port.
-        labels:
-            <<: *defaults-caddy
-            caddy: "qbittorrent.${INTERNAL_DOMAIN}" # Reverse proxy to the internal domain.
-            caddy.import: "internal gluetun:8080" # Reverse proxy internal traffic.
-        healthcheck:
-            <<: *defaults-healthcheck
-            test: "ifconfig | grep -q eth0"
+            QBITTORRENT_PEER_ID: "-qB5120-" # https://github.com/11notes/docker-qbittorrent/issues/14
+            TZ: "${TZ}" # Configures the timezone to use.
         volumes:
             - downloads:/downloads
-            - qbittorrent:/config
-
-    qbittorrent-port-manager:
-        image: jopiermeier/gluetun-qbittorrent-port-manager:latest
-        container_name: qbittorrent-port-manager
-        network_mode: service:gluetun # Route all traffic through Gluetun.
-        read_only: true
-        cap_drop:
-            - ALL
+            - qbittorrent:/qbittorrent
         depends_on:
+            caddy:
+                condition: service_started
+                restart: true
             gluetun:
                 condition: service_healthy
                 restart: true
-            qbittorrent:
-                condition: service_started
-                restart: true
-        environment:
-            <<: *defaults-env
-            QBITTORRENT_USER: "${QBITTORRENT_USER}" # Configured qBittorrent web interface username.
-            QBITTORRENT_PASS: "${QBITTORRENT_PASS}" # Configured qBittorrent web interface password.
-        volumes:
-            - gluetun:/tmp/gluetun
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
 
     ###############################################################################
     # Prowlarr: Indexer manager for 'ARR apps.                                    #
     ###############################################################################
 
     prowlarr:
-        <<: *defaults
-        image: ghcr.io/hotio/prowlarr:release
+        image: ghcr.io/11notes/prowlarr:2.0.5
         container_name: prowlarr
         network_mode: service:gluetun # Route all traffic through Gluetun.
+        read_only: true
+        restart: unless-stopped
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
+        volumes:
+            - downloads:/downloads
+            - prowlarr:/prowlarr/etc
+        tmpfs:
+            - "/tmp:uid=1000,gid=1000"
         depends_on:
+            caddy:
+                condition: service_started
+                restart: true
             gluetun:
                 condition: service_healthy
                 restart: true
-        labels:
-            <<: *defaults-env
-            caddy: "prowlarr.${INTERNAL_DOMAIN}" # Reverse proxy to the internal domain.
-            caddy.import: "internal gluetun:9696" # Reverse proxy internal traffic.
-        healthcheck:
-            <<: *defaults-healthcheck
-            test: "curl -f http://127.0.0.1:9696/ping || exit 1"
-        volumes:
-            - downloads:/downloads
-            - prowlarr:/config
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
 
     ###############################################################################
     # Flaresolverr: DDoS-Guard and Cloudflare captcha solver.                     #
     ###############################################################################
 
     flaresolverr:
-        <<: *defaults
         image: ghcr.io/flaresolverr/flaresolverr:v3.4.1
         container_name: flaresolverr
         network_mode: service:gluetun # Route all traffic through Gluetun.
+        restart: unless-stopped
         user: ${PUID}:${PGID}
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
         depends_on:
             gluetun:
                 condition: service_healthy
                 restart: true
         healthcheck:
-            <<: *defaults-healthcheck
             test: "curl -f http://127.0.0.1:8191/health || exit 1"
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
 
     ###############################################################################
     # Unpackerr: Automatic extraction of downloaded files.                        #
     ###############################################################################
 
     unpackerr:
-        <<: *defaults
-        image: ghcr.io/hotio/unpackerr:release
+        image: ghcr.io/unpackerr/unpackerr:0.14.5
         container_name: unpackerr
         hostname: unpackerr
+        restart: unless-stopped
+        user: ${PUID}:${PGID}
         environment:
-            <<: *defaults-env
+            TZ: "${TZ}" # Configures the timezone to use.
             UN_LOG_FILE: "/downloads/unpackerr.log" # Log file location.
             UN_RADARR_0_API_KEY: "${RADARR_API_KEY}" # Radarr API key.
             UN_RADARR_0_URL: "http://radarr:7878" # Primary Radarr URL.
@@ -188,67 +155,75 @@ services:
     ###############################################################################
 
     deemix:
-        <<: *defaults
         image: ghcr.io/bambanah/deemix:v4.3.5
         container_name: deemix
+        restart: unless-stopped
         hostname: deemix
-        user: ${PUID}:${PGID}
         environment:
-            <<: *defaults-env
             DEEMIX_SINGLE_USER: "true" # Use one global user.
+            TZ: "${TZ}" # Configures the timezone to use.
             UMASK_SET: "${UMASK}" # Umask to apply to newly created files.
-        healthcheck:
-            <<: *defaults-healthcheck
-            test: "curl -f http://127.0.0.1:6595 || exit 1"
-        labels:
-            <<: *defaults-caddy
-            caddy: "deemix.${INTERNAL_DOMAIN}" # Reverse proxy to the internal domain.
-            caddy.import: "internal deemix:6595" # Reverse proxy internal traffic.
         networks:
             - caddy
             - gluetun
-        ports:
-            - ${DEEMIX_PORT:-6595}:6595/tcp # Web interface.
+        expose:
+            - 6595/tcp
         volumes:
             - deemix-downloads:/downloads
             - deemix:/config
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        healthcheck:
+            test: "curl -f http://127.0.0.1:6595 || exit 1"
+        security_opt:
+            - no-new-privileges:true
 
     ###############################################################################
     # slskd: Web-based Soulseek client.                                           #
     ###############################################################################
 
     slskd:
-        <<: *defaults
-        image: slskd/slskd:latest
+        image: ghcr.io/slskd/slskd:0.23.2
         container_name: slskd
         network_mode: service:gluetun # Route all traffic thru Gluetun.
+        restart: unless-stopped
         user: ${PUID}:${PGID}
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
         environment:
-            <<: *defaults-env
+            TZ: "${TZ}" # Configures the timezone to use.
             SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
             SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
-        labels:
-            <<: *defaults-caddy
-            caddy: "soulseek.${INTERNAL_DOMAIN}" # Reverse proxy to the internal domain.
-            caddy.import: "internal gluetun:5030" # Reverse proxy internal traffic.
         volumes:
             - slskd:/app
             - soulseek-downloads:/downloads
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+            gluetun:
+                condition: service_healthy
+                restart: true
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
 
     ###############################################################################
     # Soularr: Soulseek integration for lidarr.                                   #
     ###############################################################################
 
     soularr:
-        <<: *defaults
-        image: mrusse08/soularr:latest
+        image: ghcr.io/mrusse/soularr:main
         container_name: soularr
-        network_mode: service:gluetun # Route all traffic thru Gluetun.
+        network_mode: service:gluetun
+        restart: unless-stopped
         user: ${PUID}:${PGID}
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
+        volumes:
+            - soularr:/data
+            - soulseek-downloads:/downloads
         depends_on:
             gluetun:
                 condition: service_healthy
@@ -259,30 +234,33 @@ services:
             slskd:
                 condition: service_healthy
                 restart: true
-        volumes:
-            - soularr:/data
-            - soulseek-downloads:/downloads
+        cap_drop:
+            - ALL
+        security_opt:
+            - no-new-privileges:true
 
     ###############################################################################
     # mam-ip-helper: Update MyAnonaMouse seedbox session to match Gluetun's IP.   #
     ###############################################################################
 
     mam-ip-helper:
-        <<: *defaults
-        image: tyzen9/myanonamouse-ip-helper:latest
+        image: tyzen9/myanonamouse-ip-helper:1.0.0
         container_name: mam-ip-helper
         network_mode: service:gluetun # Route all traffic through Gluetun.
         read_only: true
+        restart: unless-stopped
         user: ${PUID}:${PGID}
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
+            MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
         cap_drop:
             - ALL
         depends_on:
             gluetun:
                 condition: service_healthy
                 restart: true
-        environment:
-            <<: *defaults-env
-            MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
+        security_opt:
+            - no-new-privileges:true
 
 networks:
     caddy:
@@ -308,27 +286,24 @@ volumes:
     slskd:
         external: true
         name: slskd-volume # $ docker volume create slskd-volume
+    soularr:
+        external: true
+        name: soularr-volume
     deemix-downloads:
-        name: downloads-volume
+        name: deemix-downloads-volume
         driver_opts:
             device: "${DOWNLOADS_PATH}/deemix" # Root path to store downloaded deemix files into.
+            o: bind
+            type: none
+    soulseek-downloads:
+        name: soulseek-downloads-volume
+        driver_opts:
+            device: "${DOWNLOADS_PATH}/soulseek" # Root path to store downloaded soulseek files into.
             o: bind
             type: none
     downloads:
         name: downloads-volume
         driver_opts:
             device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
-            o: bind
-            type: none
-    soularr:
-        name: soularr-volume
-        driver_opts:
-            device: "${SOULARR_DATA_PATH}" # Root path to store Soularr data.
-            o: bind
-            type: none
-    soulseek-downloads:
-        name: downloads-volume
-        driver_opts:
-            device: "${DOWNLOADS_PATH}/soulseek" # Root path to store downloaded soulseek files into.
             o: bind
             type: none

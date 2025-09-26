@@ -1,0 +1,40 @@
+---
+services:
+    ###############################################################################
+    # The Lounge: Web based IRC client.                                           #
+    ###############################################################################
+
+    thelounge:
+        image: ghcr.io/thelounge/thelounge:4.4.3
+        container_name: thelounge
+        hostname: thelounge
+        restart: unless-stopped
+        user: ${PUID}:${PGID}
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
+        expose:
+            - 9000/tcp # Web interface.
+        networks:
+            - caddy
+        volumes:
+            - thelounge:/var/opt/thelounge
+        cap_drop:
+            - ALL
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        healthcheck:
+            test: "curl -f https://${THELOUNGE_SUBDOMAIN}.${DOMAIN} || exit 1"
+        security_opt:
+            - no-new-privileges:true
+
+networks:
+    caddy:
+        external: true
+        name: caddy-network # $ docker network create caddy-network
+
+volumes:
+    thelounge:
+        external: true
+        name: thelounge-volume # $ docker volume create thelounge-volume

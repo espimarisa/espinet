@@ -1,34 +1,6 @@
 ---
 name: media
 
-# Default Caddy options.
-x-defaults-caddy: &defaults-caddy
-    caddy.tls.ca: "https://acme.zerossl.com/v2/DV90" # Use ZeroSSL for certificates.
-    caddy.tls.dns: "cloudflare $CLOUDFLARE_API_TOKEN" # Use Cloudflare for DNS challenges.
-    caddy.tls.protocols: "tls1.3" # Require TLS 1.3.
-
-# Default environment variables.
-x-defaults-env: &defaults-env
-    PGID: "${PGID}" # Local group to run as.
-    PUID: "${PUID}" # Local user to run as.
-    TZ: "${TZ}" # Configures the timezone to use.
-    UMASK: "${UMASK}" # Default umask to apply to newly created files.
-
-# Default healthcheck options.
-x-defaults-healthcheck: &defaults-healthcheck
-    interval: 1m
-    retries: 3
-    timeout: 3s
-
-# Default options.
-x-defaults: &defaults
-    restart: unless-stopped
-    environment: *defaults-env
-    networks:
-        - caddy
-    security_opt:
-        - no-new-privileges:true
-
 include:
     - ./downloads/compose.yml # Media download tools.
     - ./management/compose.yml # Media management tools.
@@ -39,44 +11,46 @@ services:
     ###########################################################################
 
     jellyfin:
-        <<: *defaults
-        image: lscr.io/linuxserver/jellyfin:latest
+        image: ghcr.io/hotio/jellyfin:release
         container_name: jellyfin
         hostname: jellyfin
+        restart: unless-stopped
         devices:
-            - /dev/dri:/dev/dri # Video device support.
+            - /dev/dri:/dev/dri # Video device passthrough.
         environment:
-            <<: *defaults-env
-            DOCKER_MODS: "linuxserver/mods:jellyfin-opencl-intel:latest" # Enables the latest OpenCL drivers.
-            JELLYFIN_PublishedServerUrl: "https://${JELLYFIN_URL}" # Configures autodiscovery to use the external URL.
-        healthcheck:
-            <<: *defaults-healthcheck
-            test: "curl -f http://127.0.0.1:8096/health || exit 1"
-        labels:
-            <<: *defaults-caddy
-            caddy: "${JELLYFIN_URL}" # Reverse proxy traffic to the published URL.
-            caddy.import: "external jellyfin:8096" # Reverse proxy internal traffic.
-        ports:
-            - ${JELLYFIN_PORT:-8096}:8096/tcp # Web interface.
+            JELLYFIN_PublishedServerUrl: "https://${JELLYFIN_SUBDOMAIN}.${DOMAIN}" # Configures autodiscovery to use the external URL.
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
+            TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
+        expose:
+            - 8096/tcp
+        networks:
+            - caddy
         volumes:
-            - jellyfin-cache:/config/cache
             - jellyfin:/config
             - media-library:/library:ro
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        healthcheck:
+            test: "curl -f https://${JELLYFIN_SUBDOMAIN}.${DOMAIN}/health || exit 1"
+        security_opt:
+            - no-new-privileges:true
+
 networks:
     caddy:
         external: true
-        name: caddy-network # $ docker network create caddy-network
+        name: caddy-network
 
 volumes:
     jellyfin:
         external: true
-        name: jellyfin-volume # $ docker volume create jellyfin
-    jellyfin-cache:
-        external: true
-        name: jellyfin-cache-volume # $ docker volume create jellyfin-cache
+        name: jellyfin-volume
     media-library:
         name: media-library-volume
         driver_opts:
-            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
+            device: "${MEDIA_LIBRARY_PATH}"
             o: bind
             type: none

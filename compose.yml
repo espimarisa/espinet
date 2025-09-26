@@ -1,6 +1,9 @@
 ---
 include:
-    - ./services/apps/compose.yml
-    - ./services/infra/compose.yml
+    - ./services/caddy/compose.yml
+    - ./services/chhoto/compose.yml
     - ./services/media/compose.yml
-    - ./services/monitoring/compose.yml
+    - ./services/opencloud/compose.yml
+    - ./services/socket-proxy/compose.yml
+    - ./services/thelounge/compose.yml
+    - ./services/vaultwarden/compose.yml

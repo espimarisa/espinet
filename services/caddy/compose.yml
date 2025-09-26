@@ -1,0 +1,57 @@
+---
+services:
+    ###############################################################################
+    # Caddy: Reverse proxy and web server with automatic HTTPS support.           #
+    ###############################################################################
+
+    caddy:
+        image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.23
+        container_name: caddy
+        hostname: caddy
+        restart: unless-stopped
+        env_file:
+            - ../../.env
+        environment:
+            ACME_EMAIL: "${ACME_EMAIL}"
+            CADDY_DOCKER_CADDYFILE_PATH: "/Caddyfile"
+            CADDY_INGRESS_NETWORKS: "caddy" # Listen for traffic coming from the caddy network.
+            CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Cloudflare account token with DNS Zone editing to domains.
+            DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
+            DOMAIN: "${DOMAIN}"
+            INTERNAL_DOMAIN: "${INTERNAL_DOMAIN}"
+            TZ: "${TZ}" # Configures the timezone to use.
+        networks:
+            - caddy
+            - socket-proxy
+        ports:
+            - 80:80/tcp # HTTP traffic.
+            - 443:443/tcp # HTTPS traffic.
+            - 443:443/udp # HTTPS traffic.
+        volumes:
+            - ./Caddyfile:/Caddyfile
+            - caddy:/data
+        cap_add:
+            - NET_ADMIN
+            - NET_BIND_SERVICE
+        cap_drop:
+            - ALL
+        depends_on:
+            socket-proxy:
+                condition: service_healthy
+                restart: true
+        security_opt:
+            - no-new-privileges:true
+
+networks:
+    caddy:
+        external: true
+        name: caddy-network # $ docker network create caddy-network
+    socket-proxy:
+        external: true # $ docker network create --internal=true socket-proxy-network
+        internal: true # Isolates the network from the outside.
+        name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
+
+volumes:
+    caddy:
+        external: true
+        name: caddy-volume

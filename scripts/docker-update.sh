@@ -1,11 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-# Stops currently running containers.
-echo "Stopping containers..."
-docker compose stop
+set -e
 
-# Fetches latest commit and images.
-echo "Pulling latest changes..."
+echo "Pulling latest git commits..."
 git pull
+
+echo "Pulling latest Docker images..."
 docker compose pull
-echo "Finished updating."
+
+echo "Restarting services with new images..."
+docker compose up -d
+
+echo "Cleaning up old images..."
+docker image prune -f
+
+echo "Update complete!"

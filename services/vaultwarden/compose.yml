@@ -1,0 +1,58 @@
+---
+services:
+    ###############################################################################
+    # Vaultwarden: Self-hosted Bitwarden-compatible server.                       #
+    ###############################################################################
+
+    vaultwarden:
+        image: ghcr.io/dani-garcia/vaultwarden:1.34.2
+        container_name: vaultwarden
+        hostname: vaultwarden
+        restart: unless-stopped
+        environment:
+            ADMIN_RATELIMIT_MAX_BURST: "3" # Configures admin ratelimit.
+            ADMIN_RATELIMIT_SECONDS: "300" # Configures admin ratelimit cooldown.
+            ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}" # Admin encryption token.
+            DOMAIN: "https://${VAULTWARDEN_SUBDOMAIN}.${DOMAIN}" # Configures the domain to use.
+            EMAIL_CHANGE_ALLOWED: "true" # Enables email changing.
+            EMERGENCY_ACCESS_ALLOWED: "true" # Enables emergency access.
+            LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimits.
+            LOGIN_RATELIMIT_SECONDS: "60" # Configures ratelimit cooldown.
+            PUSH_ENABLED: "${VAULTWARDEN_PUSH_ENABLED}" # Configures notification support. Requires PUSH_INSTALLATION_ID and PUSH_INSTALLATION_KEY.
+            PUSH_INSTALLATION_ID: "${VAULTWARDEN_PUSH_INSTALLATION_ID}" # https://bitwarden.com/host/
+            PUSH_INSTALLATION_KEY: "${VAULTWARDEN_PUSH_INSTALLATION_KEY}" # https://bitwarden.com/host/
+            SENDS_ALLOWED: "true" # Enables Bitwarden sends.
+            SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS}" # Configures if signups should be enabled.
+            SMTP_FROM: "${SMTP_SENDER}" # External email server sender.
+            SMTP_HOST: "${SMTP_HOST}" # External email server host.
+            SMTP_PASSWORD: "${SMTP_PASSWORD}" # External email server password.
+            SMTP_PORT: "${SMTP_PORT}" # External email server port.
+            SMTP_SECURITY: "force_tls" # External email server encryption method.
+            SMTP_TIMEOUT: "${SMTP_TIMEOUT}" # 15s timeout.
+            SMTP_USERNAME: "${SMTP_USERNAME}" # External email server username.
+            WEB_VAULT_ENABLED: "true" # Enables the web vault.
+            WEBSOCKET_ENABLED: "true" # Enable WS support.
+        expose:
+            - 80/tcp # Web interface.
+        volumes:
+            - vaultwarden:/data
+        cap_drop:
+            - ALL
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        healthcheck:
+            test: "curl -f https://${VAULTWARDEN_SUBDOMAIN}.${DOMAIN}/alive || exit 1"
+        security_opt:
+            - no-new-privileges:true
+
+networks:
+    caddy:
+        external: true
+        name: caddy-network # $ docker network create caddy-network
+
+volumes:
+    vaultwarden:
+        external: true
+        name: vaultwarden-volume # $ docker volume create vaultwarden-volume
