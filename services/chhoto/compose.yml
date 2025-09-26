@@ -20,7 +20,7 @@ services:
         networks:
             - caddy
         volumes:
-            - chhoto:/db/urls.sqlite # Configuration and database.
+            - chhoto:/db # Configuration and database.
         depends_on:
             caddy:
                 condition: service_started
