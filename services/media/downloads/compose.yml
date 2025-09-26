@@ -225,7 +225,7 @@ services:
                 condition: service_healthy
                 restart: true
             lidarr:
-                condition: service_healthy
+                condition: service_started
                 restart: true
             slskd:
                 condition: service_healthy
