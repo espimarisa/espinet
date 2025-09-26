@@ -96,10 +96,9 @@ services:
     ###############################################################################
 
     sonarr:
-        image: ghcr.io/11notes/sonarr:4.0.15
+        image: ghcr.io/hotio/sonarr:release
         container_name: sonarr
         hostname: sonarr
-        read_only: true
         restart: unless-stopped
         environment:
             PGID: "${PGID}" # Local group to run as.
