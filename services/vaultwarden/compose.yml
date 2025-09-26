@@ -42,8 +42,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        healthcheck:
-            test: "curl -f https://${VAULTWARDEN_SUBDOMAIN}.${DOMAIN}/alive || exit 1"
         security_opt:
             - no-new-privileges:true
 

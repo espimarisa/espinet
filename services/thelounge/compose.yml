@@ -24,8 +24,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        healthcheck:
-            test: "curl -f https://${THELOUNGE_SUBDOMAIN}.${DOMAIN} || exit 1"
         security_opt:
             - no-new-privileges:true
 

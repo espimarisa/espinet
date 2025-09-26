@@ -47,8 +47,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        healthcheck:
-            test: "wget --spider https://${OPENCLOUD_SUBDOMAIN}.${DOMAIN} || exit 1"
         security_opt:
             - no-new-privileges:true
 
