@@ -44,7 +44,6 @@
 	header {
 		-Server
 		Permissions-Policy "interest-cohort=()" # Fuck Google.
-		Referrer-Policy "strict-origin-when-cross-origin" # Strict referrer policy.
 		Strict-Transport-Security "max-age=31536000;" # Enable HSTS.
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
