@@ -15,7 +15,7 @@
 
 		# Domain and subdomains to automatically update DNS records for.
 		domains {
-			{$DOMAIN} go jellyfin opencloud vault
+			{$DOMAIN} {$CHHOTO_SUBDOMAIN} {$JELLYFIN_SUBDOMAIN} {$OPENCLOUD_SUBDOMAIN} {$VAULTWARDEN_SUBDOMAIN} {$THELOUNGE_SUBDOMAIN}
 		}
 	}
 
@@ -38,15 +38,6 @@
 	log {
 		format json
 		output stdout
-	}
-
-	# Global headers to apply.
-	header {
-		-Server
-		Permissions-Policy "interest-cohort=()" # Fuck Google.
-		Strict-Transport-Security "max-age=31536000;" # Enable HSTS.
-		X-Content-Type-Options "nosniff"
-		X-Frame-Options "DENY"
 	}
 }
 
