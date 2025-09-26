@@ -9,9 +9,7 @@ services:
         container_name: chhoto
         hostname: chhoto
         restart: unless-stopped
-        user: ${PUID}:${PGID}
         environment:
-            db_url: "/db/urls.sqlite"
             api_key: "${CHHOTO_API_KEY}" # Configures the API key to use.
             password: "${CHHOTO_PASSWORD}" # Configures the password to use.
             site_url: "https://${CHHOTO_SUBDOMAIN}.${DOMAIN}" # Configures the URL to use.
@@ -25,8 +23,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        security_opt:
-            - no-new-privileges:true
 
 networks:
     caddy:
