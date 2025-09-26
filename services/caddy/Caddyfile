@@ -101,7 +101,7 @@
 # Cleanuparr.
 cleanuparr.{$INTERNAL_DOMAIN} {
 	import internal_only
-	reverse_proxy profilarr:11011
+	reverse_proxy cleanuparr:11011
 }
 
 # Dozzle.
