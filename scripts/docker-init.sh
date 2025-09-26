@@ -19,6 +19,7 @@ VOLUMES=(
 	"gluetun-volume"
 	"jellyfin-volume"
 	"lidarr-volume"
+	"opencloud-volume"
 	"profilarr-volume"
 	"prowlarr-volume"
 	"qbittorrent-volume"
@@ -28,6 +29,7 @@ VOLUMES=(
 	"socket-proxy-volume"
 	"sonarr-volume"
 	"soularr-volume"
+	"thelounge-volume"
 	"vaultwarden-volume"
 )
 

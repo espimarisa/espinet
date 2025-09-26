@@ -44,16 +44,18 @@ VOLUMES_TO_BACKUP=(
 	"gluetun-volume"
 	"jellyfin-volume"
 	"lidarr-volume"
+	"opencloud-volume"
 	"profilarr-volume"
 	"prowlarr-volume"
 	"qbittorrent-volume"
 	"radarr-volume"
 	"readarr-volume"
 	"slskd-volume"
+	"socket-proxy-volume"
 	"sonarr-volume"
 	"soularr-volume"
+	"thelounge-volume"
 	"vaultwarden-volume"
-	"socket-proxy-volume"
 )
 
 # Backs up each volume.
