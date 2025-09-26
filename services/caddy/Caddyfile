@@ -93,6 +93,12 @@
 	reverse_proxy vaultwarden:80
 }
 
+# The Lounge.
+{$THELOUNGE_SUBDOMAIN}.{$DOMAIN} {
+	import default_settings
+	reverse_proxy vaultwarden:80
+}
+
 ##################################
 # Internal routes.				 #
 ##################################
