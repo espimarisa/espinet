@@ -30,12 +30,8 @@ services:
         volumes:
             - jellyfin:/config
             - media-library:/library:ro
-        depends_on:
-            caddy:
-                condition: service_started
-                restart: true
         healthcheck:
-            test: "curl -f https://${JELLYFIN_SUBDOMAIN}.${DOMAIN}/health || exit 1"
+            test: "curl -f http://127.0.0.1:8096/health || exit 1"
         security_opt:
             - no-new-privileges:true
 

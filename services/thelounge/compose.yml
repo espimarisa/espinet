@@ -18,10 +18,6 @@ services:
             - caddy
         volumes:
             - thelounge:/var/opt/thelounge
-        depends_on:
-            caddy:
-                condition: service_started
-                restart: true
         security_opt:
             - no-new-privileges:true
 

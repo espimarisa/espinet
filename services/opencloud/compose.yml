@@ -38,15 +38,9 @@ services:
             - 9200/tcp # Web interface.
         networks:
             - caddy
-        extra_hosts:
-            - "${OPENCLOUD_SUBDOMAIN}.${DOMAIN}:127.0.0.1" # stupid nat loopback
         volumes:
             - opencloud-data:/var/lib/opencloud
             - opencloud:/etc/opencloud
-        depends_on:
-            caddy:
-                condition: service_started
-                restart: true
         security_opt:
             - no-new-privileges:true
 

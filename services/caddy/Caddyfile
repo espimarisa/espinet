@@ -87,7 +87,7 @@
 # The Lounge.
 {$THELOUNGE_SUBDOMAIN}.{$DOMAIN} {
 	import default_settings
-	reverse_proxy vaultwarden:80
+	reverse_proxy thelounge:9000
 }
 
 ##################################
