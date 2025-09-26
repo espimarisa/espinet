@@ -27,8 +27,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        healthcheck:
-            test: "curl -f http://127.0.0.1:8686/ping || exit 1"
         security_opt:
             - no-new-privileges:true
 

@@ -121,8 +121,6 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
-        healthcheck:
-            test: "curl -f http://127.0.0.1:8191/health || exit 1"
         cap_drop:
             - ALL
         security_opt:
@@ -175,8 +173,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        healthcheck:
-            test: "curl -f http://127.0.0.1:6595 || exit 1"
         security_opt:
             - no-new-privileges:true
 

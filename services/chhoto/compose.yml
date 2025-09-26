@@ -8,7 +8,6 @@ services:
         image: ghcr.io/sintan1729/chhoto-url:6.3.2
         container_name: chhoto
         hostname: chhoto
-        read_only: true
         restart: unless-stopped
         user: ${PUID}:${PGID}
         environment:
@@ -21,8 +20,6 @@ services:
             - caddy
         volumes:
             - chhoto:/db # Configuration and database.
-        cap_drop:
-            - ALL
         depends_on:
             caddy:
                 condition: service_started
