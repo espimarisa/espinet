@@ -115,6 +115,12 @@ dozzle.{$INTERNAL_DOMAIN} {
 	reverse_proxy dozzle:8082
 }
 
+# Deemix.
+deemix.{$INTERNAL_DOMAIN} {
+	import internal_only
+	reverse_proxy deemix:6595
+}
+
 # Lidarr.
 lidarr.{$INTERNAL_DOMAIN} {
 	import internal_only
