@@ -54,7 +54,7 @@ fi
 echo "Creating directory structure..."
 mkdir -p \
 	"${DOWNLOADS_PATH}"/{deemix,soulseek,torrents/{sonarr,readarr,radarr,lidarr,.incomplete,.torrent-files}} \
-	"${MEDIA_LIBRARY_PATH}"/{anime,audiobooks,books,comics,manga,movies,tv} \
+	"${MEDIA_LIBRARY_PATH}"/{anime,audiobooks,books,comics,manga,movies,tv-shows} \
 	"${OPENCLOUD_DATA_PATH}"
 
 # Applies permissions.
