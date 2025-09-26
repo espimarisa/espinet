@@ -36,8 +36,6 @@ services:
             - 80/tcp # Web interface.
         volumes:
             - vaultwarden:/data
-        cap_drop:
-            - ALL
         depends_on:
             caddy:
                 condition: service_started

@@ -41,8 +41,6 @@ services:
         volumes:
             - opencloud-data:/var/lib/opencloud
             - opencloud:/etc/opencloud
-        cap_drop:
-            - ALL
         depends_on:
             caddy:
                 condition: service_started

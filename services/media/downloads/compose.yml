@@ -104,8 +104,6 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
-        cap_drop:
-            - ALL
         security_opt:
             - no-new-privileges:true
 
@@ -204,8 +202,6 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
-        cap_drop:
-            - ALL
         security_opt:
             - no-new-privileges:true
 
@@ -234,8 +230,6 @@ services:
             slskd:
                 condition: service_healthy
                 restart: true
-        cap_drop:
-            - ALL
         security_opt:
             - no-new-privileges:true
 
