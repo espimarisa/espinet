@@ -34,6 +34,8 @@ services:
             WEBSOCKET_ENABLED: "true" # Enable WS support.
         expose:
             - 80/tcp # Web interface.
+        networks:
+            - caddy
         volumes:
             - vaultwarden:/data
         security_opt:
