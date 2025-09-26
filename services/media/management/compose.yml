@@ -35,13 +35,15 @@ services:
     ###############################################################################
 
     radarr:
-        image: ghcr.io/11notes/radarr:5.27.5
+        image: ghcr.io/hotio/radarr:release
         container_name: radarr
         hostname: radarr
-        read_only: true
         restart: unless-stopped
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 7878/tcp # Web interface.
         networks:
@@ -52,10 +54,6 @@ services:
             - downloads:/downloads
             - media-library:/library
             - radarr:/radarr/etc
-        tmpfs:
-            - "/tmp:uid=1000,gid=1000"
-        cap_drop:
-            - ALL
         depends_on:
             caddy:
                 condition: service_started
@@ -104,7 +102,10 @@ services:
         read_only: true
         restart: unless-stopped
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 8989/tcp # Web interface.
         networks:
@@ -114,10 +115,6 @@ services:
             - downloads:/downloads
             - media-library:/library
             - sonarr:/sonarr/etc
-        tmpfs:
-            - "/tmp:uid=1000,gid=1000"
-        cap_drop:
-            - ALL
         depends_on:
             caddy:
                 condition: service_started

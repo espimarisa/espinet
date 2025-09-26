@@ -53,17 +53,23 @@ services:
     ###############################################################################
 
     qbittorrent:
-        image: ghcr.io/11notes/qbittorrent:5.1.2
+        image: lscr.io/linuxserver/qbittorrent:latest
         container_name: qbittorrent
         network_mode: service:gluetun # Route all traffic through Gluetun.
-        read_only: true
         restart: unless-stopped
         environment:
-            QBITTORRENT_PEER_ID: "-qB5120-" # https://github.com/11notes/docker-qbittorrent/issues/14
+            DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent to /vuetorrent.
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
+        healthcheck:
+            interval: 1m
+            start_period: 30s
+            test: "ifconfig | grep -q eth0"
         volumes:
             - downloads:/downloads
-            - qbittorrent:/qbittorrent
+            - qbittorrent:/config
         depends_on:
             caddy:
                 condition: service_started
@@ -71,8 +77,6 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
-        cap_drop:
-            - ALL
         security_opt:
             - no-new-privileges:true
 
@@ -81,18 +85,18 @@ services:
     ###############################################################################
 
     prowlarr:
-        image: ghcr.io/11notes/prowlarr:2.0.5
+        image: ghcr.io/hotio/prowlarr:release
         container_name: prowlarr
         network_mode: service:gluetun # Route all traffic through Gluetun.
-        read_only: true
         restart: unless-stopped
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         volumes:
             - downloads:/downloads
             - prowlarr:/prowlarr/etc
-        tmpfs:
-            - "/tmp:uid=1000,gid=1000"
         depends_on:
             caddy:
                 condition: service_started
