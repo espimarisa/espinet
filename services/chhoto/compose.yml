@@ -11,6 +11,7 @@ services:
         restart: unless-stopped
         user: ${PUID}:${PGID}
         environment:
+            db_url: "/db/urls.sqlite"
             api_key: "${CHHOTO_API_KEY}" # Configures the API key to use.
             password: "${CHHOTO_PASSWORD}" # Configures the password to use.
             site_url: "https://${CHHOTO_SUBDOMAIN}.${DOMAIN}" # Configures the URL to use.
@@ -19,7 +20,7 @@ services:
         networks:
             - caddy
         volumes:
-            - chhoto:/db # Configuration and database.
+            - chhoto:/db/urls.sqlite # Configuration and database.
         depends_on:
             caddy:
                 condition: service_started
