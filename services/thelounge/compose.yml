@@ -21,8 +21,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        extra_hosts:
-            - "${THELOUNGE_URL}:caddy"
         healthcheck:
             test: "wget --spider http://127.0.0.1:9000 || exit 1"
         security_opt:

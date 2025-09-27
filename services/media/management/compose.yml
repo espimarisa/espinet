@@ -2,15 +2,14 @@
 services:
     # Lidarr: Music manager, organizer, and PVR.
     lidarr:
-        image: ghcr.io/hotio/lidarr:testing-2.14.3.4791 # Use testing until 2.14 API is final.
+        image: ghcr.io/11notes/lidarr:2.13.3
         container_name: lidarr
         hostname: lidarr
+        read_only: true
         restart: unless-stopped
+        tmpfs: /tmp:uid=1000,gid=1000
         environment:
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
-            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 8686/tcp # Web interface.
         networks:
@@ -18,24 +17,23 @@ services:
             - gluetun
         volumes:
             - downloads:/downloads
-            - lidarr:/config
+            - lidarr:/lidarr/etc
             - media-library:/library
-        healthcheck:
-            test: "curl -f http://127.0.0.1:8686/ping || exit 1"
+        cap_drop:
+            - ALL
         security_opt:
             - no-new-privileges:true
 
     # Radarr: Movie manager, organizer, and PVR.
     radarr:
-        image: ghcr.io/hotio/radarr:release-5.27.5.10198
+        image: ghcr.io/11notes/radarr:5.27.5
         container_name: radarr
         hostname: radarr
+        read_only: true
         restart: unless-stopped
+        tmpfs: /tmp:uid=1000,gid=1000
         environment:
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
-            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 7878/tcp # Web interface.
         networks:
@@ -45,15 +43,15 @@ services:
             - ./scripts:/config/scripts
             - downloads:/downloads
             - media-library:/library
-            - radarr:/config
-        healthcheck:
-            test: "curl -f http://127.0.0.1:7878/ping || exit 1"
+            - radarr:/radarr/etc
+        cap_drop:
+            - ALL
         security_opt:
             - no-new-privileges:true
 
     # Readarr: Book manager, organizer, and PVR.
     readarr:
-        image: ghcr.io/faustvii/readarr:0.9.0
+        image: ghcr.io/pennydreadful/bookshelf:hardcover-v0.4.20.91 # Revival of Readarr.
         container_name: readarr
         hostname: readarr
         restart: unless-stopped
@@ -73,20 +71,25 @@ services:
             - readarr:/config
         healthcheck:
             test: "wget --spider http://127.0.0.1:8787/ping || exit 1"
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
+        cap_drop:
+            - ALL
         security_opt:
             - no-new-privileges:true
 
     # Sonarr: TV/Anime series, organizer, and PVR.
     sonarr:
-        image: ghcr.io/hotio/sonarr:release-4.0.15.2941
+        image: ghcr.io/11notes/sonarr:4.0.15
         container_name: sonarr
         hostname: sonarr
         restart: unless-stopped
+        read_only: true
+        tmpfs: /tmp:uid=1000,gid=1000
         environment:
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
-            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 8989/tcp # Web interface.
         networks:
@@ -96,8 +99,8 @@ services:
             - downloads:/downloads
             - media-library:/library
             - sonarr:/config
-        healthcheck:
-            test: "curl -f http://127.0.0.1:8989/ping || exit 1"
+        cap_drop:
+            - ALL
         security_opt:
             - no-new-privileges:true
 
@@ -119,6 +122,12 @@ services:
             - gluetun
         volumes:
             - profilarr:/config
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
+        cap_drop:
+            - ALL
         security_opt:
             - no-new-privileges:true
 
@@ -140,6 +149,12 @@ services:
             - gluetun
         volumes:
             - cleanuparr:/config
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
+        cap_drop:
+            - ALL
         healthcheck:
             test: "curl -f http://127.0.0.1:11011/health || exit 1"
         security_opt:

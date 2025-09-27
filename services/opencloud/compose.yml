@@ -45,7 +45,7 @@ services:
                 condition: service_started
                 restart: true
         extra_hosts:
-            - "${OPENCLOUD_URL}:caddy"
+            - "${OPENCLOUD_URL}:host-gateway"
         healthcheck:
             test: "wget --spider http://127.0.0.1:9200 || exit 1"
         security_opt:

@@ -64,7 +64,6 @@ VOLUMES_TO_BACKUP=(
 	"caddy-volume"
 	"chhoto-volume"
 	"cleanuparr-volume"
-	"deemix-volume"
 	"gluetun-volume"
 	"jellyfin-volume"
 	"lidarr-volume"

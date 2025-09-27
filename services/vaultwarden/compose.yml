@@ -41,8 +41,6 @@ services:
             caddy:
                 condition: service_started
                 restart: true
-        extra_hosts:
-            - "${VAULTWARDEN_URL}:caddy"
         healthcheck:
             test: "curl -f http://127.0.0.1:80/alive || exit 1"
         security_opt:
