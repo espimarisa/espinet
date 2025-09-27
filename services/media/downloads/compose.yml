@@ -1,9 +1,6 @@
 ---
 services:
-    ###############################################################################
-    # Gluetun: VPN client. I use AirVPN.                                          #
-    ###############################################################################
-
+    # Gluetun: VPN client. I use AirVPN currently, see the Gluetun wiki for more.
     gluetun:
         image: ghcr.io/qdm12/gluetun:v3
         container_name: gluetun
@@ -12,29 +9,37 @@ services:
         devices:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
-            BLOCK_MALICIOUS: "off" # https://github.com/qdm12/gluetun/issues/765
-            FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # Allow the Docker network to access the Gluetun network.
-            FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # Ports allowed to be forwarded by the VPN provider.
+            BLOCK_ADS: "off" # Disables Unbound, lowers RAM usage. https://github.com/qdm12/gluetun/issues/765
+            BLOCK_MALICIOUS: "off" # Disables Unbound, lowers RAM usage. https://github.com/qdm12/gluetun/issues/765
+            BLOCK_SURVEILLANCE: "off" # Disables Unbound, lowers RAM usage. https://github.com/qdm12/gluetun/issues/765
+            DOT_PROVIDERS: "quad9" # Use Quad9 for DOT. Cloudflare can occasionally cause issues with trackers.
+            FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of subnets allowed to communicate with Gluetun over the gateway.
+            FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # List of VPN server-side port forwarded ports.
+            HEALTH_TARGET_ADDRESS: "www.quad9.net:443" # Use Quad9 for healthchecks. Cloudflare can occasionally cause issues with cranky IPs.
+            HEALTH_VPN_DURATION_INITIAL: "30s" # Increase the initial healthcheck time to reduce false-positive failures.
+            HTTPPROXY: "off" # Disable the built-in HTTP proxy.
             PGID: "${PGID}" # Local group to run as.
             PUID: "${PUID}" # Local user to run as.
-            SERVER_CITIES: "${SERVER_CITIES}" # Server cities to connect to.
-            SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # Server countries to connect to.
-            SERVER_HOSTNAMES: "${SERVER_HOSTNAMES}" # Server hostnames to connect to.
-            SERVER_NAMES: "${SERVER_NAMES}" # Server names to connect to.
-            SERVER_REGIONS: "${SERVER_REGIONS}" # Server regions to connect to.
+            SERVER_CITIES: "${SERVER_CITIES}" # Optional list of server cities to connect to.
+            SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # Optional list of server countries to connect to.
+            SERVER_HOSTNAMES: "${SERVER_HOSTNAMES}" # Optional list of server hostnames to connect to.
+            SERVER_NAMES: "${SERVER_NAMES}" # Optional list of server names to connect to.
+            SERVER_REGIONS: "${SERVER_REGIONS}" # Optional list of server regions to connect to.
+            SHADOWSOCKS: "off" # Disable the built-in Shadowsocks server.
             TZ: "${TZ}" # Configures the timezone to use.
             UPDATER_PERIOD: "24h" # Update server data every 24 hours.
-            VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers.
+            VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers
             VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
-            WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Addresses from wg0.conf.
-            WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Endpoint port from wg0.conf.
-            WIREGUARD_MTU: "1380" # https://github.com/qdm12/gluetun-wiki/issues/140
-            WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # PresharedKey from wg0.conf.
-            WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from wg0.conf.
-            WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from wg0.conf.
+            WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Address(es) from Wireguard config (i.e 10.XXX.XXX.XXX/32).
+            WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Endpoint port from Wireguard config.
+            WIREGUARD_MTU: "1380" # Use a lower MTU, I was able to get the best AirVPN performance at 1380.
+            WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL: "25s" # Increase the keepalive time a lil bit.
+            WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # PresharedKey from Wireguard config.
+            WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from Wireguard config.
+            WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from Wireguard config.
         expose:
-            - 5030/tcp # slskd http server.
-            - 50300/tcp # Soulseek traffic.
+            - ${SOULSEEK_PORT:-50300}/tcp # Soulseek traffic.
+            - 5030/tcp # slskd web interface.
             - 8080/tcp # qBittorrent web interface.
             - 8191/tcp # Flaresolverr server.
             - 9696/tcp # Prowlarr web interface.
@@ -48,12 +53,9 @@ services:
         security_opt:
             - no-new-privileges:true
 
-    ###############################################################################
-    # qBittorrent: BitTorrent client.                                             #
-    ###############################################################################
-
+    # qBittorrent: BitTorrent client.
     qbittorrent:
-        image: lscr.io/linuxserver/qbittorrent:latest
+        image: lscr.io/linuxserver/qbittorrent:5.1.2
         container_name: qbittorrent
         network_mode: service:gluetun # Route all traffic through Gluetun.
         restart: unless-stopped
@@ -64,9 +66,7 @@ services:
             TZ: "${TZ}" # Configures the timezone to use.
             UMASK: "${UMASK}" # Default umask to apply to newly created files.
         healthcheck:
-            interval: 1m
-            start_period: 30s
-            test: "ifconfig | grep -q eth0"
+            test: "curl -f http://127.0.0.1:8080 || exit 1"
         volumes:
             - downloads:/downloads
             - qbittorrent:/config
@@ -77,12 +77,9 @@ services:
         security_opt:
             - no-new-privileges:true
 
-    ###############################################################################
-    # Prowlarr: Indexer manager for 'ARR apps.                                    #
-    ###############################################################################
-
+    # Prowlarr: Indexer manager.
     prowlarr:
-        image: ghcr.io/hotio/prowlarr:release
+        image: ghcr.io/hotio/prowlarr:release-2.0.5.5160
         container_name: prowlarr
         network_mode: service:gluetun # Route all traffic through Gluetun.
         restart: unless-stopped
@@ -98,13 +95,12 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
+        healthcheck:
+            test: "curl -f http://127.0.0.1:9696/ping || exit 1"
         security_opt:
             - no-new-privileges:true
 
-    ###############################################################################
-    # Flaresolverr: DDoS-Guard and Cloudflare captcha solver.                     #
-    ###############################################################################
-
+    # Flaresolverr: DDoS-Guard and Cloudflare captcha solver.
     flaresolverr:
         image: ghcr.io/flaresolverr/flaresolverr:v3.4.1
         container_name: flaresolverr
@@ -113,19 +109,18 @@ services:
         user: ${PUID}:${PGID}
         environment:
             TZ: "${TZ}" # Configures the timezone to use.
+        cap_drop:
+            - ALL
         depends_on:
             gluetun:
                 condition: service_healthy
                 restart: true
-        cap_drop:
-            - ALL
+        healthcheck:
+            test: "curl -f http://127.0.0.1:8191/health || exit 1"
         security_opt:
             - no-new-privileges:true
 
-    ###############################################################################
-    # Unpackerr: Automatic extraction of downloaded files.                        #
-    ###############################################################################
-
+    # Unpackerr: Automatic extraction of downloaded files.
     unpackerr:
         image: ghcr.io/unpackerr/unpackerr:0.14.5
         container_name: unpackerr
@@ -144,10 +139,7 @@ services:
         volumes:
             - downloads:/downloads
 
-    ###############################################################################
-    # Deemix: Deezer downloads client.                                            #
-    ###############################################################################
-
+    # Deemix: Deezer downloads client.
     deemix:
         image: ghcr.io/bambanah/deemix:v4.3.5
         container_name: deemix
@@ -155,6 +147,8 @@ services:
         hostname: deemix
         environment:
             DEEMIX_SINGLE_USER: "true" # Use one global user.
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
             UMASK_SET: "${UMASK}" # Umask to apply to newly created files.
         networks:
@@ -165,13 +159,12 @@ services:
         volumes:
             - deemix-downloads:/downloads
             - deemix:/config
+        healthcheck:
+            test: "curl -f http://127.0.0.1:6595 || exit 1"
         security_opt:
             - no-new-privileges:true
 
-    ###############################################################################
-    # slskd: Web-based Soulseek client.                                           #
-    ###############################################################################
-
+    # slskd: Soulseek client.
     slskd:
         image: ghcr.io/slskd/slskd:0.23.2
         container_name: slskd
@@ -179,12 +172,21 @@ services:
         restart: unless-stopped
         user: ${PUID}:${PGID}
         environment:
-            TZ: "${TZ}" # Configures the timezone to use.
+            SLSKD_DOWNLOADS_DIR: "/downloads" # mkdir -p ${DOWNLOADS_PATH}/soulseek
+            SLSKD_INCOMPLETE_DIR: "/downloads/.incomplete" # mkdir -p ${DOWNLOADS_PATH}/soulseek/.incomplete
             SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
+            SLSKD_SLSK_LISTEN_PORT: "${SOULSEEK_PORT:-50300}"
+            SLSKD_SLSK_PASSWORD: "${SOULSEEK_PASSWORD}" # Soulseek password to use.
+            SLSKD_SLSK_USERNAME: "${SOULSEEK_USERNAME}" # Soulseek username to use.
             SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
+            TZ: "${TZ}" # Configures the timezone to use.
         volumes:
             - slskd:/app
             - soulseek-downloads:/downloads
+        cap_drop:
+            - ALL
+        healthcheck:
+            test: "wget --spider http://127.0.0.1:5030/health || exit 1"
         depends_on:
             gluetun:
                 condition: service_healthy
@@ -192,10 +194,7 @@ services:
         security_opt:
             - no-new-privileges:true
 
-    ###############################################################################
-    # Soularr: Soulseek integration for lidarr.                                   #
-    ###############################################################################
-
+    # Soularr: Soulseek integration for Lidarr.
     soularr:
         image: ghcr.io/mrusse/soularr:main
         container_name: soularr
@@ -207,12 +206,14 @@ services:
         volumes:
             - soularr:/data
             - soulseek-downloads:/downloads
+        healthcheck:
+            test: "curl -f http://127.0.0.1:5030/health || exit 1"
         depends_on:
             gluetun:
                 condition: service_healthy
                 restart: true
             lidarr:
-                condition: service_started
+                condition: service_healthy
                 restart: true
             slskd:
                 condition: service_healthy
@@ -220,10 +221,7 @@ services:
         security_opt:
             - no-new-privileges:true
 
-    ###############################################################################
-    # mam-ip-helper: Update MyAnonaMouse seedbox session to match Gluetun's IP.   #
-    ###############################################################################
-
+    # mam-ip-helper: Update MyAnonaMouse seedbox session to match Gluetun's IP.
     mam-ip-helper:
         image: tyzen9/myanonamouse-ip-helper:1.0.0
         container_name: mam-ip-helper
@@ -271,19 +269,19 @@ volumes:
         external: true
         name: soularr-volume
     deemix-downloads:
-        name: deemix-downloads-volume
+        name: deemix-downloads-bind
         driver_opts:
             device: "${DOWNLOADS_PATH}/deemix" # Root path to store downloaded deemix files into.
             o: bind
             type: none
     soulseek-downloads:
-        name: soulseek-downloads-volume
+        name: soulseek-downloads-bind
         driver_opts:
             device: "${DOWNLOADS_PATH}/soulseek" # Root path to store downloaded soulseek files into.
             o: bind
             type: none
     downloads:
-        name: downloads-volume
+        name: downloads-bind
         driver_opts:
             device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
             o: bind

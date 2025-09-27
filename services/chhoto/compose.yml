@@ -1,28 +1,32 @@
 ---
 services:
-    ###############################################################################
-    # chhoto-url: Self-hosted URL shortener.                                      #
-    ###############################################################################
-
+    # chhoto-url: Self-hosted URL shortener.
     chhoto:
         image: ghcr.io/sintan1729/chhoto-url:6.3.2
         container_name: chhoto
         hostname: chhoto
+        read_only: true
         restart: unless-stopped
+        user: ${PUID}:${PGID}
         environment:
+            db_url: "/db/urls.sqlite" # Path to the sqlite database.
             api_key: "${CHHOTO_API_KEY}" # Configures the API key to use.
             password: "${CHHOTO_PASSWORD}" # Configures the password to use.
-            site_url: "https://${CHHOTO_SUBDOMAIN}.${DOMAIN}" # Configures the URL to use.
+            site_url: "https://${CHHOTO_URL}" # Configures the URL to use.
         expose:
             - 4567/tcp # Web interface.
         networks:
             - caddy
         volumes:
-            - chhoto:/db # Configuration and database.
+            - chhoto-data:/db # Configuration and database.
+        cap_drop:
+            - ALL
         depends_on:
             caddy:
                 condition: service_started
                 restart: true
+        security_opt:
+            - no-new-privileges:true
 
 networks:
     caddy:
@@ -30,6 +34,9 @@ networks:
         name: caddy-network # $ docker network create caddy-network
 
 volumes:
-    chhoto:
-        external: true
-        name: chhoto-volume # $ docker volume create chhoto-volume
+    chhoto-data:
+        name: chhoto-data-bind
+        driver_opts:
+            device: "${CHHOTO_DATA_PATH}" # Root path to store Chhoto data.
+            o: bind
+            type: none

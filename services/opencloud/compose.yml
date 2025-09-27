@@ -1,11 +1,8 @@
 ---
 services:
-    ###############################################################################
-    # OpenCloud: Self-hosted cloud storage.                                       #
-    ###############################################################################
-
+    # OpenCloud: Self-hosted cloud storage.
     opencloud:
-        image: opencloudeu/opencloud-rolling:3
+        image: opencloudeu/opencloud-rolling:3.5.0
         container_name: opencloud
         entrypoint: /bin/sh
         hostname: opencloud
@@ -22,16 +19,16 @@ services:
             NOTIFICATIONS_SMTP_INSECURE: "${SMTP_INSECURE}" # If enabled, allows insecure connections to the external SMTP server.
             NOTIFICATIONS_SMTP_PASSWORD: "${SMTP_PASSWORD}" # External SMTP email account password to login with.
             NOTIFICATIONS_SMTP_PORT: "${SMTP_PORT}" # External SMTP port to connect to.
-            NOTIFICATIONS_SMTP_SENDER: "OpenCloud <${SMTP_SENDER}>" # External SMTP address used for sending email notifications.
+            NOTIFICATIONS_SMTP_SENDER: "OpenCloud <${SMTP_SENDER}>" # External SMTP address for sending email notifications.
             NOTIFICATIONS_SMTP_USERNAME: "${SMTP_USERNAME}" # External SMTP email account username to login with.
             OC_ADD_RUN_SERVICES: "notifications" # Additional services to start.
             OC_INSECURE: "false" # Do not run in insecure mode.
             OC_LOG_COLOR: "true" # Log in color.
-            OC_LOG_LEVEL: "warn" # Log at the warn level.
+            OC_LOG_LEVEL: "info" # Log at the info level.
             OC_LOG_PRETTY: "true" # Use pretty logs.
             OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD: "false" # Allow public shares without passwords.
             OC_SHARING_PUBLIC_WRITEABLE_SHARE_MUST_HAVE_PASSWORD: "true" # Writable public shares must have passwords.
-            OC_URL: "https://${OPENCLOUD_SUBDOMAIN}.${DOMAIN}" # Configures the OpenCloud URL.
+            OC_URL: "https://${OPENCLOUD_URL}" # Configures the OpenCloud URL.
             PROXY_TLS: "false" # Do not use SSL between the reverse proxy and OpenCloud.
             TZ: "${TZ}" # Configures the timezone to use.
         expose:
@@ -39,8 +36,18 @@ services:
         networks:
             - caddy
         volumes:
+            - opencloud-config:/etc/opencloud
             - opencloud-data:/var/lib/opencloud
-            - opencloud:/etc/opencloud
+        cap_drop:
+            - ALL
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        extra_hosts:
+            - "${OPENCLOUD_URL}:caddy"
+        healthcheck:
+            test: "wget --spider http://127.0.0.1:9200 || exit 1"
         security_opt:
             - no-new-privileges:true
 
@@ -50,12 +57,15 @@ networks:
         name: caddy-network # $ docker network create caddy-network
 
 volumes:
-    opencloud:
-        external: true
-        name: opencloud-volume # $ docker volume create opencloud-volume
-    opencloud-data:
-        name: opencloud-data-volume
+    opencloud-config:
+        name: opencloud-config-bind
         driver_opts:
-            device: "${OPENCLOUD_DATA_PATH}" # Root path to store OpenCloud user data.
+            device: "${OPENCLOUD_DATA_PATH}/config" # Root path to store OpenCloud config data.
+            o: bind
+            type: none
+    opencloud-data:
+        name: opencloud-data-bind
+        driver_opts:
+            device: "${OPENCLOUD_DATA_PATH}/data" # Root path to store OpenCloud user data.
             o: bind
             type: none

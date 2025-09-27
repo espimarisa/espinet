@@ -1,22 +1,19 @@
 ---
 services:
-    ###############################################################################
-    # Vaultwarden: Self-hosted Bitwarden-compatible server.                       #
-    ###############################################################################
-
+    # Vaultwarden: Self-hosted Bitwarden-compatible server.
     vaultwarden:
         image: ghcr.io/dani-garcia/vaultwarden:1.34.2
         container_name: vaultwarden
         hostname: vaultwarden
         restart: unless-stopped
         environment:
-            ADMIN_RATELIMIT_MAX_BURST: "3" # Configures admin ratelimit.
-            ADMIN_RATELIMIT_SECONDS: "300" # Configures admin ratelimit cooldown.
-            ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}" # Admin encryption token.
-            DOMAIN: "https://${VAULTWARDEN_SUBDOMAIN}.${DOMAIN}" # Configures the domain to use.
-            EMAIL_CHANGE_ALLOWED: "true" # Enables email changing.
-            EMERGENCY_ACCESS_ALLOWED: "true" # Enables emergency access.
-            LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimits.
+            ADMIN_RATELIMIT_MAX_BURST: "3" # Configures the admin ratelimit.
+            ADMIN_RATELIMIT_SECONDS: "300" # Configures the admin ratelimit cooldown.
+            ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}" # Sets the admin encryption token.
+            DOMAIN: "https://${VAULTWARDEN_URL}" # Configures the domain to use.
+            EMAIL_CHANGE_ALLOWED: "true" # Allows changing emails.
+            EMERGENCY_ACCESS_ALLOWED: "true" # Allows emergency access.
+            LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimit bursts.
             LOGIN_RATELIMIT_SECONDS: "60" # Configures ratelimit cooldown.
             PUSH_ENABLED: "${VAULTWARDEN_PUSH_ENABLED}" # Configures notification support. Requires PUSH_INSTALLATION_ID and PUSH_INSTALLATION_KEY.
             PUSH_INSTALLATION_ID: "${VAULTWARDEN_PUSH_INSTALLATION_ID}" # https://bitwarden.com/host/
@@ -37,7 +34,17 @@ services:
         networks:
             - caddy
         volumes:
-            - vaultwarden:/data
+            - vaultwarden-data:/data
+        cap_drop:
+            - ALL
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        extra_hosts:
+            - "${VAULTWARDEN_URL}:caddy"
+        healthcheck:
+            test: "curl -f http://127.0.0.1:80/alive || exit 1"
         security_opt:
             - no-new-privileges:true
 
@@ -47,6 +54,9 @@ networks:
         name: caddy-network # $ docker network create caddy-network
 
 volumes:
-    vaultwarden:
-        external: true
-        name: vaultwarden-volume # $ docker volume create vaultwarden-volume
+    vaultwarden-data:
+        name: vaultwarden-bind
+        driver_opts:
+            device: "${VAULTWARDEN_DATA_PATH}" # Root path to store Vaultwarden data.
+            o: bind
+            type: none

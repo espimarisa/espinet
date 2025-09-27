@@ -1,9 +1,6 @@
 ---
 services:
-    ###############################################################################
-    # The Lounge: Web based IRC client.                                           #
-    ###############################################################################
-
+    # The Lounge: IRC client.
     thelounge:
         image: ghcr.io/thelounge/thelounge:4.4.3
         container_name: thelounge
@@ -18,6 +15,16 @@ services:
             - caddy
         volumes:
             - thelounge:/var/opt/thelounge
+        cap_drop:
+            - ALL
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        extra_hosts:
+            - "${THELOUNGE_URL}:caddy"
+        healthcheck:
+            test: "wget --spider http://127.0.0.1:9000 || exit 1"
         security_opt:
             - no-new-privileges:true
 
@@ -28,5 +35,8 @@ networks:
 
 volumes:
     thelounge:
-        external: true
-        name: thelounge-volume # $ docker volume create thelounge-volume
+        name: thelounge-volume
+        driver_opts:
+            device: "${THELOUNGE_DATA_PATH}" # Root path to store The Lounge data.
+            o: bind
+            type: none

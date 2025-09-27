@@ -1,5 +1,4 @@
 {
-	"$schema": "https://www.schemastore.org/dockerd.json",
 	"data-root": "/mnt/docker-data",
 	"dns": ["9.9.9.9", "149.112.112.112"],
 	"ipv6": false

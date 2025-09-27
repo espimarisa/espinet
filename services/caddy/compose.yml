@@ -1,25 +1,28 @@
 ---
 services:
-    ###############################################################################
-    # Caddy: Reverse proxy and web server with automatic HTTPS support.           #
-    ###############################################################################
-
+    # Caddy: Reverse proxy and web server.
     caddy:
         image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.23
         container_name: caddy
         hostname: caddy
         restart: unless-stopped
-        env_file:
-            - ../../.env
+        dns:
+            - 9.9.9.9
+            - 149.112.112.112
         environment:
             ACME_EMAIL: "${ACME_EMAIL}"
             CADDY_DOCKER_CADDYFILE_PATH: "/Caddyfile"
             CADDY_INGRESS_NETWORKS: "caddy" # Listen for traffic coming from the caddy network.
+            CHHOTO_URL: "${CHHOTO_URL}"
             CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Cloudflare account token with DNS Zone editing to domains.
             DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
             DOMAIN: "${DOMAIN}"
             INTERNAL_DOMAIN: "${INTERNAL_DOMAIN}"
+            JELLYFIN_URL: "${JELLYFIN_URL}"
+            OPENCLOUD_URL: "${OPENCLOUD_URL}"
+            THELOUNGE_URL: "${THELOUNGE_URL}"
             TZ: "${TZ}" # Configures the timezone to use.
+            VAULTWARDEN_URL: "${VAULTWARDEN_URL}"
         networks:
             - caddy
             - socket-proxy

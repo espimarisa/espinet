@@ -6,19 +6,15 @@ include:
     - ./management/compose.yml # Media management tools.
 
 services:
-    ###########################################################################
-    # Jellyfin: Media server.                                                 #
-    ###########################################################################
-
+    # Jellyfin: Media server.
     jellyfin:
-        image: ghcr.io/hotio/jellyfin:release
+        image: ghcr.io/hotio/jellyfin:release-10.10.7
         container_name: jellyfin
         hostname: jellyfin
         restart: unless-stopped
         devices:
             - /dev/dri:/dev/dri # Video device passthrough.
         environment:
-            JELLYFIN_PublishedServerUrl: "https://${JELLYFIN_SUBDOMAIN}.${DOMAIN}" # Configures autodiscovery to use the external URL.
             PGID: "${PGID}" # Local group to run as.
             PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
@@ -29,7 +25,14 @@ services:
             - caddy
         volumes:
             - jellyfin:/config
+            - jellyfin-cache:/config/cache
             - media-library:/library:ro
+        depends_on:
+            caddy:
+                condition: service_started
+                restart: true
+        extra_hosts:
+            - "${JELLYFIN_URL}:caddy"
         healthcheck:
             test: "curl -f http://127.0.0.1:8096/health || exit 1"
         security_opt:
@@ -43,10 +46,13 @@ networks:
 volumes:
     jellyfin:
         external: true
-        name: jellyfin-volume
+        name: jellyfin-volume # $ docker volume create jellyfin-volume
+    jellyfin-cache:
+        external: true
+        name: jellyfin-cache-volume # $ docker volume create jellyfin-cache-volume
     media-library:
-        name: media-library-volume
+        name: media-library-bind
         driver_opts:
-            device: "${MEDIA_LIBRARY_PATH}"
+            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
             o: bind
             type: none

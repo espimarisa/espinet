@@ -1,8 +1,4 @@
 {
-	##################################
-	# Global options.				 #
-	##################################
-
 	acme_ca https://acme.zerossl.com/v2/DV90
 	acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
 	email {$ACME_EMAIL}
@@ -15,7 +11,7 @@
 
 		# Domain and subdomains to automatically update DNS records for.
 		domains {
-			{$DOMAIN} {$CHHOTO_SUBDOMAIN} {$JELLYFIN_SUBDOMAIN} {$OPENCLOUD_SUBDOMAIN} {$VAULTWARDEN_SUBDOMAIN} {$THELOUNGE_SUBDOMAIN}
+			{$DDNS_DOMAINS}
 		}
 	}
 
@@ -24,11 +20,6 @@
 		trusted_proxies static private_ranges 100.64.0.0/10
 	}
 }
-
-##################################
-# Reusable directives.		     #
-##################################
-
 
 # Default settings for all directives.
 (default_settings) {
@@ -48,113 +39,78 @@
 	import default_settings
 }
 
-##################################
-# Public external routes.	     #
-##################################
-
-# Chhoto.
-{$CHHOTO_SUBDOMAIN}.{$DOMAIN} {
+{$CHHOTO_URL} {
 	import default_settings
 	reverse_proxy chhoto:4567
 }
 
-# Jellyfin.
-{$JELLYFIN_SUBDOMAIN}.{$DOMAIN} {
+{$JELLYFIN_URL} {
 	import default_settings
 	reverse_proxy jellyfin:8096
 }
 
-# OpenCloud.
-{$OPENCLOUD_SUBDOMAIN}.{$DOMAIN} {
+{$OPENCLOUD_URL} {
 	import default_settings
 	reverse_proxy opencloud:9200
 }
 
-# Vaultwarden.
-{$VAULTWARDEN_SUBDOMAIN}.{$DOMAIN} {
+{$VAULTWARDEN_URL} {
 	import default_settings
-
-	# Only allow access to /admin from private_ranges.
-	@block_admin {
-		path /admin*
-		not remote_ip private_ranges 100.64.0.0/10
-	}
-
-	abort @block_admin
 	reverse_proxy vaultwarden:80
 }
 
-# The Lounge.
-{$THELOUNGE_SUBDOMAIN}.{$DOMAIN} {
+{$THELOUNGE_URL} {
 	import default_settings
 	reverse_proxy thelounge:9000
 }
 
-##################################
-# Internal routes.				 #
-##################################
+# Internal routes.
 
-# Cleanuparr.
 cleanuparr.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy cleanuparr:11011
 }
 
-# Dozzle.
-dozzle.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy dozzle:8082
-}
-
-# Deemix.
 deemix.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy deemix:6595
 }
 
-# Lidarr.
 lidarr.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy lidarr:8686
 }
 
-# Profilarr.
 profilarr.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy profilarr:6868
 }
 
-# Prowlarr.
 prowlarr.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy gluetun:9696
 }
 
-# qBittorrent.
 qbittorrent.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy gluetun:8080
 }
 
-# Radarr.
 radarr.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy radarr:7878
 }
 
-# Readarr.
 readarr.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy readarr:8787
 }
 
-# slskd.
 slskd.{$INTERNAL_DOMAIN} {
 	import internal_only
-	reverse_proxy slskd:5030
+	reverse_proxy gluetun:5030
 }
 
-# Sonarr.
 sonarr.{$INTERNAL_DOMAIN} {
 	import internal_only
 	reverse_proxy sonarr:8989
