@@ -38,6 +38,7 @@ services:
         networks:
             - caddy
         volumes:
+            - /etc/localtime:/etc/localtime:ro # Local timezone mount.
             - vaultwarden-data:/data
         cap_drop:
             - ALL

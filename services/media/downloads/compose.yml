@@ -159,6 +159,8 @@ services:
             SLSKD_SLSK_PASSWORD: "${SOULSEEK_PASSWORD}" # Soulseek password to use.
             SLSKD_SLSK_USERNAME: "${SOULSEEK_USERNAME}" # Soulseek username to use.
             SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
+            SLSKD_USERNAME: "${SLSKD_USERNAME}" # Configures the web ui username.
+            SOULSEEK_PASSWORD: "${SOULSEEK_PASSWORD}" # Configures the web ui password.
             TZ: "${TZ}" # Configures the timezone to use.
         volumes:
             - slskd:/app
