@@ -97,6 +97,10 @@
 		X-Frame-Options "SAMEORIGIN"
 		X-XSS-Protection 0 # Disable X-XSS.
 	}
+
+	# Remove X-Frame-Options from 2fa routes.
+	@2fa path /iframes/*
+	header @2fa -X-Frame-Options
 }
 
 {$THELOUNGE_URL} {
