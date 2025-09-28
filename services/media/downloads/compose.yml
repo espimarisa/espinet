@@ -64,6 +64,10 @@ services:
             - downloads:/downloads
             - qbittorrent-config:/qbittorrent/etc
             - qbittorrent-data:/qbittorrent/var
+        cap_add:
+            - CHOWN # Required to fix permissions.
+            - SETGID # Required to drop to PGID.
+            - SETUID # Required to drop to PUID.
         cap_drop:
             - ALL
         depends_on:
