@@ -21,10 +21,10 @@
 (security_headers) {
 	header {
 		-Server # Remove the Server header.
-		X-Frame-Options "SAMEORIGIN" # Prevent clickjacking attacks.
-		X-Content-Type-Options "nosniff" # Prevent browser from MIME-type sniffing
-		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" # Enable HSTS.
 		Referrer-Policy "strict-origin-when-cross-origin" # Control referrer information.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" # Enable HSTS.
+		X-Content-Type-Options "nosniff" # Prevent browser from MIME-type sniffing.
+		X-Frame-Options "SAMEORIGIN" # Prevent clickjacking attacks.
 	}
 }
 
@@ -86,13 +86,17 @@
 }
 
 # Cloudflare-protected services; proxied.
-
 {$CHHOTO_URL} {
 	import cloudflare_proxy chhoto:4567
 }
 
 {$VAULTWARDEN_URL} {
 	import cloudflare_proxy vaultwarden:80
+
+	header {
+		X-XSS-Protection 0 # Vaultwarden wants X-XSS-Protection to be disabled.
+		-X-Frame-Options # X-Frame-Options breaks some 2FA connectors.
+	}
 }
 
 {$THELOUNGE_URL} {
@@ -100,7 +104,6 @@
 }
 
 # Other external services.
-
 {$JELLYFIN_URL} {
 	import external_proxy jellyfin:8096
 }
@@ -110,7 +113,6 @@
 }
 
 # Internal services.
-
 cleanuparr.{$INTERNAL_DOMAIN} {
 	import internal_proxy cleanuparr:11011
 }
@@ -127,7 +129,7 @@ prowlarr.{$INTERNAL_DOMAIN} {
 	import internal_proxy gluetun:9696
 }
 
-qbittorrent.{$INTERNAL_DOMAIN} {
+qbittrent.{$INTERNAL_DOMAIN} {
 	import internal_proxy gluetun:8080
 }
 
