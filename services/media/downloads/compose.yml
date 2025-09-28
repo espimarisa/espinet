@@ -92,12 +92,10 @@ services:
         volumes:
             - downloads:/downloads
             - prowlarr:/prowlarr/etc
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         depends_on:
             gluetun:
                 condition: service_healthy
@@ -143,12 +141,10 @@ services:
             - gluetun
         volumes:
             - downloads:/downloads
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         security_opt:
             - no-new-privileges:true
 
@@ -173,12 +169,10 @@ services:
         volumes:
             - slskd:/app
             - soulseek-downloads:/downloads
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         healthcheck:
             test: "wget --spider http://127.0.0.1:5030/health || exit 1"
         depends_on:
@@ -200,12 +194,10 @@ services:
         volumes:
             - soularr-config:/data
             - soulseek-downloads:/downloads
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         depends_on:
             gluetun:
                 condition: service_healthy

@@ -19,12 +19,10 @@ services:
             - downloads:/downloads
             - lidarr:/lidarr/etc
             - media-library:/library
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         security_opt:
             - no-new-privileges:true
 
@@ -48,12 +46,10 @@ services:
             - downloads:/downloads
             - media-library:/library
             - radarr:/radarr/etc
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         security_opt:
             - no-new-privileges:true
 
@@ -79,12 +75,10 @@ services:
             - readarr:/config
         healthcheck:
             test: "wget --spider http://127.0.0.1:8787/ping || exit 1"
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         security_opt:
             - no-new-privileges:true
 
@@ -107,12 +101,10 @@ services:
             - downloads:/downloads
             - media-library:/library
             - sonarr:/config
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         security_opt:
             - no-new-privileges:true
 
@@ -134,12 +126,10 @@ services:
             - gluetun
         volumes:
             - profilarr:/config
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         security_opt:
             - no-new-privileges:true
 
@@ -161,12 +151,10 @@ services:
             - gluetun
         volumes:
             - cleanuparr:/config
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         healthcheck:
             test: "curl -f http://127.0.0.1:11011/health || exit 1"
         security_opt:
