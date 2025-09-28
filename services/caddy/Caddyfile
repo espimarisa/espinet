@@ -165,5 +165,9 @@ readarr.{$INTERNAL_DOMAIN} {
 }
 
 slskd.{$INTERNAL_DOMAIN} {
-	import internal_proxy gluetun:5
+	import internal_proxy gluetun:5030
+}
+
+sonarr.{$INTERNAL_DOMAIN} {
+	import internal_proxy sonarr:8989
 }
