@@ -163,7 +163,7 @@ prowlarr.{$INTERNAL_DOMAIN} {
 	import internal_proxy gluetun:9696
 }
 
-qbittrent.{$INTERNAL_DOMAIN} {
+qbittorrent.{$INTERNAL_DOMAIN} {
 	import internal_proxy gluetun:8080
 }
 
