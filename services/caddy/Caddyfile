@@ -91,10 +91,10 @@
 
 	header {
 		-Server # Remove the Server header.
-		-X-Frame-Options # Remove X-Frame-Options.
-		Referrer-Policy "strict-origin-when-cross-origin" # Control referrer information.
+		Referrer-Policy "same-origin"
 		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" # Enable HSTS.
 		X-Content-Type-Options "nosniff" # Prevent browser from MIME-type sniffing.
+		X-Frame-Options "SAMEORIGIN"
 		X-XSS-Protection 0 # Disable X-XSS.
 	}
 }
@@ -142,9 +142,4 @@ readarr.{$INTERNAL_DOMAIN} {
 }
 
 slskd.{$INTERNAL_DOMAIN} {
-	import internal_proxy gluetun:5030
-}
-
-sonarr.{$INTERNAL_DOMAIN} {
-	import internal_proxy sonarr:8989
-}
+	import internal_proxy gluetun:5
