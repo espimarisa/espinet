@@ -19,6 +19,10 @@ services:
             - downloads:/downloads
             - lidarr:/lidarr/etc
             - media-library:/library
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
             - ALL
         security_opt:
@@ -44,6 +48,10 @@ services:
             - downloads:/downloads
             - media-library:/library
             - radarr:/radarr/etc
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
             - ALL
         security_opt:
@@ -99,6 +107,10 @@ services:
             - downloads:/downloads
             - media-library:/library
             - sonarr:/config
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
             - ALL
         security_opt:

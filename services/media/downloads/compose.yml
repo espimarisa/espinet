@@ -92,6 +92,10 @@ services:
         volumes:
             - downloads:/downloads
             - prowlarr:/prowlarr/etc
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
             - ALL
         depends_on:
@@ -139,6 +143,10 @@ services:
             - gluetun
         volumes:
             - downloads:/downloads
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
             - ALL
         security_opt:
@@ -165,6 +173,10 @@ services:
         volumes:
             - slskd:/app
             - soulseek-downloads:/downloads
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
             - ALL
         healthcheck:
@@ -188,6 +200,10 @@ services:
         volumes:
             - soularr-config:/data
             - soulseek-downloads:/downloads
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
             - ALL
         depends_on:
