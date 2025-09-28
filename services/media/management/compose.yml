@@ -42,7 +42,7 @@ services:
             - caddy
             - gluetun
         volumes:
-            - ./scripts:/config/scripts
+            - ./scripts:/scripts
             - downloads:/downloads
             - media-library:/library
             - radarr:/radarr/etc
