@@ -2,14 +2,15 @@
 services:
     # Lidarr: Music manager, organizer, and PVR.
     lidarr:
-        image: ghcr.io/11notes/lidarr:2.13.3
+        image: ghcr.io/hotio/lidarr:nightly-2.14.4.4809 # use until 2.14 hits release
         container_name: lidarr
         hostname: lidarr
-        read_only: true
         restart: unless-stopped
-        tmpfs: /tmp:uid=1000,gid=1000
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 8686/tcp # Web interface.
         networks:
@@ -17,25 +18,28 @@ services:
             - gluetun
         volumes:
             - downloads:/downloads
-            - lidarr:/lidarr/etc
+            - lidarr:/config
             - media-library:/library
         cap_drop:
             - AUDIT_WRITE
             - MKNOD
             - SYS_CHROOT
+        healthcheck:
+            test: "curl -f http://127.0.0.1:8686/health || exit 1"
         security_opt:
             - no-new-privileges:true
 
     # Radarr: Movie manager, organizer, and PVR.
     radarr:
-        image: ghcr.io/11notes/radarr:5.27.5
+        image: ghcr.io/hotio/radarr:release-5.27.5.10198
         container_name: radarr
         hostname: radarr
-        read_only: true
         restart: unless-stopped
-        tmpfs: /tmp:uid=1000,gid=1000
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 7878/tcp # Web interface.
         networks:
@@ -45,11 +49,13 @@ services:
             - ./scripts:/scripts
             - downloads:/downloads
             - media-library:/library
-            - radarr:/radarr/etc
+            - radarr:/config
         cap_drop:
             - AUDIT_WRITE
             - MKNOD
             - SYS_CHROOT
+        healthcheck:
+            test: "curl -f http://127.0.0.1:7878/health || exit 1"
         security_opt:
             - no-new-privileges:true
 
@@ -84,14 +90,15 @@ services:
 
     # Sonarr: TV/Anime series, organizer, and PVR.
     sonarr:
-        image: ghcr.io/11notes/sonarr:4.0.15
+        image: ghcr.io/hotio/sonarr:release-4.0.15.2941
         container_name: sonarr
         hostname: sonarr
         restart: unless-stopped
-        read_only: true
-        tmpfs: /tmp:uid=1000,gid=1000
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 8989/tcp # Web interface.
         networks:
@@ -100,11 +107,13 @@ services:
         volumes:
             - downloads:/downloads
             - media-library:/library
-            - sonarr:/sonarr/etc
+            - sonarr:/config
         cap_drop:
             - AUDIT_WRITE
             - MKNOD
             - SYS_CHROOT
+        healthcheck:
+            test: "curl -f http://127.0.0.1:8989/health || exit 1"
         security_opt:
             - no-new-privileges:true
 

@@ -81,17 +81,18 @@ services:
 
     # Prowlarr: Indexer manager.
     prowlarr:
-        image: ghcr.io/11notes/prowlarr:2.0.5
+        image: ghcr.io/hotio/prowlarr:release-2.0.5.5160
         container_name: prowlarr
         network_mode: service:gluetun # Route all traffic through Gluetun.
         restart: unless-stopped
-        read_only: true
-        tmpfs: /tmp:uid=1000,gid=1000
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         volumes:
             - downloads:/downloads
-            - prowlarr:/prowlarr/etc
+            - prowlarr:/config
         cap_drop:
             - AUDIT_WRITE
             - MKNOD
@@ -100,6 +101,8 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
+        healthcheck:
+            test: "curl -f http://127.0.0.1:9696/health || exit 1"
         security_opt:
             - no-new-privileges:true
 
