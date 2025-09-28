@@ -10,8 +10,10 @@ services:
             - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
         environment:
             BLOCK_MALICIOUS: "off" # Disables Unbound, lowers RAM usage. https://github.com/qdm12/gluetun/issues/765
+            DOT_PROVIDERS: "quad9" # Use Quad9.
             FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of subnets allowed to communicate with Gluetun over the gateway.
             FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # List of VPN server-side port forwarded ports.
+            HEALTH_TARGET_ADDRESS: "www.quad9.net:443" # Use Quad9 for healthchecks. Cloudflare can occasionally cause issues with cranky IPs.
             HEALTH_VPN_DURATION_INITIAL: "30s" # Increase the initial healthcheck time to reduce false-positive failures.
             PGID: "${PGID}" # Local group to run as.
             PUID: "${PUID}" # Local user to run as.
@@ -66,12 +68,10 @@ services:
         volumes:
             - downloads:/downloads
             - qbittorrent:/config
-        cap_add:
-            - CHOWN # Required for s6 to fix permissions.
-            - SETGID # Required for s6 to drop to PGID.
-            - SETUID # Required for s6 to drop to PUID.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         depends_on:
             gluetun:
                 condition: service_healthy
