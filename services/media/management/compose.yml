@@ -100,7 +100,7 @@ services:
         volumes:
             - downloads:/downloads
             - media-library:/library
-            - sonarr:/config
+            - sonarr:/sonarr/etc
         cap_drop:
             - AUDIT_WRITE
             - MKNOD
