@@ -88,19 +88,6 @@
 
 {$VAULTWARDEN_URL} {
 	import cloudflare_proxy vaultwarden:80
-
-	header {
-		-Server # Remove the Server header.
-		Referrer-Policy "same-origin"
-		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" # Enable HSTS.
-		X-Content-Type-Options "nosniff" # Prevent browser from MIME-type sniffing.
-		X-Frame-Options "SAMEORIGIN"
-		X-XSS-Protection 0 # Disable X-XSS.
-	}
-
-	# Remove X-Frame-Options from 2fa routes.
-	@2fa path /iframes/*
-	header @2fa -X-Frame-Options
 }
 
 {$THELOUNGE_URL} {
