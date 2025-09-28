@@ -27,7 +27,7 @@ services:
         cap_drop:
             - ALL
         healthcheck:
-            interval: 15s
+            interval: 5s
             test: "wget --spider http://127.0.0.1:2375/_ping || exit 1"
         security_opt:
             - no-new-privileges:true

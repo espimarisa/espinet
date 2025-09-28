@@ -13,18 +13,22 @@ services:
             DOMAIN: "https://${VAULTWARDEN_URL}" # Configures the domain to use.
             EMAIL_CHANGE_ALLOWED: "true" # Allows changing emails.
             EMERGENCY_ACCESS_ALLOWED: "true" # Allows emergency access.
+            EXPERIMENTAL_CLIENT_FEATURE_FLAGS: "inline-menu-positioning-improvements,inline-menu-totp,ssh-agent,ssh-key-vault-item,export-attachments" # Flags to enable.
+            HIBP_API_KEY: "${HIBP_API_KEY}" # https://haveibeenpwned.com/Dashboard/SignIn?ReturnUrl=%2FDashboard#ApiKey
             LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimit bursts.
             LOGIN_RATELIMIT_SECONDS: "60" # Configures ratelimit cooldown.
-            PUSH_ENABLED: "${VAULTWARDEN_PUSH_ENABLED}" # Configures notification support. Requires PUSH_INSTALLATION_ID and PUSH_INSTALLATION_KEY.
+            PUSH_ENABLED: "${VAULTWARDEN_PUSH_ENABLED}" # Toggles notification support.
             PUSH_INSTALLATION_ID: "${VAULTWARDEN_PUSH_INSTALLATION_ID}" # https://bitwarden.com/host/
             PUSH_INSTALLATION_KEY: "${VAULTWARDEN_PUSH_INSTALLATION_KEY}" # https://bitwarden.com/host/
+            REQUIRE_DEVICE_EMAIL: "true" # Require new device emails.
             SENDS_ALLOWED: "true" # Enables Bitwarden sends.
             SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS}" # Configures if signups should be enabled.
+            SIGNUPS_VERIFY: "true" # Require signed up accounts to verify their email.
             SMTP_FROM: "${SMTP_SENDER}" # External email server sender.
             SMTP_HOST: "${SMTP_HOST}" # External email server host.
             SMTP_PASSWORD: "${SMTP_PASSWORD}" # External email server password.
             SMTP_PORT: "${SMTP_PORT}" # External email server port.
-            SMTP_SECURITY: "force_tls" # External email server encryption method.
+            SMTP_SECURITY: "${SMTP_SECURITY}" # External email server encryption method.
             SMTP_TIMEOUT: "${SMTP_TIMEOUT}" # 15s timeout.
             SMTP_USERNAME: "${SMTP_USERNAME}" # External email server username.
             WEB_VAULT_ENABLED: "true" # Enables the web vault.
@@ -55,6 +59,6 @@ volumes:
     vaultwarden-data:
         name: vaultwarden-bind
         driver_opts:
-            device: "${VAULTWARDEN_DATA_PATH}" # Root path to store Vaultwarden data.
+            device: "${APPDATA_PATH}/vaultwarden" # Root path to store Vaultwarden data.
             o: bind
             type: none

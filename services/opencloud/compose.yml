@@ -60,12 +60,12 @@ volumes:
     opencloud-config:
         name: opencloud-config-bind
         driver_opts:
-            device: "${OPENCLOUD_DATA_PATH}/config" # Root path to store OpenCloud config data.
+            device: "${APPDATA_PATH}/opencloud/config" # Root path to store OpenCloud config data.
             o: bind
             type: none
     opencloud-data:
         name: opencloud-data-bind
         driver_opts:
-            device: "${OPENCLOUD_DATA_PATH}/data" # Root path to store OpenCloud user data.
+            device: "${APPDATA_PATH}/opencloud/data" # Root path to store OpenCloud user data.
             o: bind
             type: none

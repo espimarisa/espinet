@@ -33,17 +33,17 @@ VOLUMES=(
 	"cleanuparr-volume"
 	"gluetun-volume"
 	"jellyfin-cache-volume"
-	"jellyfin-volume"
+	"jellyfin-config-volume"
 	"lidarr-volume"
 	"profilarr-volume"
 	"prowlarr-volume"
-	"qbittorrent-volume"
+	"qbittorrent-data-volume"
+	"qbittorrent-config-volume"
 	"radarr-volume"
 	"readarr-volume"
 	"slskd-volume"
 	"socket-proxy-volume"
 	"sonarr-volume"
-	"soularr-volume"
 )
 
 # Run privileged commands with sudo if not root.
@@ -69,12 +69,10 @@ fi
 
 # Verify that all required environment variables are set.
 REQUIRED_VARS=(
-	"CHHOTO_DATA_PATH"
+	"APPDATA_PATH"
 	"DOWNLOADS_PATH"
 	"MEDIA_LIBRARY_PATH"
-	"OPENCLOUD_DATA_PATH"
-	"THELOUNGE_DATA_PATH"
-	"VAULTWARDEN_DATA_PATH"
+	"STORAGE_PATH"
 )
 
 for var in "${REQUIRED_VARS[@]}"; do
@@ -85,43 +83,38 @@ for var in "${REQUIRED_VARS[@]}"; do
 done
 
 # Creates downloads directory structure.
-echo "> Creating downloads structure..."
+echo "Creating downloads structure..."
 for directory in "${DOWNLOADS_DIRECTORIES[@]}"; do
 	mkdir -p "$DOWNLOADS_PATH/$directory"
 done
 mkdir -p "$DOWNLOADS_PATH/soulseek/.incomplete"
 
 # Creates torrents subdirectory structure.
-echo "> Creating torrents structure..."
+echo "Creating torrents structure..."
 for directory in "${TORRENTS_DIRECTORIES[@]}"; do
 	mkdir -p "$DOWNLOADS_PATH/torrents/$directory"
 done
 
 # Creates media library structure.
-echo "> Creating media library structure..."
+echo "Creating media library structure..."
 for directory in "${MEDIA_LIBRARY_DIRECTORIES[@]}"; do
 	mkdir -p "$MEDIA_LIBRARY_PATH/$directory"
 done
 
 # Creates application data structure.
-echo "> Creating application data structure..."
-mkdir -p "${CHHOTO_DATA_PATH}"
-mkdir -p "${OPENCLOUD_DATA_PATH}"/{data,config}
-mkdir -p "${THELOUNGE_DATA_PATH}"
-mkdir -p "${VAULTWARDEN_DATA_PATH}"
+echo "Creating application data structure..."
+mkdir -p "${APPDATA_PATH}"/{chhoto,opencloud,soularr,thelounge,vaultwarden}
+mkdir -p "${APPDATA_PATH}"/opencloud/{config,data}
 
 # Sets ownership for all created data directories.
-echo "> Setting ownership..."
+echo "Setting ownership..."
 $SUDO chown -R "${PUID}:${PGID}" \
-	"${CHHOTO_DATA_PATH}" \
+	"${APPDATA_PATH}" \
 	"${DOWNLOADS_PATH}" \
-	"${MEDIA_LIBRARY_PATH}" \
-	"${OPENCLOUD_DATA_PATH}" \
-	"${THELOUNGE_DATA_PATH}" \
-	"${VAULTWARDEN_DATA_PATH}"
+	"${MEDIA_LIBRARY_PATH}"
 
 # Docker network setup.
-echo "> Creating Docker networks..."
+echo "Creating Docker networks..."
 for network in "${NETWORKS[@]}"; do
 	docker network create "$network" || true
 done
@@ -131,7 +124,7 @@ for network in "${INTERNAL_NETWORKS[@]}"; do
 done
 
 # Docker volume setup.
-echo "> Creating Docker volumes..."
+echo "Creating Docker volumes..."
 for volume in "${VOLUMES[@]}"; do
 	docker volume create "$volume" || true
 done

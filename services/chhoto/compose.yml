@@ -37,6 +37,6 @@ volumes:
     chhoto-data:
         name: chhoto-data-bind
         driver_opts:
-            device: "${CHHOTO_DATA_PATH}" # Root path to store Chhoto data.
+            device: "${APPDATA_PATH}/chhoto" # Root path to store Chhoto data.
             o: bind
             type: none

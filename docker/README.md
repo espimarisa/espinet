@@ -6,9 +6,9 @@ These are some of my personal notes on Docker for future reference.
 
 By default, Docker uses your system DNS. I prefer to bypass this as I have some quirks setup with my NextDNS profile.
 Additionally, the local-only reverse proxies I have setup won't be able to get certificates without bypassing it.
-Instead of configuring it per-container, I prefer to bypass it all together and use [Quad9](https://quad9.net).
+Instead of configuring it per-container, I prefer to bypass it all together.
 
-You can do this by updating `/etc/docker/daemon.json` to include `"dns": ["9.9.9.9", "149.112.112.112"]`.
+You can do this by updating `/etc/docker/daemon.json` to include `"dns": ["1.1.1.1", "1.0.0.1"]`.
 
 ## IPV6
 

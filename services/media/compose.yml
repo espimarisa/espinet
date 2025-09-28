@@ -24,7 +24,7 @@ services:
         volumes:
             - /etc/localtime:/etc/localtime:ro # Local timezone mount.
             - jellyfin-cache:/cache
-            - jellyfin:/config
+            - jellyfin-config:/config
             - media-library:/library:ro
         cap_drop:
             - ALL
@@ -41,9 +41,9 @@ networks:
         name: caddy-network
 
 volumes:
-    jellyfin:
+    jellyfin-config:
         external: true
-        name: jellyfin-volume # $ docker volume create jellyfin-volume
+        name: jellyfin-config-volume # $ docker volume create jellyfin-config-volume
     jellyfin-cache:
         external: true
         name: jellyfin-cache-volume # $ docker volume create jellyfin-cache-volume

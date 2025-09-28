@@ -35,6 +35,6 @@ volumes:
     thelounge:
         name: thelounge-volume
         driver_opts:
-            device: "${THELOUNGE_DATA_PATH}" # Root path to store The Lounge data.
+            device: "${APPDATA_PATH}/thelounge" # Root path to store The Lounge data.
             o: bind
             type: none

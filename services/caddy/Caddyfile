@@ -1,112 +1,148 @@
 {
-	acme_ca https://acme.zerossl.com/v2/DV90
-	acme_dns cloudflare {$CLOUDFLARE_API_TOKEN}
+	acme_ca https://acme.zerossl.com/v2/DV90 # Use ZeroSSL for certificates.
+	acme_dns cloudflare {$CLOUDFLARE_API_TOKEN} # Use Cloudflare for DNS challenges.
 	email {$ACME_EMAIL}
 
 	dynamic_dns {
-		# Use Cloudflare for Dynamic DNS.
 		provider cloudflare {$CLOUDFLARE_API_TOKEN}
 		check_interval 1h
 		versions ipv4
-
-		# Domain and subdomains to automatically update DNS records for.
 		domains {
 			{$DDNS_DOMAINS}
 		}
 	}
 
 	servers {
-		# Pass origin IP to Docker containers; allow private ranges + Tailscale access.
-		trusted_proxies static private_ranges 100.64.0.0/10
+		trusted_proxies static private_ranges 100.64.0.0/10 # Trust static ranges and Tailscale ranges.
 	}
 }
 
-# Default settings for all directives.
-(default_settings) {
-	encode zstd gzip
+# Snippet for common security headers.
+(security_headers) {
+	header {
+		-Server # Remove the Server header.
+		X-Frame-Options "SAMEORIGIN" # Prevent clickjacking attacks.
+		X-Content-Type-Options "nosniff" # Prevent browser from MIME-type sniffing
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" # Enable HSTS.
+		Referrer-Policy "strict-origin-when-cross-origin" # Control referrer information.
+	}
+}
 
-	# Enable logging.
+# Snippet for Cloudflare-protected services.
+(cloudflare_proxy) {
+	import security_headers
+
+	# Match requests from Cloudflare's IPs
+	@cloudflare {
+		remote_ip 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+	}
+
+	# Match requests from local/private network ranges.
+	@local {
+		remote_ip private_ranges 100.64.0.0/10
+	}
+
+	# Handle requests from Cloudflare, setting the real IP header
+	handle @cloudflare {
+		reverse_proxy {args[0]} {
+			header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+		}
+	}
+
+	# Handle requests from local networks (without the Cloudflare header)
+	handle @local {
+		reverse_proxy {args[0]}
+	}
+
+	# Block all other requests
+	handle {
+		respond "Access Denied" 403
+	}
+
+	encode zstd gzip
 	log {
 		format json
 		output stdout
 	}
 }
 
-# Internal only directive.
-(internal_only) {
+# Snippet for general external services.
+(external_proxy) {
+	import security_headers
+	reverse_proxy {args[0]}
+	encode zstd gzip
+	log {
+		format json
+		output stdout
+	}
+}
+
+# Snippet for internal-only services.
+(internal_proxy) {
 	@not_internal not remote_ip private_ranges 100.64.0.0/10
 	abort @not_internal
-	import default_settings
+	reverse_proxy {args[0]}
+	encode zstd gzip
 }
+
+# Cloudflare-protected services; proxied.
 
 {$CHHOTO_URL} {
-	import default_settings
-	reverse_proxy chhoto:4567
-}
-
-{$JELLYFIN_URL} {
-	import default_settings
-	reverse_proxy jellyfin:8096
-}
-
-{$OPENCLOUD_URL} {
-	import default_settings
-	reverse_proxy opencloud:9200
+	import cloudflare_proxy chhoto:4567
 }
 
 {$VAULTWARDEN_URL} {
-	import default_settings
-	reverse_proxy vaultwarden:80
+	import cloudflare_proxy vaultwarden:80
 }
 
 {$THELOUNGE_URL} {
-	import default_settings
-	reverse_proxy thelounge:9000
+	import cloudflare_proxy thelounge:9000
 }
 
-# Internal routes.
+# Other external services.
+
+{$JELLYFIN_URL} {
+	import external_proxy jellyfin:8096
+}
+
+{$OPENCLOUD_URL} {
+	import external_proxy opencloud:9200
+}
+
+# Internal services.
 
 cleanuparr.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy cleanuparr:11011
+	import internal_proxy cleanuparr:11011
 }
 
 lidarr.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy lidarr:8686
+	import internal_proxy lidarr:8686
 }
 
 profilarr.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy profilarr:6868
+	import internal_proxy profilarr:6868
 }
 
 prowlarr.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy gluetun:9696
+	import internal_proxy gluetun:9696
 }
 
 qbittorrent.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy gluetun:8080
+	import internal_proxy gluetun:8080
 }
 
 radarr.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy radarr:7878
+	import internal_proxy radarr:7878
 }
 
 readarr.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy readarr:8787
+	import internal_proxy readarr:8787
 }
 
 slskd.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy gluetun:5030
+	import internal_proxy gluetun:5030
 }
 
 sonarr.{$INTERNAL_DOMAIN} {
-	import internal_only
-	reverse_proxy sonarr:8989
+	import internal_proxy sonarr:8989
 }
