@@ -14,7 +14,6 @@ services:
             EMAIL_CHANGE_ALLOWED: "true" # Allows changing emails.
             EMERGENCY_ACCESS_ALLOWED: "true" # Allows emergency access.
             EXPERIMENTAL_CLIENT_FEATURE_FLAGS: "inline-menu-positioning-improvements,inline-menu-totp,ssh-agent,ssh-key-vault-item,export-attachments" # Flags to enable.
-            HIBP_API_KEY: "${HIBP_API_KEY}" # https://haveibeenpwned.com/Dashboard/SignIn?ReturnUrl=%2FDashboard#ApiKey
             LOGIN_RATELIMIT_MAX_BURST: "10" # Configures ratelimit bursts.
             LOGIN_RATELIMIT_SECONDS: "60" # Configures ratelimit cooldown.
             PUSH_ENABLED: "${VAULTWARDEN_PUSH_ENABLED}" # Toggles notification support.
