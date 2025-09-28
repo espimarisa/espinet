@@ -53,17 +53,25 @@ services:
 
     # qBittorrent: BitTorrent client.
     qbittorrent:
-        image: ghcr.io/11notes/qbittorrent:5.1.2
+        image: lscr.io/linuxserver/qbittorrent:5.1.2
         container_name: qbittorrent
         network_mode: service:gluetun # Route all traffic through Gluetun.
-        read_only: true
         restart: unless-stopped
         environment:
+            DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent.
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         volumes:
             - downloads:/downloads
-            - qbittorrent-config:/qbittorrent/etc
-            - qbittorrent-data:/qbittorrent/var
+            - qbittorrent:/config
+        cap_add:
+            - CHOWN # Required for s6 to fix permissions.
+            - SETGID # Required for s6 to drop to PGID.
+            - SETUID # Required for s6 to drop to PUID.
+        cap_drop:
+            - ALL
         depends_on:
             gluetun:
                 condition: service_healthy
@@ -224,12 +232,9 @@ networks:
         name: gluetun-network # $ docker network create gluetun-network
 
 volumes:
-    qbittorrent-config:
+    qbittorrent:
         external: true
-        name: qbittorrent-config-volume # $ docker volume create qbittorrent-config-volume
-    qbittorrent-data:
-        external: true
-        name: qbittorrent-data-volume # $ docker volume create qbittorrent-volume
+        name: qbittorrent-volume # $ docker volume create qbittorrent-volume
     gluetun:
         external: true
         name: gluetun-volume # $ docker volume create gluetun-volume
