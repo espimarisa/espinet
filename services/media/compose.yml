@@ -28,6 +28,14 @@ services:
             - media-library:/library:ro
         cap_drop:
             - ALL
+        deploy:
+            resources:
+                reservations:
+                    cpus: "1.0"
+                    memory: "2G"
+                limits:
+                    cpus: "4.0"
+                    memory: "16G"
         group_add:
             - ${RENDER_GID} # Required for video device support.
         healthcheck:

@@ -15,6 +15,7 @@ services:
             CONTAINERS: "1" # Allow containers endpoint.
             EVENTS: "1" # Allow event logging.
             NETWORKS: "1" # Allow networks endpoint.
+            INFO: "1" # Allow info endpoint.
             NODES: "1" # Allow nodes endpoint.
             PING: "1" # Allow ping endpoint.
             SERVICES: "1" # Allow services endpoint.
