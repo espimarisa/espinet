@@ -148,9 +148,11 @@ services:
         container_name: huntarr
         hostname: huntarr
         restart: unless-stopped
-        user: ${PUID}:${PGID}
         environment:
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         expose:
             - 9705/tcp # Web interface.
         networks:
