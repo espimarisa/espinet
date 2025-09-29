@@ -2,7 +2,7 @@
 services:
     # Lidarr: Music manager, organizer, and PVR.
     lidarr:
-        image: ghcr.io/hotio/lidarr:nightly-2.14.4.4809 # use until 2.14 hits release
+        image: ghcr.io/hotio/lidarr:pr-plugins-2.14.2.4786
         container_name: lidarr
         hostname: lidarr
         restart: unless-stopped
@@ -142,6 +142,29 @@ services:
         security_opt:
             - no-new-privileges:true
 
+    # Huntarr: Automatic media upgrades and monitoring for 'ARR apps.
+    huntarr:
+        image: ghcr.io/plexguide/huntarr:8.2.10
+        container_name: huntarr
+        hostname: huntarr
+        restart: unless-stopped
+        user: ${PUID}:${PGID}
+        environment:
+            TZ: "${TZ}" # Configures the timezone to use.
+        expose:
+            - 9705/tcp # Web interface.
+        networks:
+            - caddy
+            - gluetun
+        volumes:
+            - huntarr:/config
+        cap_drop:
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
+        security_opt:
+            - no-new-privileges:true
+
     # Cleanuparr: Automatic cleanup and routine maintenence for 'ARR apps.
     cleanuparr:
         image: ghcr.io/cleanuparr/cleanuparr:2.3.1
@@ -181,6 +204,9 @@ volumes:
     cleanuparr:
         external: true
         name: cleanuparr-volume # $ docker volume create cleanuparr-volume
+    huntarr:
+        external: true
+        name: huntarr-volume # $ docker volume create huntarr-volume
     lidarr:
         external: true
         name: lidarr-volume # $ docker volume create lidarr-volume

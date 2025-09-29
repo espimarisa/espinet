@@ -34,6 +34,7 @@ VOLUMES=(
 	"gluetun-volume"
 	"jellyfin-cache-volume"
 	"jellyfin-config-volume"
+	"huntarr-volume"
 	"lidarr-volume"
 	"profilarr-volume"
 	"prowlarr-volume"
@@ -102,7 +103,7 @@ done
 
 # Creates application data structure.
 echo "Creating application data structure..."
-mkdir -p "${APPDATA_PATH}"/{chhoto,opencloud,soularr,thelounge,vaultwarden}
+mkdir -p "${APPDATA_PATH}"/{chhoto,opencloud,thelounge,vaultwarden}
 mkdir -p "${APPDATA_PATH}"/opencloud/{config,data}
 
 # Sets ownership for all created data directories.

@@ -159,8 +159,8 @@ services:
         restart: unless-stopped
         user: ${PUID}:${PGID}
         environment:
-            SLSKD_DOWNLOADS_DIR: "/downloads" # mkdir -p ${DOWNLOADS_PATH}/soulseek
-            SLSKD_INCOMPLETE_DIR: "/downloads/.incomplete" # mkdir -p ${DOWNLOADS_PATH}/soulseek/.incomplete
+            SLSKD_DOWNLOADS_DIR: "/downloads/soulseek" # mkdir -p ${DOWNLOADS_PATH}/soulseek
+            SLSKD_INCOMPLETE_DIR: "/downloads/soulseek/.incomplete" # mkdir -p ${DOWNLOADS_PATH}/soulseek/.incomplete
             SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
             SLSKD_SLSK_LISTEN_PORT: "${SOULSEEK_PORT:-50300}"
             SLSKD_SLSK_PASSWORD: "${SOULSEEK_PASSWORD}" # Soulseek password to use.
@@ -171,7 +171,7 @@ services:
             TZ: "${TZ}" # Configures the timezone to use.
         volumes:
             - slskd:/app
-            - soulseek-downloads:/downloads
+            - downloads:/downloads
         cap_drop:
             - AUDIT_WRITE
             - MKNOD
@@ -182,37 +182,6 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
-        security_opt:
-            - no-new-privileges:true
-
-    # Soularr: Soulseek integration for Lidarr.
-    soularr:
-        image: ghcr.io/mrusse/soularr:main
-        container_name: soularr
-        network_mode: service:gluetun
-        restart: unless-stopped
-        user: ${PUID}:${PGID}
-        environment:
-            TZ: "${TZ}" # Configures the timezone to use.
-        volumes:
-            - soularr-config:/data
-            - soulseek-downloads:/downloads
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
-            lidarr:
-                condition: service_healthy
-                restart: true
-            slskd:
-                condition: service_healthy
-                restart: true
-        healthcheck:
-            test: "curl -f http://127.0.0.1:5030/health || exit 1"
         security_opt:
             - no-new-privileges:true
 
@@ -257,21 +226,6 @@ volumes:
     slskd:
         external: true
         name: slskd-volume # $ docker volume create slskd-volume
-    soularr:
-        external: true
-        name: soularr-volume
-    soularr-config:
-        name: soularr-config-bind
-        driver_opts:
-            device: "${APPDATA_PATH}/soularr" # Root path to store Soularr data.
-            o: bind
-            type: none
-    soulseek-downloads:
-        name: soulseek-downloads-bind
-        driver_opts:
-            device: "${DOWNLOADS_PATH}/soulseek" # Root path to store downloaded soulseek files into.
-            o: bind
-            type: none
     downloads:
         name: downloads-bind
         driver_opts:
