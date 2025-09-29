@@ -61,7 +61,7 @@ services:
 
     # Readarr: Book manager, organizer, and PVR.
     readarr:
-        image: ghcr.io/pennydreadful/bookshelf:hardcover-v0.4.20.91 # Revival of Readarr.
+        image: ghcr.io/pennydreadful/bookshelf:softcover-v0.4.20.91 # Revival of Readarr.
         container_name: readarr
         hostname: readarr
         restart: unless-stopped
