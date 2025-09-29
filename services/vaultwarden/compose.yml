@@ -41,7 +41,9 @@ services:
             - /etc/localtime:/etc/localtime:ro # Local timezone mount.
             - vaultwarden-data:/data
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         depends_on:
             caddy:
                 condition: service_started
