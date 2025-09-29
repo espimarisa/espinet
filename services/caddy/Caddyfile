@@ -136,6 +136,10 @@
 }
 
 # Internal services.
+huntarr.{$INTERNAL_DOMAIN} {
+	import internal_proxy huntarr:9705
+}
+
 cleanuparr.{$INTERNAL_DOMAIN} {
 	import internal_proxy cleanuparr:11011
 }
