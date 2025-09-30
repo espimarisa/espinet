@@ -5,7 +5,7 @@ NETWORKS=("caddy-network" "gluetun-network")
 INTERNAL_NETWORKS=("socket-proxy-network")
 
 # List of downloads directories to create.
-DOWNLOADS_DIRECTORIES=("lazylibrarian" "torrents" "soulseek")
+DOWNLOADS_DIRECTORIES=("lazylibrarian" "deezer" "torrents" "soulseek")
 TORRENTS_DIRECTORIES=(
 	".incomplete"
 	".torrent-files"
@@ -31,7 +31,6 @@ MEDIA_LIBRARY_DIRECTORIES=(
 VOLUMES=(
 	"caddy-volume"
 	"cleanuparr-volume"
-	"deemix-volume"
 	"gluetun-volume"
 	"huntarr-volume"
 	"jellyfin-cache-volume"

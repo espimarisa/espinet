@@ -37,7 +37,6 @@ services:
             - ${SOULSEEK_PORT:-50300}/tcp # Soulseek traffic.
             - 5030/tcp # slskd web interface.
             - 5299/tcp # LazyLibrarian web interface.
-            - 6595/tcp # Deemix web interface.
             - 8080/tcp # qBittorrent web interface.
             - 8191/tcp # Byparr server.
             - 9696/tcp # Prowlarr web interface.
@@ -78,30 +77,6 @@ services:
             gluetun:
                 condition: service_healthy
                 restart: true
-        security_opt:
-            - no-new-privileges:true
-
-    # Deemix: Deezer downloads client.
-    deemix:
-        image: ghcr.io/bambanah/deemix:v4.3.5
-        container_name: deemix
-        network_mode: service:gluetun # Route all traffic through Gluetun.
-        restart: unless-stopped
-        environment:
-            DEEMIX_SINGLE_USER: "true" # Use one global user.
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
-            TZ: "${TZ}" # Configures the timezone to use.
-            UMASK_SET: "${UMASK}" # Default umask to apply to newly created files.
-        volumes:
-            - deemix:/config
-            - downloads:/downloads
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        healthcheck:
-            test: "curl -f http://127.0.0.1:6595 || exit 1"
         security_opt:
             - no-new-privileges:true
 
@@ -268,9 +243,6 @@ networks:
         name: gluetun-network # $ docker network create gluetun-network
 
 volumes:
-    deemix:
-        external: true
-        name: deemix-volume # $ docker volume create deemix-volume
     gluetun:
         external: true
         name: gluetun-volume # $ docker volume create gluetun-volume
