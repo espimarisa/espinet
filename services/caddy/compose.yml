@@ -2,7 +2,7 @@
 services:
     # Caddy: Reverse proxy and web server.
     caddy:
-        image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.23
+        image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.30
         container_name: caddy
         hostname: caddy
         restart: unless-stopped

@@ -36,8 +36,10 @@ services:
         expose:
             - ${SOULSEEK_PORT:-50300}/tcp # Soulseek traffic.
             - 5030/tcp # slskd web interface.
+            - 5299/tcp # LazyLibrarian web interface.
+            - 6595/tcp # Deemix web interface.
             - 8080/tcp # qBittorrent web interface.
-            - 8191/tcp # Flaresolverr server.
+            - 8191/tcp # Byparr server.
             - 9696/tcp # Prowlarr web interface.
         networks:
             - caddy
@@ -79,6 +81,61 @@ services:
         security_opt:
             - no-new-privileges:true
 
+    # Deemix: Deezer downloads client.
+    deemix:
+        image: ghcr.io/bambanah/deemix:v4.3.5
+        container_name: deemix
+        network_mode: service:gluetun # Route all traffic through Gluetun.
+        restart: unless-stopped
+        environment:
+            DEEMIX_SINGLE_USER: "true" # Use one global user.
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
+            TZ: "${TZ}" # Configures the timezone to use.
+            UMASK_SET: "${UMASK}" # Default umask to apply to newly created files.
+        expose:
+            - 6595/tcp # Web interface.
+        volumes:
+            - deemix:/config
+            - downloads:/downloads
+        cap_drop:
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
+        healthcheck:
+            test: "curl -f http://127.0.0.1:6595 || exit 1"
+        security_opt:
+            - no-new-privileges:true
+
+    # LazyLibrarian: Book downloader and manager. Replacement for Readarr (RIP).
+    lazylibrarian:
+        image: lscr.io/linuxserver/lazylibrarian:version-9dfe9ad5
+        container_name: lazylibrarian
+        network_mode: service:gluetun # Route all traffic through Gluetun.
+        restart: unless-stopped
+        environment:
+            DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:lazylibrarian-ffmpeg"
+            PGID: "${PGID}" # Local group to run as.
+            PUID: "${PUID}" # Local user to run as.
+            TZ: "${TZ}" # Configures the timezone to use.
+            UMASK: "${UMASK}" # Default umask to apply to newly created files.
+        volumes:
+            - downloads:/downloads
+            - lazylibrarian:/config
+            - media-library:/library
+        cap_drop:
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
+        depends_on:
+            gluetun:
+                condition: service_healthy
+                restart: true
+        healthcheck:
+            test: "curl -f http://127.0.0.1:5299/health || exit 1"
+        security_opt:
+            - no-new-privileges:true
+
     # Prowlarr: Indexer manager.
     prowlarr:
         image: ghcr.io/hotio/prowlarr:release-2.0.5.5160
@@ -106,15 +163,15 @@ services:
         security_opt:
             - no-new-privileges:true
 
-    # Flaresolverr: DDoS-Guard and Cloudflare captcha solver.
-    flaresolverr:
-        image: ghcr.io/flaresolverr/flaresolverr:v3.4.1
-        container_name: flaresolverr
+    # Byparr: Cookie scraper, DDoS-Guard, and captcha solver.
+    byparr:
+        image: ghcr.io/thephaseless/byparr:2.0.1
+        container_name: byparr
         network_mode: service:gluetun # Route all traffic through Gluetun.
         restart: unless-stopped
         user: ${PUID}:${PGID}
-        environment:
-            TZ: "${TZ}" # Configures the timezone to use.
+        volumes:
+            - /etc/localtime:/etc/localtime:ro # Local timezone mount.
         cap_drop:
             - ALL
         depends_on:
@@ -216,12 +273,18 @@ networks:
         name: gluetun-network # $ docker network create gluetun-network
 
 volumes:
-    qbittorrent:
+    deemix:
         external: true
-        name: qbittorrent-volume # $ docker volume create qbittorrent-volume
+        name: deemix-volume # $ docker volume create deemix-volume
     gluetun:
         external: true
         name: gluetun-volume # $ docker volume create gluetun-volume
+    lazylibrarian:
+        external: true
+        name: lazylibrarian-volume # $ docker volume create lazylibrarian-volume
+    qbittorrent:
+        external: true
+        name: qbittorrent-volume # $ docker volume create qbittorrent-volume
     prowlarr:
         external: true
         name: prowlarr-volume # $ docker volume create prowlarr-volume

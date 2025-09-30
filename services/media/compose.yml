@@ -8,7 +8,7 @@ include:
 services:
     # Jellyfin: Media server.
     jellyfin:
-        image: ghcr.io/jellyfin/jellyfin:10.11.0-rc6
+        image: ghcr.io/jellyfin/jellyfin:10.11.0-rc8
         container_name: jellyfin
         hostname: jellyfin
         restart: unless-stopped
@@ -28,14 +28,6 @@ services:
             - media-library:/library:ro
         cap_drop:
             - ALL
-        deploy:
-            resources:
-                reservations:
-                    cpus: "1.0"
-                    memory: "2G"
-                limits:
-                    cpus: "4.0"
-                    memory: "16G"
         group_add:
             - ${RENDER_GID} # Required for video device support.
         healthcheck:

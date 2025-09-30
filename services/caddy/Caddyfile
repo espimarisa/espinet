@@ -136,12 +136,21 @@
 }
 
 # Internal services.
+
 huntarr.{$INTERNAL_DOMAIN} {
 	import internal_proxy huntarr:9705
 }
 
 cleanuparr.{$INTERNAL_DOMAIN} {
 	import internal_proxy cleanuparr:11011
+}
+
+deemix.{$INTERNAL_DOMAIN} {
+	import internal_proxy gluetun:6595
+}
+
+lazylibrarian.{$INTERNAL_DOMAIN} {
+	import internal_proxy lazylibrarian:5299
 }
 
 lidarr.{$INTERNAL_DOMAIN} {
@@ -162,10 +171,6 @@ qbittorrent.{$INTERNAL_DOMAIN} {
 
 radarr.{$INTERNAL_DOMAIN} {
 	import internal_proxy radarr:7878
-}
-
-readarr.{$INTERNAL_DOMAIN} {
-	import internal_proxy readarr:8787
 }
 
 slskd.{$INTERNAL_DOMAIN} {

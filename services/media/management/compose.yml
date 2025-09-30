@@ -59,35 +59,6 @@ services:
         security_opt:
             - no-new-privileges:true
 
-    # Readarr: Book manager, organizer, and PVR.
-    readarr:
-        image: ghcr.io/pennydreadful/bookshelf:hardcover-v0.4.20.91
-        container_name: readarr
-        hostname: readarr
-        restart: unless-stopped
-        environment:
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
-            TZ: "${TZ}" # Configures the timezone to use.
-            UMASK: "${UMASK}" # Default umask to apply to newly created files.
-        expose:
-            - 8787/tcp # Web interface.
-        networks:
-            - caddy
-            - gluetun
-        volumes:
-            - downloads:/downloads
-            - media-library:/library
-            - readarr:/config
-        healthcheck:
-            test: "wget --spider http://127.0.0.1:8787/health || exit 1"
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        security_opt:
-            - no-new-privileges:true
-
     # Sonarr: TV/Anime series, organizer, and PVR.
     sonarr:
         image: ghcr.io/hotio/sonarr:release-4.0.15.2941
@@ -169,7 +140,7 @@ services:
 
     # Cleanuparr: Automatic cleanup and routine maintenence for 'ARR apps.
     cleanuparr:
-        image: ghcr.io/cleanuparr/cleanuparr:2.3.1
+        image: ghcr.io/cleanuparr/cleanuparr:2.3.3
         container_name: cleanuparr
         hostname: cleanuparr
         restart: unless-stopped
@@ -218,9 +189,6 @@ volumes:
     radarr:
         external: true
         name: radarr-volume # $ docker volume create radarr-volume
-    readarr:
-        external: true
-        name: readarr-volume # $ docker volume create readarr-volume
     sonarr:
         external: true
         name: sonarr-volume # $ docker volume create sonarr-volume
