@@ -150,7 +150,7 @@ deemix.{$INTERNAL_DOMAIN} {
 }
 
 lazylibrarian.{$INTERNAL_DOMAIN} {
-	import internal_proxy lazylibrarian:5299
+	import internal_proxy gluetun:5299
 }
 
 lidarr.{$INTERNAL_DOMAIN} {
