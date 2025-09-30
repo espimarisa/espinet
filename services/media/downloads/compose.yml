@@ -167,11 +167,12 @@ services:
         container_name: byparr
         network_mode: service:gluetun # Route all traffic through Gluetun.
         restart: unless-stopped
-        user: ${PUID}:${PGID}
         volumes:
             - /etc/localtime:/etc/localtime:ro # Local timezone mount.
         cap_drop:
-            - ALL
+            - AUDIT_WRITE
+            - MKNOD
+            - SYS_CHROOT
         depends_on:
             gluetun:
                 condition: service_healthy
