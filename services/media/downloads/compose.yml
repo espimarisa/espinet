@@ -121,10 +121,6 @@ services:
             - downloads:/downloads
             - lazylibrarian:/config
             - media-library:/library
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
         depends_on:
             gluetun:
                 condition: service_healthy
