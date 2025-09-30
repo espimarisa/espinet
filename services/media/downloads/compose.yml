@@ -168,10 +168,12 @@ services:
             SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
             SLSKD_USERNAME: "${SLSKD_USERNAME}" # Configures the web ui username.
             SOULSEEK_PASSWORD: "${SOULSEEK_PASSWORD}" # Configures the web ui password.
+            SLSKD_SHARED_DIR: "/library" # Share sorted music library.
             TZ: "${TZ}" # Configures the timezone to use.
         volumes:
             - slskd:/app
             - downloads:/downloads
+            - music-library:/library:ro
         cap_drop:
             - AUDIT_WRITE
             - MKNOD
@@ -230,5 +232,11 @@ volumes:
         name: downloads-bind
         driver_opts:
             device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
+            o: bind
+            type: none
+    music-library:
+        name: music-library-bind
+        driver_opts:
+            device: "${MEDIA_LIBRARY_PATH}/music" # Root path to the music library.
             o: bind
             type: none
