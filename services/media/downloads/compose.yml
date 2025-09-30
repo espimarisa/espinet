@@ -93,8 +93,6 @@ services:
             PUID: "${PUID}" # Local user to run as.
             TZ: "${TZ}" # Configures the timezone to use.
             UMASK_SET: "${UMASK}" # Default umask to apply to newly created files.
-        expose:
-            - 6595/tcp # Web interface.
         volumes:
             - deemix:/config
             - downloads:/downloads
