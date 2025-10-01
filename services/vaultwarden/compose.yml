@@ -1,11 +1,16 @@
 ---
 services:
-    # Vaultwarden: Self-hosted Bitwarden-compatible server.
+    ###########################################################################
+    # Vaultwarden: Bitwarden srv - https://github.com/dani-garcia/vaultwarden #
+    ###########################################################################
+
     vaultwarden:
         image: ghcr.io/dani-garcia/vaultwarden:1.34.3
         container_name: vaultwarden
         hostname: vaultwarden
         restart: unless-stopped
+        user: "${PUID}:${PGID}"
+        read_only: true
         environment:
             ADMIN_RATELIMIT_MAX_BURST: "3" # Configures the admin ratelimit.
             ADMIN_RATELIMIT_SECONDS: "300" # Configures the admin ratelimit cooldown.
@@ -37,17 +42,13 @@ services:
             - 80/tcp # Web interface.
         networks:
             - caddy
+        tmpfs:
+            - "/tmp:uid=${PUID},gid=${PGID}" # Required for read-only image.
         volumes:
             - /etc/localtime:/etc/localtime:ro # Local timezone mount.
             - vaultwarden-data:/data
         cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        depends_on:
-            caddy:
-                condition: service_started
-                restart: true
+            - ALL
         healthcheck:
             test: "curl -f http://127.0.0.1:80/alive || exit 1"
         security_opt:

@@ -83,8 +83,17 @@
 	encode zstd gzip
 }
 
+###########################################################################
+# Proxied external services.        								  	  #
+###########################################################################
+
+
 {$CHHOTO_URL} {
 	import cloudflare_proxy chhoto:4567
+}
+
+{$THELOUNGE_URL} {
+	import cloudflare_proxy thelounge:9000
 }
 
 # Vaultwarden is very picky about headers.
@@ -122,11 +131,11 @@
 	}
 }
 
-{$THELOUNGE_URL} {
-	import cloudflare_proxy thelounge:9000
-}
+###########################################################################
+# Non-proxied external services.        								  #
+###########################################################################
 
-# Other external services.
+
 {$JELLYFIN_URL} {
 	import external_proxy jellyfin:8096
 }
@@ -135,14 +144,16 @@
 	import external_proxy opencloud:9200
 }
 
-# Internal services.
-
-huntarr.{$INTERNAL_DOMAIN} {
-	import internal_proxy huntarr:9705
-}
+###########################################################################
+# Internal services.        								  			  #
+###########################################################################
 
 cleanuparr.{$INTERNAL_DOMAIN} {
 	import internal_proxy cleanuparr:11011
+}
+
+huntarr.{$INTERNAL_DOMAIN} {
+	import internal_proxy huntarr:9705
 }
 
 lazylibrarian.{$INTERNAL_DOMAIN} {

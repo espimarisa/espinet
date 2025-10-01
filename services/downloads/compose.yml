@@ -1,6 +1,32 @@
 ---
+# Default environment variables.
+x-defaults-environment: &defaults-environment
+    PGID: "${PGID}" # Local group to run as.
+    PUID: "${PUID}" # Local user to run as.
+    TZ: "${TZ}" # Configures the timezone to use.
+    UMASK: "${UMASK}" # Default umask to apply to newly created files.
+
+# Default container options.
+x-defaults: &defaults
+    restart: unless-stopped
+    environment: *defaults-environment
+    network_mode: service:gluetun
+    cap_drop:
+        - AUDIT_WRITE
+        - MKNOD
+        - SYS_CHROOT
+    depends_on:
+        gluetun:
+            condition: service_healthy
+            restart: true
+    security_opt:
+        - no-new-privileges:true
+
 services:
-    # Gluetun: VPN client. I use AirVPN currently, see the Gluetun wiki for more.
+    ###########################################################################
+    # Gluetun: Container VPN client - https://github.com/qdm12/gluetun        #
+    ###########################################################################
+
     gluetun:
         image: ghcr.io/qdm12/gluetun:v3.40.0
         container_name: gluetun
@@ -34,7 +60,7 @@ services:
             WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from Wireguard config.
             WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from Wireguard config.
         expose:
-            - ${SOULSEEK_PORT:-50300}/tcp # Soulseek traffic.
+            - "${SOULSEEK_PORT:-50300}/tcp" # Soulseek traffic.
             - 5030/tcp # slskd web interface.
             - 5299/tcp # LazyLibrarian web interface.
             - 8080/tcp # qBittorrent web interface.
@@ -54,185 +80,111 @@ services:
         security_opt:
             - no-new-privileges:true
 
-    # qBittorrent: BitTorrent client.
+    ###########################################################################
+    # qBittorrent: BitTorrent client - https://www.qbittorrent.org/           #
+    ###########################################################################
+
     qbittorrent:
+        <<: *defaults
         image: lscr.io/linuxserver/qbittorrent:5.1.2
         container_name: qbittorrent
-        network_mode: service:gluetun # Route all traffic through Gluetun.
-        restart: unless-stopped
         environment:
+            <<: *defaults-environment
             DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent.
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
-            TZ: "${TZ}" # Configures the timezone to use.
-            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         volumes:
             - downloads:/downloads
             - qbittorrent:/config
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
-        security_opt:
-            - no-new-privileges:true
 
-    # LazyLibrarian: Book downloader and manager. Replacement for Readarr (RIP).
+    ###########################################################################
+    # LazyLibrarian: Book manager and PVR - https://lazylibrarian.gitlab.io   #
+    ###########################################################################
+
     lazylibrarian:
+        <<: *defaults
         image: lscr.io/linuxserver/lazylibrarian:version-9dfe9ad5
         container_name: lazylibrarian
-        network_mode: service:gluetun # Route all traffic through Gluetun.
-        restart: unless-stopped
         environment:
+            <<: *defaults-environment
             DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:lazylibrarian-ffmpeg"
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
-            TZ: "${TZ}" # Configures the timezone to use.
-            UMASK: "${UMASK}" # Default umask to apply to newly created files.
         volumes:
             - downloads:/downloads
             - lazylibrarian:/config
             - media-library:/library
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
         healthcheck:
             test: "curl -f http://127.0.0.1:5299/health || exit 1"
-        security_opt:
-            - no-new-privileges:true
 
-    # Prowlarr: Indexer manager.
-    prowlarr:
-        image: ghcr.io/hotio/prowlarr:release-2.0.5.5160
-        container_name: prowlarr
-        network_mode: service:gluetun # Route all traffic through Gluetun.
-        restart: unless-stopped
-        environment:
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
-            TZ: "${TZ}" # Configures the timezone to use.
-            UMASK: "${UMASK}" # Default umask to apply to newly created files.
-        volumes:
-            - downloads:/downloads
-            - prowlarr:/config
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
-        healthcheck:
-            test: "curl -f http://127.0.0.1:9696/health || exit 1"
-        security_opt:
-            - no-new-privileges:true
+    ###########################################################################
+    # slskd: Soulseek client - https://github.com/slskd/slskd                 #
+    ###########################################################################
 
-    # Byparr: Cookie scraper, DDoS-Guard, and captcha solver.
-    byparr:
-        image: ghcr.io/thephaseless/byparr:2.0.1
-        container_name: byparr
-        network_mode: service:gluetun # Route all traffic through Gluetun.
-        restart: unless-stopped
-        volumes:
-            - /etc/localtime:/etc/localtime:ro # Local timezone mount.
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
-        healthcheck:
-            test: "curl -f http://127.0.0.1:8191/health || exit 1"
-        security_opt:
-            - no-new-privileges:true
-
-    # Unpackerr: Automatic extraction of downloaded files.
-    unpackerr:
-        image: ghcr.io/unpackerr/unpackerr:0.14.5
-        container_name: unpackerr
-        hostname: unpackerr
-        restart: unless-stopped
-        user: ${PUID}:${PGID}
-        environment:
-            TZ: "${TZ}" # Configures the timezone to use.
-            UN_LOG_FILE: "/downloads/unpackerr.log" # Log file location.
-            UN_RADARR_0_API_KEY: "${RADARR_API_KEY}" # Radarr API key.
-            UN_RADARR_0_URL: "http://radarr:7878" # Primary Radarr URL.
-            UN_SONARR_0_API_KEY: "${SONARR_API_KEY}" # Sonarr API key.
-            UN_SONARR_0_URL: "http://sonarr:8989" # Primary Sonarr URL.
-        networks:
-            - gluetun
-        volumes:
-            - downloads:/downloads
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        security_opt:
-            - no-new-privileges:true
-
-    # slskd: Soulseek client.
     slskd:
+        <<: *defaults
         image: ghcr.io/slskd/slskd:0.23.2
         container_name: slskd
-        network_mode: service:gluetun # Route all traffic thru Gluetun.
-        restart: unless-stopped
-        user: ${PUID}:${PGID}
+        user: "${PUID}:${PGID}"
         environment:
+            <<: *defaults-environment
             SLSKD_DOWNLOADS_DIR: "/downloads/soulseek" # mkdir -p ${DOWNLOADS_PATH}/soulseek
             SLSKD_INCOMPLETE_DIR: "/downloads/soulseek/.incomplete" # mkdir -p ${DOWNLOADS_PATH}/soulseek/.incomplete
             SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
+            SLSKD_SHARED_DIR: "/library/music" # Share sorted music library.
             SLSKD_SLSK_LISTEN_PORT: "${SOULSEEK_PORT:-50300}"
             SLSKD_SLSK_PASSWORD: "${SOULSEEK_PASSWORD}" # Soulseek password to use.
             SLSKD_SLSK_USERNAME: "${SOULSEEK_USERNAME}" # Soulseek username to use.
             SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
             SLSKD_USERNAME: "${SLSKD_USERNAME}" # Configures the web ui username.
             SOULSEEK_PASSWORD: "${SOULSEEK_PASSWORD}" # Configures the web ui password.
-            SLSKD_SHARED_DIR: "/library" # Share sorted music library.
             TZ: "${TZ}" # Configures the timezone to use.
         volumes:
             - slskd:/app
             - downloads:/downloads
-            - music-library:/library:ro
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
+            - media-library:/library:ro
         healthcheck:
             test: "wget --spider http://127.0.0.1:5030/health || exit 1"
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
+
+    ###########################################################################
+    # Prowlarr: Indexer manager for PVRs - https://prowlarr.com               #
+    ###########################################################################
+
+    prowlarr:
+        <<: *defaults
+        image: ghcr.io/hotio/prowlarr:release-2.0.5.5160
+        container_name: prowlarr
+        volumes:
+            - downloads:/downloads
+            - prowlarr:/config
+        healthcheck:
+            test: "curl -f http://127.0.0.1:9696/health || exit 1"
+
+    ###########################################################################
+    # Byparr: Cloudflare solver - https://github.com/ThePhaseless/Byparr      #
+    ###########################################################################
+
+    byparr:
+        <<: *defaults
+        image: ghcr.io/thephaseless/byparr:2.0.1
+        container_name: byparr
+        volumes:
+            - /etc/localtime:/etc/localtime:ro # Local timezone mount.
+        healthcheck:
+            test: "curl -f http://127.0.0.1:8191/health || exit 1"
         security_opt:
             - no-new-privileges:true
 
-    # mam-ip-helper: Update MyAnonaMouse seedbox session to match Gluetun's IP.
+    ###########################################################################
+    # MaM-IP-Helper: MyAnonaMouse seedbox IP synchronization.                 #
+    ###########################################################################
+
     mam-ip-helper:
+        <<: *defaults
         image: tyzen9/myanonamouse-ip-helper:1.0.0
         container_name: mam-ip-helper
-        network_mode: service:gluetun # Route all traffic through Gluetun.
         read_only: true
-        restart: unless-stopped
         user: ${PUID}:${PGID}
         environment:
+            <<: *defaults-environment
             TZ: "${TZ}" # Configures the timezone to use.
             MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
-        cap_drop:
-            - ALL
-        depends_on:
-            gluetun:
-                condition: service_healthy
-                restart: true
-        security_opt:
-            - no-new-privileges:true
 
 networks:
     caddy:
@@ -264,9 +216,9 @@ volumes:
             device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
             o: bind
             type: none
-    music-library:
-        name: music-library-bind
+    media-library:
+        name: media-library-bind
         driver_opts:
-            device: "${MEDIA_LIBRARY_PATH}/music" # Root path to the music library.
+            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
             o: bind
             type: none

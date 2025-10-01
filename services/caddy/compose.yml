@@ -1,18 +1,20 @@
 ---
 services:
-    # Caddy: Reverse proxy and web server.
+    ###########################################################################
+    # Caddy: Reverse proxy and web server - https://caddyserver.com/          #
+    ###########################################################################
+
     caddy:
         image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.30
         container_name: caddy
         hostname: caddy
+        read_only: true
         restart: unless-stopped
-        dns:
-            - 9.9.9.9
-            - 149.112.112.112
+        user: ${PUID}:${PGID}
         environment:
             ACME_EMAIL: "${ACME_EMAIL}"
             CADDY_DOCKER_CADDYFILE_PATH: "/Caddyfile"
-            CADDY_INGRESS_NETWORKS: "caddy" # Listen for traffic coming from the caddy network.
+            CADDY_INGRESS_NETWORKS: "penisfart" # Listen for traffic coming from the caddy network.
             CHHOTO_URL: "${CHHOTO_URL}"
             CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Cloudflare account token with DNS Zone editing to domains.
             DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
@@ -30,6 +32,8 @@ services:
             - 80:80/tcp # HTTP traffic.
             - 443:443/tcp # HTTPS traffic.
             - 443:443/udp # HTTPS traffic.
+        tmpfs:
+            - "/tmp:uid=${PUID},gid=${PGID}" # Required for read-only image.
         volumes:
             - ./Caddyfile:/Caddyfile
             - caddy:/data
@@ -38,6 +42,9 @@ services:
             - NET_BIND_SERVICE
         cap_drop:
             - ALL
+        dns:
+            - 9.9.9.9
+            - 149.112.112.112
         depends_on:
             socket-proxy:
                 condition: service_healthy

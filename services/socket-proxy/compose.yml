@@ -1,13 +1,15 @@
 ---
 services:
-    # Socket Proxy: Proxies the Docker Socket for increased security.
+    ###########################################################################
+    # Socket Proxy: Proxy wrapper for the Docker socket for secure access.    #
+    ###########################################################################
+
     socket-proxy:
         image: lscr.io/linuxserver/socket-proxy:3.2.5
         container_name: socket-proxy
         hostname: socket-proxy
         read_only: true
         restart: unless-stopped
-        tmpfs: /run # Required for read_only image.
         environment:
             ALLOW_RESTARTS: "1" # Allow restarting containers.
             ALLOW_START: "1" # Allow starting containers.
@@ -25,6 +27,8 @@ services:
             - socket-proxy # Internal-only socket proxy network.
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
+        tmpfs:
+            - /run # Required for read-only image.
         cap_drop:
             - ALL
         healthcheck:

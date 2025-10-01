@@ -1,13 +1,17 @@
 ---
 services:
-    # OpenCloud: Self-hosted cloud storage.
+    ###########################################################################
+    # OpenCloud: Self-hosted cloud storage service - https://opencloud.eu/en  #
+    ###########################################################################
+
     opencloud:
         image: opencloudeu/opencloud-rolling:3.5.0
         container_name: opencloud
         entrypoint: /bin/sh
         hostname: opencloud
         restart: unless-stopped
-        user: ${PUID}:${PGID}
+        read_only: true
+        user: "${PUID}:${PGID}"
         command:
             ["-c", "opencloud init --insecure true || true; opencloud server"]
         environment:
@@ -35,17 +39,15 @@ services:
             - 9200/tcp # Web interface.
         networks:
             - caddy
+        tmpfs:
+            - "/tmp:uid=${PUID},gid=${PGID}" # Required for read-only image.
         volumes:
             - opencloud-config:/etc/opencloud
             - opencloud-data:/var/lib/opencloud
         cap_drop:
             - ALL
-        depends_on:
-            caddy:
-                condition: service_started
-                restart: true
         extra_hosts:
-            - "${OPENCLOUD_URL}:host-gateway"
+            - "${OPENCLOUD_URL}:host-gateway" # Required for resolving the external URL.
         healthcheck:
             test: "wget --spider http://127.0.0.1:9200 || exit 1"
         security_opt:

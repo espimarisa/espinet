@@ -1,26 +1,28 @@
 ---
 services:
-    # The Lounge: IRC client.
+    ###########################################################################
+    # The Lounge: IRC Client - https://thelounge.chat                         #
+    ###########################################################################
+
     thelounge:
         image: ghcr.io/thelounge/thelounge:4.4.3
         container_name: thelounge
         hostname: thelounge
         restart: unless-stopped
-        user: ${PUID}:${PGID}
+        read_only: true
+        user: "${PUID}:${PGID}"
         environment:
             TZ: "${TZ}" # Configures the timezone to use.
         expose:
             - 9000/tcp # Web interface.
         networks:
             - caddy
+        tmpfs:
+            - "/tmp:uid=${PUID},gid=${PGID}" # Required for read-only image.
         volumes:
             - thelounge:/var/opt/thelounge
         cap_drop:
             - ALL
-        depends_on:
-            caddy:
-                condition: service_started
-                restart: true
         healthcheck:
             test: "wget --spider http://127.0.0.1:9000 || exit 1"
         security_opt:

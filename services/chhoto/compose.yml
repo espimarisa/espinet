@@ -1,13 +1,16 @@
 ---
 services:
-    # chhoto-url: Self-hosted URL shortener.
+    ###########################################################################
+    # Chhoto URL: URL shortener - https://github.com/sintan1729/chhoto-url    #
+    ###########################################################################
+
     chhoto:
         image: ghcr.io/sintan1729/chhoto-url:6.3.2
         container_name: chhoto
         hostname: chhoto
         read_only: true
         restart: unless-stopped
-        user: ${PUID}:${PGID}
+        user: "${PUID}:${PGID}" # Run as a non-root user.
         environment:
             db_url: "/db/urls.sqlite" # Path to the sqlite database.
             api_key: "${CHHOTO_API_KEY}" # Configures the API key to use.
@@ -21,10 +24,6 @@ services:
             - chhoto-data:/db # Configuration and database.
         cap_drop:
             - ALL
-        depends_on:
-            caddy:
-                condition: service_started
-                restart: true
         security_opt:
             - no-new-privileges:true
 
