@@ -166,8 +166,6 @@ services:
         container_name: byparr
         volumes:
             - /etc/localtime:/etc/localtime:ro # Local timezone mount.
-        healthcheck:
-            test: "curl -f http://127.0.0.1:8191/health || exit 1"
         security_opt:
             - no-new-privileges:true
 
