@@ -21,7 +21,7 @@ fi
 
 # Verify that all required environment variables are set.
 REQUIRED_VARS=(
-	"APPDATA_DIRECTORY"
+	"APPDATA_PATH"
 	"BACKUP_CONFIG_DIRECTORY"
 	"RCLONE_REMOTE"
 	"RCLONE_REMOTE_DIRECTORY"
@@ -56,11 +56,11 @@ REMOTE_CURRENT_PATH="${REMOTE_BASE_PATH}/current"
 REMOTE_ARCHIVE_PATH="${REMOTE_BASE_PATH}/archive/${TIMESTAMP}"
 
 # Perform an incremental backup with versioning.
-echo "Syncing data from ${APPDATA_DIRECTORY}/opencloud to ${REMOTE_CURRENT_PATH}..."
+echo "Syncing data from ${APPDATA_PATH}/opencloud to ${REMOTE_CURRENT_PATH}..."
 echo "Older file versions will be moved to: ${REMOTE_ARCHIVE_PATH}"
 
 rclone copy \
-	"${APPDATA_DIRECTORY}/opencloud" \
+	"${APPDATA_PATH}/opencloud" \
 	"${REMOTE_CURRENT_PATH}" \
 	--backup-dir "${REMOTE_ARCHIVE_PATH}" \
 	--progress \

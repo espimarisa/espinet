@@ -21,7 +21,7 @@ fi
 
 # Verify that all required environment variables are set.
 REQUIRED_VARS=(
-	"APPDATA_DIRECTORY"
+	"APPDATA_PATH"
 	"BACKUP_STAGING_DIRECTORY"
 	"BACKUP_CONFIG_DIRECTORY"
 	"RCLONE_REMOTE"
@@ -67,10 +67,10 @@ DIRECTORIES_TO_BACKUP=(
 )
 
 for dir in "${DIRECTORIES_TO_BACKUP[@]}"; do
-	SOURCE_PATH="${APPDATA_DIRECTORY}/${dir}"
+	SOURCE_PATH="${APPDATA_PATH}/${dir}"
 	if [ -d "$SOURCE_PATH" ]; then
 		echo " > Backing up directory: ${dir}"
-		tar -czf "${STAGING_DIR}/${dir}_${TIMESTAMP}.tar.gz" -C "${APPDATA_DIRECTORY}" "${dir}"
+		tar -czf "${STAGING_DIR}/${dir}_${TIMESTAMP}.tar.gz" -C "${APPDATA_PATH}" "${dir}"
 	else
 		echo " > Warning: Directory not found, skipping: ${SOURCE_PATH}"
 	fi
