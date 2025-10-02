@@ -31,6 +31,8 @@ MEDIA_LIBRARY_DIRECTORIES=(
 VOLUMES=(
 	"caddy-volume"
 	"cleanuparr-volume"
+	"dozzle-volume"
+	"gatus-db-volume"
 	"gluetun-volume"
 	"huntarr-volume"
 	"jellyfin-cache-volume"

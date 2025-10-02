@@ -82,6 +82,8 @@ VOLUMES_TO_BACKUP=(
 	"caddy-volume"
 	"chhoto-volume"
 	"cleanuparr-volume"
+	"dozzle-volume"
+	"gatus-db-volume"
 	"huntarr-volume"
 	"jellyfin-volume"
 	"lazylibrarian-volume"
