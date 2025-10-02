@@ -104,6 +104,12 @@ endpoints:
     group: Internal Infrastructure
     url: ${SOCKET_PROXY_URL}/containers/caddy/json
 
+  # Dozzle.
+  - name: Dozzle
+    <<: *defaults-container
+    group: Internal Infrastructure
+    url: ${SOCKET_PROXY_URL}/containers/dozzle/json
+
   # Socket Proxy.
   - name: Socket Proxy
     <<: *defaults-container
