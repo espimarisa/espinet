@@ -49,7 +49,6 @@ services:
       APPDATA_PATH: "${APPDATA_PATH}" # Pass for internal config.
       CHHOTO_URL: "${CHHOTO_URL}" # Pass URL for internal config.
       DOMAIN: "${DOMAIN}" # Pass URL for internal config.
-      GATUS_ALERT_DESCRIPTION: "${GATUS_ALERT_DESCRIPTION}" # Description to use for alerts.
       GATUS_HEADER: "${GATUS_HEADER}" # Header to show.
       GATUS_LOGO_URL: "${GATUS_LOGO_URL}" # Custom logo URL to use.
       GATUS_TITLE: "${GATUS_TITLE}" # Page title to use.
