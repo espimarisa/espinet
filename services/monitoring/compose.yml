@@ -1,0 +1,125 @@
+---
+services:
+  ###########################################################################
+  # Dozzle: Docker log viewer - https://dozzle.dev/                         #
+  ###########################################################################
+
+  dozzle:
+    image: ghcr.io/amir20/dozzle:v8.14.3
+    container_name: dozzle
+    hostname: dozzle
+    restart: unless-stopped
+    read_only: true
+    user: "${PUID}:${PGID}"
+    environment:
+      DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
+      DOZZLE_ENABLE_ACTIONS: "true" # Enables container actions.
+      DOZZLE_ENABLE_SHELL: "true" # Allows access to container shells.
+    expose:
+      - 8080/tcp # Web interface.
+    networks:
+      - caddy
+      - socket-proxy
+    volumes:
+      - dozzle:/data
+    cap_drop:
+      - ALL
+    depends_on:
+      socket-proxy:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+    security_opt:
+      - no-new-privileges:true
+
+  ###########################################################################
+  # Gatus: Status and uptime monitoring - https://gatus.io                  #
+  ###########################################################################
+
+  gatus:
+    image: ghcr.io/twin/gatus:v5.25.2
+    container_name: gatus
+    hostname: gatus
+    restart: unless-stopped
+    read_only: true
+    user: "${PUID}:${PGID}"
+    environment:
+      ALERTS_DISCORD_WEBHOOK_URL: "${ALERTS_DISCORD_WEBHOOK_URL}" # Alerts Discord webhook URL.
+      APPDATA_PATH: "${APPDATA_PATH}" # Pass for internal config.
+      CHHOTO_URL: "${CHHOTO_URL}" # Pass URL for internal config.
+      DOMAIN: "${DOMAIN}" # Pass URL for internal config.
+      GATUS_ALERT_DESCRIPTION: "${GATUS_ALERT_DESCRIPTION}" # Description to use for alerts.
+      GATUS_HEADER: "${GATUS_HEADER}" # Header to show.
+      GATUS_LOGO_URL: "${GATUS_LOGO_URL}" # Custom logo URL to use.
+      GATUS_TITLE: "${GATUS_TITLE}" # Page title to use.
+      JELLYFIN_URL: "${JELLYFIN_URL}" # Pass URL for internal config.
+      OPENCLOUD_URL: "${OPENCLOUD_URL}" # Pass URL for internal config.
+      SOCKET_PROXY_URL: "http://socket-proxy:2375/v1.45" # Docker Socket Proxy baseurl.
+      THELOUNGE_URL: "${THELOUNGE_URL}" # Pass URL for internal config.
+      TZ: "${TZ}" # Configures the timezone to use.
+      VAULTWARDEN_URL: "${VAULTWARDEN_URL}" # Pass URL for internal config.
+    expose:
+      - 8080/tcp # Web interface.
+    networks:
+      - caddy
+      - monitoring
+      - socket-proxy
+    volumes:
+      - ./gatus:/config
+    cap_drop:
+      - ALL
+    depends_on:
+      gatus-db:
+        condition: service_healthy
+        restart: true
+      socket-proxy:
+        condition: service_healthy
+        restart: true
+    security_opt:
+      - no-new-privileges:true
+
+  gatus-db:
+    image: postgres:16-alpine3.22
+    container_name: gatus-db
+    hostname: gatus-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "gatus" # Postgres user to use.
+      POSTGRES_PASSWORD: "gatus" # Postgres password to use.
+      POSTGRES_DB: "gatus" # Postgres DB to use.
+      TZ: "${TZ}" # Configures the timezone to use.
+    networks:
+      - monitoring
+    volumes:
+      - gatus-db:/var/lib/postgresql/data
+    healthcheck:
+      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+    cap_drop:
+      - AUDIT_WRITE
+      - MKNOD
+      - SYS_CHROOT
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  caddy:
+    external: true
+    name: caddy-network # $ docker network create caddy-network
+  monitoring:
+    external: true
+    internal: true # Isolates the network from the outside.
+    name: monitoring-network # $ docker network create monitoring-network
+  socket-proxy:
+    external: true # $ docker network create --internal=true socket-proxy-network
+    internal: true # Isolates the network from the outside.
+    name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
+
+volumes:
+  dozzle:
+    name: dozzle-volume
+    external: true
+  gatus-db:
+    name: gatus-db-volume
+    external: true

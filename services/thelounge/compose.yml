@@ -1,42 +1,42 @@
 ---
 services:
-    ###########################################################################
-    # The Lounge: IRC Client - https://thelounge.chat                         #
-    ###########################################################################
+  ###########################################################################
+  # The Lounge: IRC Client - https://thelounge.chat                         #
+  ###########################################################################
 
-    thelounge:
-        image: ghcr.io/thelounge/thelounge:4.4.3
-        container_name: thelounge
-        hostname: thelounge
-        restart: unless-stopped
-        read_only: true
-        user: "${PUID}:${PGID}"
-        environment:
-            TZ: "${TZ}" # Configures the timezone to use.
-        expose:
-            - 9000/tcp # Web interface.
-        networks:
-            - caddy
-        tmpfs:
-            - "/tmp:uid=${PUID},gid=${PGID}" # Required for read-only image.
-        volumes:
-            - thelounge:/var/opt/thelounge
-        cap_drop:
-            - ALL
-        healthcheck:
-            test: "wget --spider http://127.0.0.1:9000 || exit 1"
-        security_opt:
-            - no-new-privileges:true
+  thelounge:
+    image: ghcr.io/thelounge/thelounge:4.4.3
+    container_name: thelounge
+    hostname: thelounge
+    restart: unless-stopped
+    read_only: true
+    user: "${PUID}:${PGID}"
+    environment:
+      TZ: "${TZ}" # Configures the timezone to use.
+    expose:
+      - 9000/tcp # Web interface.
+    networks:
+      - caddy
+    tmpfs:
+      - "/tmp:uid=${PUID},gid=${PGID}" # Required for read-only image.
+    volumes:
+      - thelounge:/var/opt/thelounge
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: "wget --spider http://127.0.0.1:9000 || exit 1"
+    security_opt:
+      - no-new-privileges:true
 
 networks:
-    caddy:
-        external: true
-        name: caddy-network # $ docker network create caddy-network
+  caddy:
+    external: true
+    name: caddy-network # $ docker network create caddy-network
 
 volumes:
-    thelounge:
-        name: thelounge-volume
-        driver_opts:
-            device: "${APPDATA_PATH}/thelounge" # Root path to store The Lounge data.
-            o: bind
-            type: none
+  thelounge:
+    name: thelounge-volume
+    driver_opts:
+      device: "${APPDATA_PATH}/thelounge" # Root path to store The Lounge data.
+      o: bind
+      type: none

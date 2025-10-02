@@ -1,11 +1,12 @@
 ---
 include:
-    - ./services/caddy/compose.yml
-    - ./services/chhoto/compose.yml
-    - ./services/downloads/compose.yml
-    - ./services/jellyfin/compose.yml
-    - ./services/media-management/compose.yml
-    - ./services/opencloud/compose.yml
-    - ./services/socket-proxy/compose.yml
-    - ./services/thelounge/compose.yml
-    - ./services/vaultwarden/compose.yml
+  - ./services/caddy/compose.yml
+  - ./services/chhoto/compose.yml
+  - ./services/downloads/compose.yml
+  - ./services/jellyfin/compose.yml
+  - ./services/media-management/compose.yml
+  - ./services/opencloud/compose.yml
+  - ./services/socket-proxy/compose.yml
+  - ./services/thelounge/compose.yml
+  - ./services/vaultwarden/compose.yml
+  - ./services/monitoring/compose.yml

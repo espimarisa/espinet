@@ -1,49 +1,49 @@
 ---
 services:
-    ###########################################################################
-    # Socket Proxy: Proxy wrapper for the Docker socket for secure access.    #
-    ###########################################################################
+  ###########################################################################
+  # Socket Proxy: Proxy wrapper for the Docker socket for secure access.    #
+  ###########################################################################
 
-    socket-proxy:
-        image: lscr.io/linuxserver/socket-proxy:3.2.5
-        container_name: socket-proxy
-        hostname: socket-proxy
-        read_only: true
-        restart: unless-stopped
-        environment:
-            ALLOW_RESTARTS: "1" # Allow restarting containers.
-            ALLOW_START: "1" # Allow starting containers.
-            ALLOW_STOP: "1" # Allow stopping containers.
-            CONTAINERS: "1" # Allow containers endpoint.
-            EVENTS: "1" # Allow event logging.
-            NETWORKS: "1" # Allow networks endpoint.
-            INFO: "1" # Allow info endpoint.
-            NODES: "1" # Allow nodes endpoint.
-            PING: "1" # Allow ping endpoint.
-            SERVICES: "1" # Allow services endpoint.
-            SWARM: "1" # Allow swarm checking.
-            TZ: "${TZ}" # Local timezone to use.
-        networks:
-            - socket-proxy # Internal-only socket proxy network.
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
-        tmpfs:
-            - /run # Required for read-only image.
-        cap_drop:
-            - ALL
-        healthcheck:
-            interval: 5s
-            test: "wget --spider http://127.0.0.1:2375/_ping || exit 1"
-        security_opt:
-            - no-new-privileges:true
+  socket-proxy:
+    image: lscr.io/linuxserver/socket-proxy:3.2.5
+    container_name: socket-proxy
+    hostname: socket-proxy
+    read_only: true
+    restart: unless-stopped
+    environment:
+      ALLOW_RESTARTS: "1" # Allow restarting containers.
+      ALLOW_START: "1" # Allow starting containers.
+      ALLOW_STOP: "1" # Allow stopping containers.
+      CONTAINERS: "1" # Allow containers endpoint.
+      EVENTS: "1" # Allow event logging.
+      NETWORKS: "1" # Allow networks endpoint.
+      INFO: "1" # Allow info endpoint.
+      NODES: "1" # Allow nodes endpoint.
+      PING: "1" # Allow ping endpoint.
+      SERVICES: "1" # Allow services endpoint.
+      SWARM: "1" # Allow swarm checking.
+      TZ: "${TZ}" # Local timezone to use.
+    networks:
+      - socket-proxy # Internal-only socket proxy network.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
+    tmpfs:
+      - /run # Required for read-only image.
+    cap_drop:
+      - ALL
+    healthcheck:
+      interval: 10s
+      test: "wget --spider http://127.0.0.1:2375/_ping || exit 1"
+    security_opt:
+      - no-new-privileges:true
 
 networks:
-    socket-proxy:
-        external: true # $ docker network create --internal=true socket-proxy-network
-        internal: true # Isolates the network from the outside.
-        name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
+  socket-proxy:
+    external: true # $ docker network create --internal=true socket-proxy-network
+    internal: true # Isolates the network from the outside.
+    name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
 
 volumes:
-    socket-proxy:
-        external: true
-        name: socket-proxy-volume # $ docker volume create socket-proxy-volume
+  socket-proxy:
+    external: true
+    name: socket-proxy-volume # $ docker volume create socket-proxy-volume

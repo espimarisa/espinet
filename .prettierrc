@@ -8,6 +8,15 @@
 	"htmlWhitespaceSensitivity": "css",
 	"jsxSingleQuote": false,
 	"objectWrap": "preserve",
+	"overrides": [
+		{
+			"files": "*.{yaml,yml}",
+			"options": {
+				"useTabs": false,
+				"tabWidth": 2
+			}
+		}
+	],
 	"printWidth": 80,
 	"proseWrap": "preserve",
 	"quoteProps": "consistent",

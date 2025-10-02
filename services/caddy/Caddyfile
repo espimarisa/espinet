@@ -92,6 +92,10 @@
 	import cloudflare_proxy chhoto:4567
 }
 
+{$GATUS_URL} {
+	import cloudflare_proxy gatus:8080
+}
+
 {$THELOUNGE_URL} {
 	import cloudflare_proxy thelounge:9000
 }
@@ -150,6 +154,10 @@
 
 cleanuparr.{$INTERNAL_DOMAIN} {
 	import internal_proxy cleanuparr:11011
+}
+
+dozzle.{$INTERNAL_DOMAIN} {
+	import internal_proxy dozzle:8080
 }
 
 huntarr.{$INTERNAL_DOMAIN} {

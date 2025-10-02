@@ -1,41 +1,41 @@
 ---
 services:
-    ###########################################################################
-    # Chhoto URL: URL shortener - https://github.com/sintan1729/chhoto-url    #
-    ###########################################################################
+  ###########################################################################
+  # Chhoto URL: URL shortener - https://github.com/sintan1729/chhoto-url    #
+  ###########################################################################
 
-    chhoto:
-        image: ghcr.io/sintan1729/chhoto-url:6.3.2
-        container_name: chhoto
-        hostname: chhoto
-        read_only: true
-        restart: unless-stopped
-        user: "${PUID}:${PGID}" # Run as a non-root user.
-        environment:
-            db_url: "/db/urls.sqlite" # Path to the sqlite database.
-            api_key: "${CHHOTO_API_KEY}" # Configures the API key to use.
-            password: "${CHHOTO_PASSWORD}" # Configures the password to use.
-            site_url: "https://${CHHOTO_URL}" # Configures the URL to use.
-        expose:
-            - 4567/tcp # Web interface.
-        networks:
-            - caddy
-        volumes:
-            - chhoto-data:/db # Configuration and database.
-        cap_drop:
-            - ALL
-        security_opt:
-            - no-new-privileges:true
+  chhoto:
+    image: ghcr.io/sintan1729/chhoto-url:6.3.2
+    container_name: chhoto
+    hostname: chhoto
+    read_only: true
+    restart: unless-stopped
+    user: "${PUID}:${PGID}" # Run as a non-root user.
+    environment:
+      db_url: "/db/urls.sqlite" # Path to the sqlite database.
+      api_key: "${CHHOTO_API_KEY}" # Configures the API key to use.
+      password: "${CHHOTO_PASSWORD}" # Configures the password to use.
+      site_url: "https://${CHHOTO_URL}" # Configures the URL to use.
+    expose:
+      - 4567/tcp # Web interface.
+    networks:
+      - caddy
+    volumes:
+      - chhoto-data:/db # Configuration and database.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
 networks:
-    caddy:
-        external: true
-        name: caddy-network # $ docker network create caddy-network
+  caddy:
+    external: true
+    name: caddy-network # $ docker network create caddy-network
 
 volumes:
-    chhoto-data:
-        name: chhoto-data-bind
-        driver_opts:
-            device: "${APPDATA_PATH}/chhoto" # Root path to store Chhoto data.
-            o: bind
-            type: none
+  chhoto-data:
+    name: chhoto-data-bind
+    driver_opts:
+      device: "${APPDATA_PATH}/chhoto" # Root path to store Chhoto data.
+      o: bind
+      type: none

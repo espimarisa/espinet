@@ -1,222 +1,222 @@
 ---
 # Default environment variables.
 x-defaults-environment: &defaults-environment
-    PGID: "${PGID}" # Local group to run as.
-    PUID: "${PUID}" # Local user to run as.
-    TZ: "${TZ}" # Configures the timezone to use.
-    UMASK: "${UMASK}" # Default umask to apply to newly created files.
+  PGID: "${PGID}" # Local group to run as.
+  PUID: "${PUID}" # Local user to run as.
+  TZ: "${TZ}" # Configures the timezone to use.
+  UMASK: "${UMASK}" # Default umask to apply to newly created files.
 
 # Default container options.
 x-defaults: &defaults
-    restart: unless-stopped
-    environment: *defaults-environment
-    network_mode: service:gluetun
-    cap_drop:
-        - AUDIT_WRITE
-        - MKNOD
-        - SYS_CHROOT
-    depends_on:
-        gluetun:
-            condition: service_healthy
-            restart: true
-    security_opt:
-        - no-new-privileges:true
+  restart: unless-stopped
+  environment: *defaults-environment
+  network_mode: service:gluetun
+  cap_drop:
+    - AUDIT_WRITE
+    - MKNOD
+    - SYS_CHROOT
+  depends_on:
+    gluetun:
+      condition: service_healthy
+      restart: true
+  security_opt:
+    - no-new-privileges:true
 
 services:
-    ###########################################################################
-    # Gluetun: Container VPN client - https://github.com/qdm12/gluetun        #
-    ###########################################################################
+  ###########################################################################
+  # Gluetun: Container VPN client - https://github.com/qdm12/gluetun        #
+  ###########################################################################
 
-    gluetun:
-        image: ghcr.io/qdm12/gluetun:v3.40.0
-        container_name: gluetun
-        hostname: gluetun
-        restart: unless-stopped
-        devices:
-            - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
-        environment:
-            BLOCK_MALICIOUS: "off" # Disables Unbound, lowers RAM usage. https://github.com/qdm12/gluetun/issues/765
-            DOT_PROVIDERS: "quad9" # Use Quad9.
-            FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of subnets allowed to communicate with Gluetun over the gateway.
-            FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # List of VPN server-side port forwarded ports.
-            HEALTH_TARGET_ADDRESS: "www.quad9.net:443" # Use Quad9 for healthchecks. Cloudflare can occasionally cause issues with cranky IPs.
-            HEALTH_VPN_DURATION_INITIAL: "30s" # Increase the initial healthcheck time to reduce false-positive failures.
-            PGID: "${PGID}" # Local group to run as.
-            PUID: "${PUID}" # Local user to run as.
-            SERVER_CITIES: "${SERVER_CITIES}" # Optional list of server cities to connect to.
-            SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # Optional list of server countries to connect to.
-            SERVER_HOSTNAMES: "${SERVER_HOSTNAMES}" # Optional list of server hostnames to connect to.
-            SERVER_NAMES: "${SERVER_NAMES}" # Optional list of server names to connect to.
-            SERVER_REGIONS: "${SERVER_REGIONS}" # Optional list of server regions to connect to.
-            TZ: "${TZ}" # Configures the timezone to use.
-            UPDATER_PERIOD: "24h" # Update server data every 24 hours.
-            VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers
-            VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
-            WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Address(es) from Wireguard config (i.e 10.XXX.XXX.XXX/32).
-            WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Endpoint port from Wireguard config.
-            WIREGUARD_MTU: "1380" # Use a lower MTU, I was able to get the best AirVPN performance at 1380.
-            WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL: "25s" # Increase the keepalive time a lil bit.
-            WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # PresharedKey from Wireguard config.
-            WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from Wireguard config.
-            WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from Wireguard config.
-        expose:
-            - "${SOULSEEK_PORT:-50300}/tcp" # Soulseek traffic.
-            - 5030/tcp # slskd web interface.
-            - 5299/tcp # LazyLibrarian web interface.
-            - 8080/tcp # qBittorrent web interface.
-            - 8191/tcp # Byparr server.
-            - 9696/tcp # Prowlarr web interface.
-        networks:
-            - caddy
-            - gluetun
-        volumes:
-            - gluetun:/gluetun
-        cap_add:
-            - NET_ADMIN # Required for Wireguard configuration.
-        cap_drop:
-            - AUDIT_WRITE
-            - MKNOD
-            - SYS_CHROOT
-        security_opt:
-            - no-new-privileges:true
+  gluetun:
+    image: ghcr.io/qdm12/gluetun:v3.40.0
+    container_name: gluetun
+    hostname: gluetun
+    restart: unless-stopped
+    devices:
+      - /dev/net/tun:/dev/net/tun # TUN/TAP device passthrough.
+    environment:
+      BLOCK_MALICIOUS: "off" # Disables Unbound, lowers RAM usage. https://github.com/qdm12/gluetun/issues/765
+      DOT_PROVIDERS: "quad9" # Use Quad9.
+      FIREWALL_OUTBOUND_SUBNETS: "${FIREWALL_OUTBOUND_SUBNETS}" # List of subnets allowed to communicate with Gluetun over the gateway.
+      FIREWALL_VPN_INPUT_PORTS: "${FIREWALL_VPN_INPUT_PORTS}" # List of VPN server-side port forwarded ports.
+      HEALTH_TARGET_ADDRESS: "www.quad9.net:443" # Use Quad9 for healthchecks. Cloudflare can occasionally cause issues with cranky IPs.
+      HEALTH_VPN_DURATION_INITIAL: "30s" # Increase the initial healthcheck time to reduce false-positive failures.
+      PGID: "${PGID}" # Local group to run as.
+      PUID: "${PUID}" # Local user to run as.
+      SERVER_CITIES: "${SERVER_CITIES}" # Optional list of server cities to connect to.
+      SERVER_COUNTRIES: "${SERVER_COUNTRIES}" # Optional list of server countries to connect to.
+      SERVER_HOSTNAMES: "${SERVER_HOSTNAMES}" # Optional list of server hostnames to connect to.
+      SERVER_NAMES: "${SERVER_NAMES}" # Optional list of server names to connect to.
+      SERVER_REGIONS: "${SERVER_REGIONS}" # Optional list of server regions to connect to.
+      TZ: "${TZ}" # Configures the timezone to use.
+      UPDATER_PERIOD: "24h" # Update server data every 24 hours.
+      VPN_SERVICE_PROVIDER: "${VPN_SERVICE_PROVIDER}" # https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers
+      VPN_TYPE: "wireguard" # Use Wireguard for VPN connections.
+      WIREGUARD_ADDRESSES: "${WIREGUARD_ADDRESSES}" # Address(es) from Wireguard config (i.e 10.XXX.XXX.XXX/32).
+      WIREGUARD_ENDPOINT_PORT: "${WIREGUARD_ENDPOINT_PORT}" # Endpoint port from Wireguard config.
+      WIREGUARD_MTU: "1380" # Use a lower MTU, I was able to get the best AirVPN performance at 1380.
+      WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL: "25s" # Increase the keepalive time a lil bit.
+      WIREGUARD_PRESHARED_KEY: "${WIREGUARD_PRESHARED_KEY}" # PresharedKey from Wireguard config.
+      WIREGUARD_PRIVATE_KEY: "${WIREGUARD_PRIVATE_KEY}" # PrivateKey from Wireguard config.
+      WIREGUARD_PUBLIC_KEY: "${WIREGUARD_PUBLIC_KEY}" # PublicKey from Wireguard config.
+    expose:
+      - "${SOULSEEK_PORT:-50300}/tcp" # Soulseek traffic.
+      - 5030/tcp # slskd web interface.
+      - 5299/tcp # LazyLibrarian web interface.
+      - 8080/tcp # qBittorrent web interface.
+      - 8191/tcp # Byparr server.
+      - 9696/tcp # Prowlarr web interface.
+    networks:
+      - caddy
+      - gluetun
+    volumes:
+      - gluetun:/gluetun
+    cap_add:
+      - NET_ADMIN # Required for Wireguard configuration.
+    cap_drop:
+      - AUDIT_WRITE
+      - MKNOD
+      - SYS_CHROOT
+    security_opt:
+      - no-new-privileges:true
 
-    ###########################################################################
-    # qBittorrent: BitTorrent client - https://www.qbittorrent.org/           #
-    ###########################################################################
+  ###########################################################################
+  # qBittorrent: BitTorrent client - https://www.qbittorrent.org/           #
+  ###########################################################################
 
-    qbittorrent:
-        <<: *defaults
-        image: lscr.io/linuxserver/qbittorrent:5.1.2
-        container_name: qbittorrent
-        environment:
-            <<: *defaults-environment
-            DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent.
-        volumes:
-            - downloads:/downloads
-            - qbittorrent:/config
+  qbittorrent:
+    <<: *defaults
+    image: lscr.io/linuxserver/qbittorrent:5.1.2
+    container_name: qbittorrent
+    environment:
+      <<: *defaults-environment
+      DOCKER_MODS: "ghcr.io/gabe565/linuxserver-mod-vuetorrent" # Auto-install Vuetorrent.
+    volumes:
+      - downloads:/downloads
+      - qbittorrent:/config
 
-    ###########################################################################
-    # LazyLibrarian: Book manager and PVR - https://lazylibrarian.gitlab.io   #
-    ###########################################################################
+  ###########################################################################
+  # LazyLibrarian: Book manager and PVR - https://lazylibrarian.gitlab.io   #
+  ###########################################################################
 
-    lazylibrarian:
-        <<: *defaults
-        image: lscr.io/linuxserver/lazylibrarian:version-9dfe9ad5
-        container_name: lazylibrarian
-        environment:
-            <<: *defaults-environment
-            DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:lazylibrarian-ffmpeg"
-        volumes:
-            - downloads:/downloads
-            - lazylibrarian:/config
-            - media-library:/library
-        healthcheck:
-            test: "curl -f http://127.0.0.1:5299/health || exit 1"
+  lazylibrarian:
+    <<: *defaults
+    image: lscr.io/linuxserver/lazylibrarian:version-9dfe9ad5
+    container_name: lazylibrarian
+    environment:
+      <<: *defaults-environment
+      DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:lazylibrarian-ffmpeg"
+    volumes:
+      - downloads:/downloads
+      - lazylibrarian:/config
+      - media-library:/library
+    healthcheck:
+      test: "curl -f http://127.0.0.1:5299/health || exit 1"
 
-    ###########################################################################
-    # slskd: Soulseek client - https://github.com/slskd/slskd                 #
-    ###########################################################################
+  ###########################################################################
+  # slskd: Soulseek client - https://github.com/slskd/slskd                 #
+  ###########################################################################
 
-    slskd:
-        <<: *defaults
-        image: ghcr.io/slskd/slskd:0.23.2
-        container_name: slskd
-        user: "${PUID}:${PGID}"
-        environment:
-            <<: *defaults-environment
-            SLSKD_DOWNLOADS_DIR: "/downloads/soulseek" # mkdir -p ${DOWNLOADS_PATH}/soulseek
-            SLSKD_INCOMPLETE_DIR: "/downloads/soulseek/.incomplete" # mkdir -p ${DOWNLOADS_PATH}/soulseek/.incomplete
-            SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
-            SLSKD_SHARED_DIR: "/library/music" # Share sorted music library.
-            SLSKD_SLSK_LISTEN_PORT: "${SOULSEEK_PORT:-50300}"
-            SLSKD_SLSK_PASSWORD: "${SOULSEEK_PASSWORD}" # Soulseek password to use.
-            SLSKD_SLSK_USERNAME: "${SOULSEEK_USERNAME}" # Soulseek username to use.
-            SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
-            SLSKD_USERNAME: "${SLSKD_USERNAME}" # Configures the web ui username.
-            SOULSEEK_PASSWORD: "${SOULSEEK_PASSWORD}" # Configures the web ui password.
-            TZ: "${TZ}" # Configures the timezone to use.
-        volumes:
-            - slskd:/app
-            - downloads:/downloads
-            - media-library:/library:ro
-        healthcheck:
-            test: "wget --spider http://127.0.0.1:5030/health || exit 1"
+  slskd:
+    <<: *defaults
+    image: ghcr.io/slskd/slskd:0.23.2
+    container_name: slskd
+    user: "${PUID}:${PGID}"
+    environment:
+      <<: *defaults-environment
+      SLSKD_DOWNLOADS_DIR: "/downloads/soulseek" # mkdir -p ${DOWNLOADS_PATH}/soulseek
+      SLSKD_INCOMPLETE_DIR: "/downloads/soulseek/.incomplete" # mkdir -p ${DOWNLOADS_PATH}/soulseek/.incomplete
+      SLSKD_REMOTE_CONFIGURATION: "true" # Allows configuring settings through the web interface.
+      SLSKD_SHARED_DIR: "/library/music" # Share sorted music library.
+      SLSKD_SLSK_LISTEN_PORT: "${SOULSEEK_PORT:-50300}"
+      SLSKD_SLSK_PASSWORD: "${SOULSEEK_PASSWORD}" # Soulseek password to use.
+      SLSKD_SLSK_USERNAME: "${SOULSEEK_USERNAME}" # Soulseek username to use.
+      SLSKD_UMASK: "${UMASK}" # Configures the umask to set on newly created files.
+      SLSKD_USERNAME: "${SLSKD_USERNAME}" # Configures the web ui username.
+      SOULSEEK_PASSWORD: "${SOULSEEK_PASSWORD}" # Configures the web ui password.
+      TZ: "${TZ}" # Configures the timezone to use.
+    volumes:
+      - slskd:/app
+      - downloads:/downloads
+      - media-library:/library:ro
+    healthcheck:
+      test: "wget --spider http://127.0.0.1:5030/health || exit 1"
 
-    ###########################################################################
-    # Prowlarr: Indexer manager for PVRs - https://prowlarr.com               #
-    ###########################################################################
+  ###########################################################################
+  # Prowlarr: Indexer manager for PVRs - https://prowlarr.com               #
+  ###########################################################################
 
-    prowlarr:
-        <<: *defaults
-        image: ghcr.io/hotio/prowlarr:release-2.0.5.5160
-        container_name: prowlarr
-        volumes:
-            - downloads:/downloads
-            - prowlarr:/config
-        healthcheck:
-            test: "curl -f http://127.0.0.1:9696/health || exit 1"
+  prowlarr:
+    <<: *defaults
+    image: ghcr.io/hotio/prowlarr:release-2.0.5.5160
+    container_name: prowlarr
+    volumes:
+      - downloads:/downloads
+      - prowlarr:/config
+    healthcheck:
+      test: "curl -f http://127.0.0.1:9696/health || exit 1"
 
-    ###########################################################################
-    # Byparr: Cloudflare solver - https://github.com/ThePhaseless/Byparr      #
-    ###########################################################################
+  ###########################################################################
+  # Byparr: Cloudflare solver - https://github.com/ThePhaseless/Byparr      #
+  ###########################################################################
 
-    byparr:
-        <<: *defaults
-        image: ghcr.io/thephaseless/byparr:2.0.1
-        container_name: byparr
-        volumes:
-            - /etc/localtime:/etc/localtime:ro # Local timezone mount.
-        security_opt:
-            - no-new-privileges:true
+  byparr:
+    <<: *defaults
+    image: ghcr.io/thephaseless/byparr:2.0.1
+    container_name: byparr
+    volumes:
+      - /etc/localtime:/etc/localtime:ro # Local timezone mount.
+    security_opt:
+      - no-new-privileges:true
 
-    ###########################################################################
-    # MaM-IP-Helper: MyAnonaMouse seedbox IP synchronization.                 #
-    ###########################################################################
+  ###########################################################################
+  # MaM-IP-Helper: MyAnonaMouse seedbox IP synchronization.                 #
+  ###########################################################################
 
-    mam-ip-helper:
-        <<: *defaults
-        image: tyzen9/myanonamouse-ip-helper:1.0.0
-        container_name: mam-ip-helper
-        read_only: true
-        user: ${PUID}:${PGID}
-        environment:
-            <<: *defaults-environment
-            TZ: "${TZ}" # Configures the timezone to use.
-            MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
+  mam-ip-helper:
+    <<: *defaults
+    image: tyzen9/myanonamouse-ip-helper:1.0.0
+    container_name: mam-ip-helper
+    read_only: true
+    user: ${PUID}:${PGID}
+    environment:
+      <<: *defaults-environment
+      TZ: "${TZ}" # Configures the timezone to use.
+      MAM_ID: "${MAM_ID}" # MyAnonaMouse session ID.
 
 networks:
-    caddy:
-        external: true
-        name: caddy-network # $ docker network create caddy-network
-    gluetun:
-        external: true
-        name: gluetun-network # $ docker network create gluetun-network
+  caddy:
+    external: true
+    name: caddy-network # $ docker network create caddy-network
+  gluetun:
+    external: true
+    name: gluetun-network # $ docker network create gluetun-network
 
 volumes:
-    gluetun:
-        external: true
-        name: gluetun-volume # $ docker volume create gluetun-volume
-    lazylibrarian:
-        external: true
-        name: lazylibrarian-volume # $ docker volume create lazylibrarian-volume
-    qbittorrent:
-        external: true
-        name: qbittorrent-volume # $ docker volume create qbittorrent-volume
-    prowlarr:
-        external: true
-        name: prowlarr-volume # $ docker volume create prowlarr-volume
-    slskd:
-        external: true
-        name: slskd-volume # $ docker volume create slskd-volume
-    downloads:
-        name: downloads-bind
-        driver_opts:
-            device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
-            o: bind
-            type: none
-    media-library:
-        name: media-library-bind
-        driver_opts:
-            device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
-            o: bind
-            type: none
+  gluetun:
+    external: true
+    name: gluetun-volume # $ docker volume create gluetun-volume
+  lazylibrarian:
+    external: true
+    name: lazylibrarian-volume # $ docker volume create lazylibrarian-volume
+  qbittorrent:
+    external: true
+    name: qbittorrent-volume # $ docker volume create qbittorrent-volume
+  prowlarr:
+    external: true
+    name: prowlarr-volume # $ docker volume create prowlarr-volume
+  slskd:
+    external: true
+    name: slskd-volume # $ docker volume create slskd-volume
+  downloads:
+    name: downloads-bind
+    driver_opts:
+      device: "${DOWNLOADS_PATH}" # Root path to store downloaded files into.
+      o: bind
+      type: none
+  media-library:
+    name: media-library-bind
+    driver_opts:
+      device: "${MEDIA_LIBRARY_PATH}" # Root path to the media library.
+      o: bind
+      type: none
