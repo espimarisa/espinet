@@ -2,7 +2,7 @@
 
 # List of networks to create.
 NETWORKS=("caddy-network" "gluetun-network")
-INTERNAL_NETWORKS=("monitoring" "socket-proxy-network")
+INTERNAL_NETWORKS=("monitoring-network" "socket-proxy-network")
 
 # List of downloads directories to create.
 DOWNLOADS_DIRECTORIES=("lazylibrarian" "deezer" "torrents" "soulseek")
