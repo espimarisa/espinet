@@ -17,6 +17,7 @@ services:
       CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Cloudflare account token with DNS Zone editing to domains.
       DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
       DOMAIN: "${DOMAIN}"
+      GATUS_URL: "${GATUS_URL}"
       INTERNAL_DOMAIN: "${INTERNAL_DOMAIN}"
       JELLYFIN_URL: "${JELLYFIN_URL}"
       OPENCLOUD_URL: "${OPENCLOUD_URL}"
