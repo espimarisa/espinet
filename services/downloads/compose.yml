@@ -111,7 +111,7 @@ services:
       - lazylibrarian:/config
       - media-library:/library
     healthcheck:
-      test: "curl -f http://127.0.0.1:5299/health || exit 1"
+      test: "curl -f http://127.0.0.1:5299 || exit 1"
 
   ###########################################################################
   # slskd: Soulseek client - https://github.com/slskd/slskd                 #
