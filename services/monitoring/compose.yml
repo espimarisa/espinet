@@ -37,7 +37,7 @@ services:
     devices:
       - /dev/dri/card0:/dev/dri/card0 # GPU monitoring.
     environment:
-      HUB_URL: "https://beszel.${INTERNAL_DOMAIN}" # Hub URL to connect to.
+      HUB_URL: "http://0.0.0.0:8090" # Hub URL to connect to.
       KEY: "${BESZEL_KEY}" # SSH key to connect to the Beszel hub with; generated in the WebUI post-install.
       LISTEN: 0.0.0.0:45876 # Host port to listen on; defaults to 45876.
       TOKEN: "${BESZEL_TOKEN}" # Token to connect to the Beszel hub with; generated in the WebUI post-install.
@@ -46,7 +46,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount, wooo scary!
       - ${STORAGE_PATH}:/extra-filesystems/storage:ro # Storage directory for FS monitoring.
       - beszel-socket:/beszel_socket # Beszel agent socket.
-      - beszel:/beszel_data # Beszel data.
     depends_on:
       beszel:
         condition: service_healthy
@@ -55,7 +54,9 @@ services:
         condition: service_healthy
         restart: true
     cap_add:
+      - CAP_DAC_OVERRIDE # alright
       - CAP_PERFMON # Required for Intel GPU monitoring apparently?
+      - CAP_SYS_ADMIN # Required for Intel GPU monitoring apparently? Scary
     healthcheck:
       test: ["CMD", "/agent", "health"]
     security_opt:
