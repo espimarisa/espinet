@@ -80,6 +80,7 @@ done
 echo "Backing up Docker volumes..."
 VOLUMES_TO_BACKUP=(
 	"beszel-agent-volume"
+	"beszel-socket-volume"
 	"beszel-volume"
 	"caddy-volume"
 	"chhoto-volume"
