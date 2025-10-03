@@ -42,8 +42,3 @@ networks:
     external: true # $ docker network create --internal=true socket-proxy-network
     internal: true # Isolates the network from the outside.
     name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
-
-volumes:
-  socket-proxy:
-    external: true
-    name: socket-proxy-volume # $ docker volume create socket-proxy-volume

@@ -105,7 +105,6 @@ services:
     container_name: lazylibrarian
     environment:
       <<: *defaults-environment
-      # DOCKER_MODS: "linuxserver/mods:universal-calibre|linuxserver/mods:lazylibrarian-ffmpeg"
     volumes:
       - downloads:/downloads
       - lazylibrarian:/config

@@ -29,6 +29,8 @@ MEDIA_LIBRARY_DIRECTORIES=(
 
 # List of volumes to create.
 VOLUMES=(
+	"beszel-socket-volume"
+	"beszel-volume"
 	"caddy-volume"
 	"cleanuparr-volume"
 	"dozzle-volume"

@@ -79,6 +79,8 @@ done
 # 3. Back up each Docker volume.
 echo "Backing up Docker volumes..."
 VOLUMES_TO_BACKUP=(
+	"beszel-agent-volume"
+	"beszel-volume"
 	"caddy-volume"
 	"chhoto-volume"
 	"cleanuparr-volume"
