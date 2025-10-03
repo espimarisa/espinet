@@ -104,6 +104,18 @@ endpoints:
     group: Internal Infrastructure
     url: ${SOCKET_PROXY_URL}/containers/caddy/json
 
+  # Beszel.
+  - name: Beszel
+    <<: *defaults-container
+    group: Internal Infrastructure
+    url: ${SOCKET_PROXY_URL}/containers/beszel/json
+
+  # Beszel Agent.
+  - name: Beszel Agent
+    <<: *defaults-container
+    group: Internal Infrastructure
+    url: ${SOCKET_PROXY_URL}/containers/beszel-agent/json
+
   # Dozzle.
   - name: Dozzle
     <<: *defaults-container
