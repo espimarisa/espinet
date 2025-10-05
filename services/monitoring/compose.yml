@@ -26,7 +26,8 @@ services:
       test: ["CMD", "/beszel", "health", "--url", "http://localhost:8090"]
     security_opt:
       - no-new-privileges:true
-    tmpfs: /tmp
+    tmpfs:
+      - "/tmp" # Required for read-only image.
 
   beszel-agent:
     image: ghcr.io/henrygd/beszel/beszel-agent-intel:0.12.12 # use -intel for Arc GPU support.
@@ -64,6 +65,8 @@ services:
       test: ["CMD", "/agent", "health"]
     security_opt:
       - no-new-privileges:true
+    tmpfs:
+      - "/tmp" # Required for read-only image.
 
   ###########################################################################
   # Dozzle: Docker log viewer - https://dozzle.dev/                         #
