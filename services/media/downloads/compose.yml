@@ -8,9 +8,10 @@ x-defaults-environment: &defaults-environment
 
 # Default container options.
 x-defaults: &defaults
-  restart: unless-stopped
+  env_file: ../../../.env
   environment: *defaults-environment
   network_mode: service:gluetun
+  restart: unless-stopped
   cap_drop:
     - AUDIT_WRITE
     - MKNOD
@@ -30,6 +31,7 @@ services:
   gluetun:
     image: ghcr.io/qdm12/gluetun:v3.40.0
     container_name: gluetun
+    env_file: ../../.env
     hostname: gluetun
     restart: unless-stopped
     devices:

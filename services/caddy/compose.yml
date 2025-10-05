@@ -7,23 +7,15 @@ services:
   caddy:
     image: ghcr.io/homeall/caddy-reverse-proxy-cloudflare:2025.09.30
     container_name: caddy
+    env_file: ../../.env
     hostname: caddy
     restart: unless-stopped
     environment:
-      ACME_EMAIL: "${ACME_EMAIL}"
+      DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
       CADDY_DOCKER_CADDYFILE_PATH: "/Caddyfile"
       CADDY_INGRESS_NETWORKS: "caddy" # Listen for traffic coming from the caddy network.
-      CHHOTO_URL: "${CHHOTO_URL}"
       CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}" # Cloudflare account token with DNS Zone editing to domains.
-      DOCKER_HOST: "tcp://socket-proxy:2375" # Connect to the socket proxy.
-      DOMAIN: "${DOMAIN}"
-      GATUS_URL: "${GATUS_URL}"
-      INTERNAL_DOMAIN: "${INTERNAL_DOMAIN}"
-      JELLYFIN_URL: "${JELLYFIN_URL}"
-      OPENCLOUD_URL: "${OPENCLOUD_URL}"
-      THELOUNGE_URL: "${THELOUNGE_URL}"
       TZ: "${TZ}" # Configures the timezone to use.
-      VAULTWARDEN_URL: "${VAULTWARDEN_URL}"
     networks:
       - caddy
       - socket-proxy
@@ -61,4 +53,4 @@ networks:
 volumes:
   caddy:
     external: true
-    name: caddy-volume
+    name: caddy-volume # $ docker volume create caddy-volume

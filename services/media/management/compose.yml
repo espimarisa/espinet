@@ -9,6 +9,7 @@ x-defaults-environment: &defaults-environment
 # Default container options.
 x-defaults: &defaults
   restart: unless-stopped
+  env_file: ../../../.env
   environment: *defaults-environment
   networks:
     - caddy

@@ -43,7 +43,7 @@ alerting:
 # Storage configuration.
 storage:
   type: postgres
-  path: "postgres://gatus:gatus@gatus-db:5432/gatus?sslmode=disable"
+  path: "postgres://postgres:postgres@gatus-db:5432/postgres?sslmode=disable"
 
 # UI configuration.
 ui:

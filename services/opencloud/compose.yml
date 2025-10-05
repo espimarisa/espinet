@@ -8,9 +8,10 @@ services:
     image: opencloudeu/opencloud-rolling:3.5.0
     container_name: opencloud
     entrypoint: /bin/sh
+    env_file: ../../.env
     hostname: opencloud
-    restart: unless-stopped
     read_only: true
+    restart: unless-stopped
     user: "${PUID}:${PGID}"
     command: ["-c", "opencloud init --insecure true || true; opencloud server"]
     environment:

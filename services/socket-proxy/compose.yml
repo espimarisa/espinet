@@ -5,35 +5,28 @@ services:
   ###########################################################################
 
   socket-proxy:
-    image: lscr.io/linuxserver/socket-proxy:3.2.5
+    image: ghcr.io/11notes/socket-proxy:2.1.4
     container_name: socket-proxy
+    env_file: ../../.env
     hostname: socket-proxy
     read_only: true
+    user: "0:${DOCKER_GID}"
     restart: unless-stopped
     environment:
-      ALLOW_RESTARTS: "1" # Allow restarting containers.
-      ALLOW_START: "1" # Allow starting containers.
-      ALLOW_STOP: "1" # Allow stopping containers.
-      CONTAINERS: "1" # Allow containers endpoint.
-      EVENTS: "1" # Allow event logging.
-      NETWORKS: "1" # Allow networks endpoint.
-      INFO: "1" # Allow info endpoint.
-      NODES: "1" # Allow nodes endpoint.
-      PING: "1" # Allow ping endpoint.
-      SERVICES: "1" # Allow services endpoint.
-      SWARM: "1" # Allow swarm checking.
+      DEBUG: true
       TZ: "${TZ}" # Local timezone to use.
     networks:
       - socket-proxy # Internal-only socket proxy network.
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro # Host Docker socket mount.
-    tmpfs:
-      - /run # Required for read-only image.
+      - /var/run/docker.sock:/run/docker.sock:ro # Host Docker socket mount.
+      - socket-proxy:/run/proxy # Docker socket proxy volume.
     cap_drop:
       - ALL
-    healthcheck:
-      interval: 10s
-      test: "wget --spider http://127.0.0.1:2375/_ping || exit 1"
+    cap_add:
+      - CHOWN # Required to change ownership.
+      - DAC_OVERRIDE # Required for user:0:docker_gid
+      - SETGID # Required to drop to GID.
+      - SETUID # Required to drop to UID.
     security_opt:
       - no-new-privileges:true
 
@@ -42,3 +35,8 @@ networks:
     external: true # $ docker network create --internal=true socket-proxy-network
     internal: true # Isolates the network from the outside.
     name: socket-proxy-network # Internal-only network used only for Socket Proxy traffic.
+
+volumes:
+  socket-proxy:
+    external: true
+    name: socket-proxy-volume # $ docker volume create socket-proxy-volume
