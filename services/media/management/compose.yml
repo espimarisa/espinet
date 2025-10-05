@@ -11,9 +11,6 @@ x-defaults: &defaults
   restart: unless-stopped
   env_file: ../../../.env
   environment: *defaults-environment
-  networks:
-    - caddy
-    - gluetun
   cap_drop:
     - AUDIT_WRITE
     - MKNOD
@@ -33,6 +30,10 @@ services:
     hostname: lidarr
     expose:
       - 8686/tcp # Web interface.
+    networks:
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.3 # Use static container IP address.
     volumes:
       - downloads:/downloads
       - lidarr:/config
@@ -52,6 +53,10 @@ services:
     restart: unless-stopped
     expose:
       - 7878/tcp # Web interface.
+    networks:
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.4 # Use static container IP address.
     volumes:
       - ./scripts:/scripts
       - downloads:/downloads
@@ -71,6 +76,10 @@ services:
     hostname: sonarr
     expose:
       - 8989/tcp
+    networks:
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.5 # Use static container IP address.
     volumes:
       - downloads:/downloads
       - media-library:/library
@@ -87,6 +96,10 @@ services:
     image: santiagosayshey/profilarr:v1.1.3
     container_name: profilarr
     hostname: profilarr
+    networks:
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.6 # Use static container IP address.
     expose:
       - 6868/tcp
     volumes:
@@ -104,6 +117,10 @@ services:
     read_only: true
     expose:
       - 9705/tcp
+    networks:
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.7 # Use static container IP address.
     volumes:
       - huntarr:/config
     tmpfs:
@@ -120,6 +137,10 @@ services:
     hostname: cleanuparr
     expose:
       - 11011/tcp
+    networks:
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.8 # Use static container IP address.
     volumes:
       - cleanuparr:/config
     healthcheck:
@@ -143,6 +164,10 @@ services:
       UN_RADARR_0_URL: "http://radarr:7878" # Primary Radarr URL.
       UN_SONARR_0_API_KEY: "${SONARR_API_KEY}" # Sonarr API key.
       UN_SONARR_0_URL: "http://sonarr:8989" # Primary Sonarr URL.
+    networks:
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.9 # Use static container IP address.
     tmpfs:
       - "/tmp" # Required for read-only image.
     volumes:
@@ -153,7 +178,12 @@ networks:
     external: true
     name: caddy-network # $ docker network create caddy-network
   gluetun:
+    driver: bridge
     external: true
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16 # Use 172.19.0.0/16 as a static subnet.
+          gateway: 172.19.0.1 # Use 172.19.0.1 as the default gateway.
     name: gluetun-network # $ docker network create gluetun-network
 
 volumes:

@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# List of networks to create.
-NETWORKS=("caddy-network" "gluetun-network")
-INTERNAL_NETWORKS=("socket-proxy-network")
-
 # List of downloads directories to create.
 DOWNLOADS_DIRECTORIES=("deezer" "lazylibrarian" "soulseek" "torrents")
 TORRENTS_DIRECTORIES=(
@@ -120,13 +116,9 @@ $SUDO chown -R "${PUID}:${PGID}" \
 
 # Docker network setup.
 echo "Creating Docker networks..."
-for network in "${NETWORKS[@]}"; do
-	docker network create "$network" || true
-done
-
-for network in "${INTERNAL_NETWORKS[@]}"; do
-	docker network create --internal "$network" || true
-done
+docker network create --internal "socket-proxy-network" || true
+docker network create "--driver=bridge --subnet=172.19.0.0/16 --gateway=172.19.0.1 gluetun-network" || true
+docker network create "caddy-network" || true
 
 # Docker volume setup.
 echo "Creating Docker volumes..."

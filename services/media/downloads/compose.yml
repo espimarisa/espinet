@@ -69,8 +69,9 @@ services:
       - 8191/tcp # Byparr server.
       - 9696/tcp # Prowlarr web interface.
     networks:
-      - caddy
-      - gluetun
+      caddy:
+      gluetun:
+        ipv4_address: 172.19.0.2 # Use 172.19.0.2 as the Gluetun IP address.
     volumes:
       - gluetun:/gluetun
     cap_add:
@@ -188,7 +189,12 @@ networks:
     external: true
     name: caddy-network # $ docker network create caddy-network
   gluetun:
+    driver: bridge
     external: true
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16 # Use 172.19.0.0/16 as a static subnet.
+          gateway: 172.19.0.1 # Use 172.19.0.1 as the default gateway.
     name: gluetun-network # $ docker network create gluetun-network
 
 volumes:
