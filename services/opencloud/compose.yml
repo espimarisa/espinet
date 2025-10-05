@@ -29,7 +29,7 @@ services:
       OC_INSECURE: "false" # Do not run in insecure mode.
       OC_LOG_COLOR: "true" # Log in color.
       OC_LOG_LEVEL: "info" # Log at the info level.
-      OC_LOG_PRETTY: "true" # Use pretty logs.
+      OC_LOG_PRETTY: "false" # Do not use pretty logs; machine readable logs >>>> smfh
       OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD: "false" # Allow public shares without passwords.
       OC_SHARING_PUBLIC_WRITEABLE_SHARE_MUST_HAVE_PASSWORD: "true" # Writable public shares must have passwords.
       OC_URL: "https://${OPENCLOUD_URL}" # Configures the OpenCloud URL.
