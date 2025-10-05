@@ -66,7 +66,7 @@ services:
     security_opt:
       - no-new-privileges:true
     tmpfs:
-      - "/tmp" # Required for read-only image.
+      - "/tmp/beszel_health" # Required for read-only image.
 
   ###########################################################################
   # Dozzle: Docker log viewer - https://dozzle.dev/                         #
